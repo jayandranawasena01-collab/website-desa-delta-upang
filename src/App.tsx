@@ -35,7 +35,7 @@ const initialBerita = [
 
 // Data awal perangkat desa
 const initialPerangkat = [
-  { id: 1, nama: "Bapak Fulan, S.E.", jabatan: "Kepala Desa", foto: "https://images.unsplash.com/photo-1552058544-f2b08422138a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
+  { id: 1, nama: "Pendi.", jabatan: "Kepala Desa", foto: "https://drive.google.com/file/d/1PgwPZsA8eKAr-h3IQ0Dt-S7eX13xLKtQ/view?usp=drive_link" },
   { id: 2, nama: "Ahmad Yani, S.IP.", jabatan: "Sekretaris Desa", foto: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
   { id: 3, nama: "Siti Rahmawati", jabatan: "Kaur Keuangan", foto: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
   { id: 4, nama: "Budi Santoso", jabatan: "Kaur Perencanaan", foto: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
