@@ -92,7 +92,7 @@ const initialBeranda = {
   namaDesa: "Delta Upang",
   deskripsiDesa: "Kecamatan Makarti Jaya, Kabupaten Banyuasin \nProvinsi Sumatera Selatan",
   fotoKades: "https://lh3.googleusercontent.com/d/1L5Y15w_obbihHFz4rUMrOAci5V7TtAIz",
-  namaKades: "Bapak Fulan, S.E.",
+  namaKades: "PENDI.",
   jabatanKades: "Kepala Desa Delta Upang",
   sambutanKades: "Assalamu'alaikum Warahmatullahi Wabarakatuh. Puji syukur kita panjatkan ke hadirat Allah SWT. Selamat datang di website resmi Desa Delta Upang. Melalui media ini, kami berupaya mewujudkan transparansi dan kemudahan akses informasi bagi seluruh warga dan masyarakat luas mengenai program kerja, kegiatan, dan pembangunan di desa kita tercinta.",
   stats: [
@@ -145,7 +145,8 @@ export default function App() {
   });
   
   const [dataBeranda, setDataBeranda] = useState(() => {
-    const saved = localStorage.getItem('desa_data_beranda_v4');
+    // V5: Memicu pembaruan teks nama Kades secara otomatis
+    const saved = localStorage.getItem('desa_data_beranda_v5');
     return saved ? JSON.parse(saved) : initialBeranda;
   });
 
@@ -169,7 +170,7 @@ export default function App() {
   useEffect(() => { localStorage.setItem('desa_data_perangkat_v2', JSON.stringify(daftarPerangkat)); }, [daftarPerangkat]);
   useEffect(() => { localStorage.setItem('desa_data_lembaga_v1', JSON.stringify(daftarLembaga)); }, [daftarLembaga]);
   useEffect(() => { localStorage.setItem('desa_data_profil_v1', JSON.stringify(daftarProfil)); }, [daftarProfil]);
-  useEffect(() => { localStorage.setItem('desa_data_beranda_v4', JSON.stringify(dataBeranda)); }, [dataBeranda]);
+  useEffect(() => { localStorage.setItem('desa_data_beranda_v5', JSON.stringify(dataBeranda)); }, [dataBeranda]);
 
   const navigateTo = (page: string, tabId: any = null) => {
     setCurrentPage(page);
@@ -757,10 +758,12 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
           )}
 
           {/* Teks Berjalan (Marquee) di bawah Logo */}
-          <div className="w-full max-w-3xl mx-auto overflow-hidden relative mb-6 mt-4">
+          <div className="w-full max-w-4xl mx-auto overflow-hidden relative mb-6 mt-4 py-2">
             <div className="animate-roll whitespace-nowrap">
-              <span className="inline-flex items-center gap-2 py-1.5 px-6 rounded-full bg-emerald-600/80 backdrop-blur-md border border-emerald-400/30 text-sm font-bold tracking-widest uppercase shadow-lg text-white">
-                <Landmark className="w-4 h-4 flex-shrink-0" /> Selamat Datang di Website Resmi
+              <span 
+                className="text-xl md:text-2xl lg:text-3xl font-black tracking-[0.15em] uppercase text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-200 drop-shadow-[0_0_15px_rgba(251,191,36,0.6)]"
+              >
+                Selamat Datang di Website Resmi
               </span>
             </div>
           </div>
