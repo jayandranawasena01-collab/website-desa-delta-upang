@@ -97,6 +97,9 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState('beranda');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeProfilTab, setActiveProfilTab] = useState<number | null>(null);
+  
+  // States untuk mengatur dropdown klik
+  const [isDesktopProfilOpen, setIsDesktopProfilOpen] = useState(false);
   const [isMobileProfilOpen, setIsMobileProfilOpen] = useState(false);
   
   // State Admin
@@ -126,6 +129,15 @@ export default function App() {
     return saved ? JSON.parse(saved) : initialBeranda;
   });
 
+  // Efek klik di luar untuk menutup dropdown desktop
+  useEffect(() => {
+    const handleOutsideClick = () => {
+      setIsDesktopProfilOpen(false);
+    };
+    document.addEventListener('click', handleOutsideClick);
+    return () => document.removeEventListener('click', handleOutsideClick);
+  }, []);
+
   // Saat halaman atau tab profil berubah, otomatis scroll ke atas agar informasi yang dipilih langsung terlihat
   useEffect(() => { 
     window.scrollTo(0, 0); 
@@ -142,9 +154,10 @@ export default function App() {
     if (page === 'profil' && tabId !== null) {
       setActiveProfilTab(tabId);
     }
-    // Menutup menu mobile & dropdown saat pindah halaman
+    // Menutup menu mobile & dropdown saat pindah halaman atau selesai memilih
     setIsMobileMenuOpen(false);
     setIsMobileProfilOpen(false);
+    setIsDesktopProfilOpen(false);
   };
 
   const handleLogin = (e: any) => {
@@ -190,10 +203,17 @@ export default function App() {
             <nav className="hidden lg:flex space-x-1 items-center bg-black/20 p-1.5 rounded-2xl backdrop-blur-md border border-white/10">
               <NavButton active={currentPage === 'beranda'} onClick={() => navigateTo('beranda')} icon={<Home className="w-4 h-4 mr-2" />}>Beranda</NavButton>
               
-              {/* Dropdown Profil Desa */}
-              <div className="relative group">
+              {/* Dropdown Profil Desa (Click Based) */}
+              <div className="relative" onClick={(e) => e.stopPropagation()}>
                 <button
-                  onClick={() => navigateTo('profil', daftarProfil[0]?.id)}
+                  onClick={() => {
+                    if (currentPage === 'profil') {
+                      setIsDesktopProfilOpen(!isDesktopProfilOpen);
+                    } else {
+                      navigateTo('profil', daftarProfil[0]?.id);
+                      setIsDesktopProfilOpen(true);
+                    }
+                  }}
                   className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
                     currentPage === 'profil'
                       ? 'bg-white text-emerald-900 shadow-md'
@@ -202,11 +222,13 @@ export default function App() {
                 >
                   <Info className="w-4 h-4 mr-2" />
                   Profil Desa
-                  <ChevronDown className="w-4 h-4 ml-1 opacity-70 group-hover:rotate-180 transition-transform duration-300" />
+                  <ChevronDown className={`w-4 h-4 ml-1 opacity-70 transition-transform duration-300 ${isDesktopProfilOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {/* Dropdown Menu Elegan */}
-                <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.15)] border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top translate-y-2 group-hover:translate-y-0 z-50 overflow-hidden">
+                <div className={`absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.15)] border border-gray-100 transition-all duration-300 transform origin-top z-50 overflow-hidden ${
+                  isDesktopProfilOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'
+                }`}>
                   <div className="flex flex-col py-1.5">
                     {daftarProfil.map((profil: any, index: number) => (
                       <button
