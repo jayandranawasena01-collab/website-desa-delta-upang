@@ -162,27 +162,27 @@ export default function App() {
   
   // States Data (Diperbarui versi kuncinya agar me-reset data yang menyebabkan blank screen)
   const [daftarBerita, setDaftarBerita] = useState(() => {
-    const saved = localStorage.getItem('desa_data_berita_v3');
+    const saved = localStorage.getItem('desa_data_berita_v4');
     return saved ? JSON.parse(saved) : initialBerita;
   });
   
   const [daftarPerangkat, setDaftarPerangkat] = useState(() => {
-    const saved = localStorage.getItem('desa_data_perangkat_v3');
+    const saved = localStorage.getItem('desa_data_perangkat_v4');
     return saved ? JSON.parse(saved) : initialPerangkat;
   });
 
   const [daftarLembaga, setDaftarLembaga] = useState(() => {
-    const saved = localStorage.getItem('desa_data_lembaga_v2');
+    const saved = localStorage.getItem('desa_data_lembaga_v3');
     return saved ? JSON.parse(saved) : initialLembaga;
   });
 
   const [daftarProfil, setDaftarProfil] = useState(() => {
-    const saved = localStorage.getItem('desa_data_profil_v2');
+    const saved = localStorage.getItem('desa_data_profil_v3');
     return saved ? JSON.parse(saved) : initialProfil;
   });
   
   const [dataBeranda, setDataBeranda] = useState(() => {
-    const saved = localStorage.getItem('desa_data_beranda_v8');
+    const saved = localStorage.getItem('desa_data_beranda_v9');
     return saved ? JSON.parse(saved) : initialBeranda;
   });
 
@@ -191,11 +191,11 @@ export default function App() {
     try {
       const currentKeys = [
         'desa_admin_status',
-        'desa_data_berita_v3',
-        'desa_data_perangkat_v3',
-        'desa_data_lembaga_v2',
-        'desa_data_profil_v2',
-        'desa_data_beranda_v8'
+        'desa_data_berita_v4',
+        'desa_data_perangkat_v4',
+        'desa_data_lembaga_v3',
+        'desa_data_profil_v3',
+        'desa_data_beranda_v9'
       ];
       const keysToRemove = [];
       for (let i = 0; i < localStorage.length; i++) {
@@ -231,26 +231,26 @@ export default function App() {
   }, [isAdmin]);
   
   useEffect(() => { 
-    try { localStorage.setItem('desa_data_berita_v3', JSON.stringify(daftarBerita)); } catch(e){ console.error(e); } 
+    try { localStorage.setItem('desa_data_berita_v4', JSON.stringify(daftarBerita)); } catch(e){ console.error(e); } 
   }, [daftarBerita]);
   
   useEffect(() => { 
-    try { localStorage.setItem('desa_data_perangkat_v3', JSON.stringify(daftarPerangkat)); } catch(e){ console.error(e); } 
+    try { localStorage.setItem('desa_data_perangkat_v4', JSON.stringify(daftarPerangkat)); } catch(e){ console.error(e); } 
   }, [daftarPerangkat]);
   
   useEffect(() => { 
-    try { localStorage.setItem('desa_data_lembaga_v2', JSON.stringify(daftarLembaga)); } catch(e){ console.error(e); } 
+    try { localStorage.setItem('desa_data_lembaga_v3', JSON.stringify(daftarLembaga)); } catch(e){ console.error(e); } 
   }, [daftarLembaga]);
   
   useEffect(() => { 
-    try { localStorage.setItem('desa_data_profil_v2', JSON.stringify(daftarProfil)); } catch(e){ console.error(e); } 
+    try { localStorage.setItem('desa_data_profil_v3', JSON.stringify(daftarProfil)); } catch(e){ console.error(e); } 
   }, [daftarProfil]);
   
   useEffect(() => { 
     try { 
-      localStorage.setItem('desa_data_beranda_v8', JSON.stringify(dataBeranda)); 
+      localStorage.setItem('desa_data_beranda_v9', JSON.stringify(dataBeranda)); 
     } catch (e) {
-      alert("Gagal menyimpan perubahan: Memori browser penuh. Harap muat ulang (refresh) halaman ini.");
+      alert("Gagal menyimpan perubahan: Memori browser masih penuh. Harap hapus cache secara manual.");
     }
   }, [dataBeranda]);
 
@@ -741,12 +741,9 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
   const handleHeroBgChange = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      compressImage(file, 1080, false, (base64) => {
-        // Langsung perbarui latar belakang di belakang form agar terlihat preview instant
-        setDataBeranda((prev: any) => ({ ...prev, heroBg: base64 }));
+      compressImage(file, 1200, false, (base64) => {
         setEditForm((prev: any) => ({ ...prev, heroBg: base64 }));
       });
-      // Mengosongkan input agar bisa mengupload file yang sama jika batal
       e.target.value = '';
     }
   };
@@ -754,7 +751,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
   const handleLogoHeroChange = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      compressImage(file, 300, true, (base64) => {
+      compressImage(file, 400, true, (base64) => {
         setEditForm((prev: any) => ({ ...prev, logoHero: base64 }));
       });
       e.target.value = '';
@@ -764,7 +761,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
   const handleHeaderLogoChange = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      compressImage(file, 200, true, (base64) => {
+      compressImage(file, 300, true, (base64) => {
         setEditForm((prev: any) => ({ ...prev, headerLogo: base64 }));
       });
       e.target.value = '';
@@ -807,24 +804,15 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
         </div>
 
         {isAdmin && (
-          <>
-            <div className="absolute top-6 left-6 z-20">
-               <button 
-                 onClick={() => { setEditForm(dataBeranda); setShowEditor(true); }} 
-                 className="cursor-pointer bg-white/90 backdrop-blur hover:bg-white text-emerald-800 px-6 py-3 rounded-2xl font-bold flex items-center shadow-[0_8px_30px_rgba(0,0,0,0.3)] transition-all hover:scale-105 border border-white/50"
-               >
-                  <Edit className="w-5 h-5 mr-3 text-emerald-600" /> 
-                  Edit Konten Beranda
-               </button>
-            </div>
-            <div className="absolute top-6 right-6 z-20">
-               <label className="cursor-pointer bg-white/90 backdrop-blur hover:bg-white text-emerald-800 px-6 py-3 rounded-2xl font-bold flex items-center shadow-[0_8px_30px_rgba(0,0,0,0.3)] transition-all hover:scale-105 border border-white/50">
-                  <Upload className="w-5 h-5 mr-3 text-emerald-600" /> 
-                  Ubah Latar Belakang
-                  <input type="file" accept="image/*" className="hidden" onChange={handleHeroBgChange} />
-               </label>
-            </div>
-          </>
+          <div className="absolute top-6 left-6 z-20">
+             <button 
+               onClick={() => { setEditForm(dataBeranda); setShowEditor(true); }} 
+               className="cursor-pointer bg-white/90 backdrop-blur hover:bg-white text-emerald-800 px-6 py-3 rounded-2xl font-bold flex items-center shadow-[0_8px_30px_rgba(0,0,0,0.3)] transition-all hover:scale-105 border border-white/50"
+             >
+                <Edit className="w-5 h-5 mr-3 text-emerald-600" /> 
+                Edit Konten Beranda
+             </button>
+          </div>
         )}
         
         <div className="container mx-auto px-4 lg:px-8 relative z-10 text-center text-white mt-12 md:mt-16">
@@ -965,6 +953,27 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   
+                  {/* Edit Background Hero */}
+                  <div className="col-span-full mb-2">
+                    <label className="block text-sm font-bold text-gray-700 mb-3">Gambar Latar Belakang (Hero)</label>
+                    <div className="flex items-center gap-5">
+                      {editForm.heroBg ? (
+                         <img src={editForm.heroBg} alt="Preview Latar" className="w-32 h-20 object-cover rounded-xl shadow-sm border border-gray-200" />
+                      ) : (
+                         <div className="w-32 h-20 bg-gray-200 rounded-xl flex items-center justify-center border border-gray-300 border-dashed">
+                           <ImageIcon className="w-6 h-6 text-gray-400" />
+                         </div>
+                      )}
+                      <div className="flex-1">
+                        <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 px-5 py-2 rounded-xl font-bold flex items-center justify-center transition-all w-max shadow-sm">
+                          <Upload className="w-5 h-5 mr-2" /> Ganti Gambar Latar
+                          <input type="file" accept="image/*" className="hidden" onChange={handleHeroBgChange} />
+                        </label>
+                        <p className="text-sm text-gray-500 mt-2 font-medium">Gambar pemandangan untuk latar atas. Otomatis dikompres.</p>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Edit Logo Header */}
                   <div className="col-span-full mb-2">
                     <label className="block text-sm font-bold text-gray-700 mb-3">Logo Navigasi Header (Pojok Kiri Atas)</label>
@@ -986,6 +995,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
                     </div>
                   </div>
 
+                  {/* Edit Logo Tengah */}
                   <div className="col-span-full">
                     <label className="block text-sm font-bold text-gray-700 mb-3">Logo Teks Hero (Bagian Tengah)</label>
                     <div className="flex items-center gap-5">
@@ -1126,7 +1136,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
                 </div>
               </div>
               
-              <div className="flex justify-end gap-4 pt-6 border-t border-gray-200 sticky bottom-0 bg-white p-4 -mx-8 -mb-8 rounded-b-3xl shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
+              <div className="flex justify-end gap-4 pt-6 sticky bottom-0 bg-white p-4 -mx-8 -mb-8 rounded-b-3xl">
                 <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
                   Batal
                 </button>
@@ -1429,7 +1439,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                 </div>
               </div>
               
-              <div className="flex justify-end gap-4 pt-6 border-t border-gray-100">
+              <div className="flex justify-end gap-4 pt-6 sticky bottom-0 bg-white p-4 -mx-8 -mb-8 rounded-b-3xl">
                 <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
                   Batal
                 </button>
@@ -1740,7 +1750,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                 </div>
               </div>
               
-              <div className="flex justify-end gap-4 pt-6 border-t border-gray-100">
+              <div className="flex justify-end gap-4 pt-6 sticky bottom-0 bg-white p-4 -mx-8 -mb-8 rounded-b-3xl">
                 <button type="button" onClick={() => setShowEditorPerangkat(false)} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
                   Batal
                 </button>
@@ -1838,7 +1848,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                 </div>
               </div>
               
-              <div className="flex justify-end gap-4 pt-6 border-t border-gray-100">
+              <div className="flex justify-end gap-4 pt-6 sticky bottom-0 bg-white p-4 -mx-8 -mb-8 rounded-b-3xl">
                 <button type="button" onClick={() => setShowEditorLembaga(false)} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
                   Batal
                 </button>
@@ -2098,7 +2108,7 @@ function HalamanBerita({ isAdmin, daftarBerita, setDaftarBerita }: any) {
                 </div>
               </div>
               
-              <div className="flex justify-end gap-4 pt-6 border-t border-gray-100">
+              <div className="flex justify-end gap-4 pt-6 sticky bottom-0 bg-white p-4 -mx-8 -mb-8 rounded-b-3xl">
                 <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
                   Batal
                 </button>
