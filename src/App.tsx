@@ -126,7 +126,11 @@ export default function App() {
     return saved ? JSON.parse(saved) : initialBeranda;
   });
 
-  useEffect(() => { window.scrollTo(0, 0); }, [currentPage]);
+  // Saat halaman atau tab profil berubah, otomatis scroll ke atas agar informasi yang dipilih langsung terlihat
+  useEffect(() => { 
+    window.scrollTo(0, 0); 
+  }, [currentPage, activeProfilTab]);
+
   useEffect(() => { localStorage.setItem('desa_admin_status', isAdmin.toString()); }, [isAdmin]);
   useEffect(() => { localStorage.setItem('desa_data_berita_v2', JSON.stringify(daftarBerita)); }, [daftarBerita]);
   useEffect(() => { localStorage.setItem('desa_data_perangkat_v2', JSON.stringify(daftarPerangkat)); }, [daftarPerangkat]);
@@ -138,7 +142,9 @@ export default function App() {
     if (page === 'profil' && tabId !== null) {
       setActiveProfilTab(tabId);
     }
+    // Menutup menu mobile & dropdown saat pindah halaman
     setIsMobileMenuOpen(false);
+    setIsMobileProfilOpen(false);
   };
 
   const handleLogin = (e: any) => {
@@ -865,23 +871,43 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
     }
   };
 
+  // Logika Khusus untuk mem-parsing format Visi & Misi yang dinamis
+  const isVisiMisi = activeProfil && activeProfil.judul.toLowerCase().includes('visi');
+  let visiText = "";
+  let misiList: string[] = [];
+
+  if (isVisiMisi && activeProfil) {
+    const text = activeProfil.konten;
+    const misiIndex = text.toUpperCase().indexOf('MISI');
+    
+    if (misiIndex !== -1) {
+        visiText = text.substring(0, misiIndex).replace(/VISI KAMI:/i, '').replace(/"/g, '').trim();
+        const rawMisiText = text.substring(misiIndex);
+        // Membersihkan awalan "MISI DESA:" atau "MISI:" dan angka urutan
+        const cleanMisiText = rawMisiText.replace(/^MISI( DESA)?:\s*/i, '');
+        misiList = cleanMisiText.split('\n').map((m: string) => m.replace(/^\d+[\.\)]\s*/, '').trim()).filter((m: string) => m);
+    } else {
+        visiText = text;
+    }
+  }
+
   return (
     <div className="animate-in fade-in zoom-in-95 duration-500 py-16 bg-gray-50 min-h-[70vh]">
-      <div className="container mx-auto px-4 lg:px-8">
+      <div className="container mx-auto px-4 lg:px-8 flex flex-col items-center justify-center">
         
         {/* Header Halaman */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-10 w-full max-w-4xl mx-auto">
           <span className="text-emerald-600 font-bold tracking-widest uppercase text-sm mb-2 block">Informasi Publik</span>
           <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">Profil Desa</h2>
           <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-600 to-emerald-400 mx-auto rounded-full"></div>
-          <p className="mt-6 text-gray-600 max-w-2xl mx-auto text-lg leading-relaxed">
+          <p className="mt-6 text-gray-600 text-lg leading-relaxed">
             Mengenal lebih dekat sejarah, visi misi, letak geografis, dan struktur organisasi Pemerintah Desa Delta Upang.
           </p>
         </div>
 
         {/* Tombol Tambah Bagian Profil (Khusus Admin) */}
         {isAdmin && (
-          <div className="mb-8 flex justify-end">
+          <div className="w-full max-w-5xl mb-6 flex justify-end">
             <button 
               onClick={() => openEditor()} 
               className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center transition-all"
@@ -891,103 +917,111 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
           </div>
         )}
 
-        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
-          
-          {/* KIRI: Daftar Menu Tab (List Bar) */}
-          <div className="w-full lg:w-1/3 flex flex-col gap-3 sticky top-28 z-10">
-            {daftarProfil.length === 0 ? (
-               <div className="bg-white p-6 rounded-2xl border border-gray-100 text-center text-gray-500 italic">Belum ada menu profil.</div>
-            ) : (
-              daftarProfil.map((profil: any) => {
-                const isActive = activeTabId === profil.id;
-                return (
-                  <button
-                    key={profil.id}
-                    onClick={() => setActiveTabId(profil.id)}
-                    className={`group w-full flex items-center justify-between p-5 rounded-2xl transition-all duration-300 text-left font-bold text-lg ${
-                      isActive 
-                        ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-[0_10px_20px_rgba(5,150,105,0.3)] transform scale-[1.02]' 
-                        : 'bg-white text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 shadow-sm border border-gray-100 hover:border-emerald-200'
-                    }`}
-                  >
-                    <div className="flex items-center">
-                      <div className={`p-2.5 rounded-xl mr-4 transition-colors ${isActive ? 'bg-white/20' : 'bg-emerald-100 text-emerald-600 group-hover:bg-emerald-200'}`}>
-                        {renderIcon(profil.iconName, "w-6 h-6")}
-                      </div>
-                      {profil.judul}
-                    </div>
-                    <ChevronRight className={`w-5 h-5 transition-transform ${isActive ? 'translate-x-1 opacity-100' : 'opacity-0 group-hover:opacity-100 group-hover:translate-x-1'}`} />
+        {/* KONTEN TENGAH YANG DIPILIH (FULL WIDTH / CENTERED) */}
+        <div className="w-full max-w-5xl bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden relative min-h-[500px] flex flex-col mx-auto">
+          {activeProfil ? (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 flex-grow flex flex-col">
+              
+              {/* Kontrol Admin untuk Konten Aktif */}
+              {isAdmin && (
+                <div className="absolute top-4 right-4 z-20 flex gap-2">
+                  <button onClick={() => openEditor(activeProfil)} className="bg-amber-500 hover:bg-amber-600 text-white p-2.5 rounded-xl shadow-lg transition">
+                    <Edit className="w-5 h-5" />
                   </button>
-                )
-              })
-            )}
-          </div>
+                  <button onClick={() => handleDelete(activeProfil.id)} className="bg-rose-500 hover:bg-rose-600 text-white p-2.5 rounded-xl shadow-lg transition">
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
+              )}
 
-          {/* KANAN: Konten Detail yang Dipilih */}
-          <div className="w-full lg:w-2/3 bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden relative min-h-[500px] flex flex-col">
-            {activeProfil ? (
-              <div className="animate-in fade-in slide-in-from-right-4 duration-500 flex-grow flex flex-col">
-                
-                {/* Kontrol Admin untuk Konten Aktif */}
-                {isAdmin && (
-                  <div className="absolute top-4 right-4 z-20 flex gap-2">
-                    <button onClick={() => openEditor(activeProfil)} className="bg-amber-500 hover:bg-amber-600 text-white p-2.5 rounded-xl shadow-lg transition">
-                      <Edit className="w-5 h-5" />
-                    </button>
-                    <button onClick={() => handleDelete(activeProfil.id)} className="bg-rose-500 hover:bg-rose-600 text-white p-2.5 rounded-xl shadow-lg transition">
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </div>
-                )}
-
-                {/* Gambar Konten Profil */}
-                {activeProfil.gambar && (
-                  <div className="relative w-full h-64 md:h-80 overflow-hidden bg-gray-100 flex-shrink-0">
-                    <img 
-                      src={activeProfil.gambar} 
-                      alt={activeProfil.judul} 
-                      className="w-full h-full object-cover"
-                      onError={(e: any) => { e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=1200&q=80' }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/70 via-gray-900/20 to-transparent"></div>
-                    <div className="absolute bottom-0 left-0 p-8 w-full">
-                       <h3 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight drop-shadow-md">
-                         {activeProfil.judul}
-                       </h3>
-                    </div>
-                  </div>
-                )}
-
-                {/* Teks Konten Profil & Tombol Kembali */}
-                <div className={`p-8 md:p-10 flex-grow flex flex-col ${!activeProfil.gambar && 'pt-12'}`}>
-                  {!activeProfil.gambar && (
-                     <h3 className="text-3xl md:text-4xl font-extrabold text-emerald-900 tracking-tight mb-8 pb-4 border-b-2 border-emerald-100">
-                       {activeProfil.judul}
-                     </h3>
-                  )}
-                  <div className="text-gray-700 text-lg leading-relaxed whitespace-pre-wrap font-medium flex-grow">
-                    {activeProfil.konten}
-                  </div>
-
-                  {/* Tombol Kembali ke Halaman Beranda (Pojok Bawah) */}
-                  <div className="mt-12 pt-6 border-t border-gray-100 flex justify-end">
-                    <button 
-                      onClick={() => navigateTo('beranda')}
-                      className="flex items-center text-sm font-bold text-gray-500 hover:text-emerald-700 bg-gray-50 hover:bg-emerald-50 px-5 py-3 rounded-xl border border-gray-200 hover:border-emerald-200 transition-all shadow-sm hover:shadow"
-                    >
-                      <ArrowRight className="w-4 h-4 mr-2 rotate-180" /> Kembali ke Halaman Utama
-                    </button>
+              {/* Gambar Konten Profil */}
+              {activeProfil.gambar && (
+                <div className="relative w-full h-64 md:h-96 overflow-hidden bg-gray-100 flex-shrink-0">
+                  <img 
+                    src={activeProfil.gambar} 
+                    alt={activeProfil.judul} 
+                    className="w-full h-full object-cover"
+                    onError={(e: any) => { e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=1200&q=80' }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-gray-900/30 to-transparent"></div>
+                  <div className="absolute bottom-0 left-0 p-8 md:p-12 w-full">
+                      <div className="flex items-center gap-3 text-emerald-300 mb-3">
+                        {renderIcon(activeProfil.iconName, "w-6 h-6")}
+                        <span className="font-bold tracking-widest uppercase text-sm">Bagian Profil</span>
+                      </div>
+                      <h3 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight drop-shadow-md">
+                        {activeProfil.judul}
+                      </h3>
                   </div>
                 </div>
+              )}
 
+              {/* Teks Konten Profil & Tombol Kembali */}
+              <div className={`p-6 md:p-12 flex-grow flex flex-col ${!activeProfil.gambar && 'pt-16 md:pt-20'}`}>
+                {!activeProfil.gambar && (
+                   <div className="mb-10 text-center">
+                     <div className="inline-flex justify-center items-center bg-emerald-100 text-emerald-600 p-4 rounded-2xl mb-6 shadow-sm">
+                       {renderIcon(activeProfil.iconName, "w-10 h-10")}
+                     </div>
+                     <h3 className="text-3xl md:text-5xl font-extrabold text-emerald-900 tracking-tight">
+                       {activeProfil.judul}
+                     </h3>
+                   </div>
+                )}
+                
+                {/* RENDERER KHUSUS VISI & MISI ATAU TEKS STANDAR */}
+                <div className="flex-grow max-w-4xl mx-auto w-full">
+                  {isVisiMisi ? (
+                    <div className="space-y-12">
+                      {/* Visi */}
+                      <div className="bg-gradient-to-br from-emerald-800 to-emerald-950 rounded-3xl shadow-2xl p-8 md:p-14 text-center transform hover:scale-[1.02] transition-transform duration-300">
+                        <h3 className="text-2xl font-extrabold text-white mb-6 tracking-widest">VISI KAMI</h3>
+                        <p className="text-xl md:text-3xl text-emerald-50 font-medium leading-tight italic drop-shadow-md">
+                          "{visiText}"
+                        </p>
+                      </div>
+
+                      {/* Misi */}
+                      <div className="bg-white rounded-3xl shadow-xl p-8 md:p-14 border border-gray-100 relative overflow-hidden">
+                         <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-bl-[100px] -z-10"></div>
+                        <h3 className="text-2xl md:text-3xl font-extrabold text-emerald-900 mb-8 text-center tracking-widest">MISI DESA</h3>
+                        <div className="space-y-5">
+                          {misiList.map((misi: string, index: number) => (
+                            <div key={index} className="flex items-start bg-gray-50 hover:bg-emerald-50 p-5 md:p-6 rounded-2xl transition-colors duration-300 border border-gray-100 hover:border-emerald-200">
+                              <div className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center font-black text-lg md:text-xl mr-4 md:mr-5 shadow-sm">
+                                {index + 1}
+                              </div>
+                              <p className="text-gray-700 text-base md:text-xl font-medium pt-1 md:pt-1.5 leading-relaxed">{misi}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-gray-700 text-lg md:text-xl leading-relaxed whitespace-pre-wrap font-medium">
+                      {activeProfil.konten}
+                    </div>
+                  )}
+                </div>
+
+                {/* Tombol Kembali ke Halaman Beranda (Pojok Bawah) */}
+                <div className="mt-16 pt-8 border-t border-gray-100 flex justify-end w-full max-w-4xl mx-auto">
+                  <button 
+                    onClick={() => navigateTo('beranda')}
+                    className="flex items-center text-sm md:text-base font-bold text-gray-500 hover:text-emerald-700 bg-gray-50 hover:bg-emerald-50 px-6 py-3.5 rounded-xl border border-gray-200 hover:border-emerald-200 transition-all shadow-sm hover:shadow-md"
+                  >
+                    <ArrowRight className="w-5 h-5 mr-2 rotate-180" /> Kembali ke Halaman Utama
+                  </button>
+                </div>
               </div>
-            ) : (
-              <div className="p-16 text-center h-full flex flex-col items-center justify-center text-gray-400">
-                <Info className="w-16 h-16 mb-4 text-gray-300" />
-                <p className="text-xl font-medium">Pilih menu di samping untuk melihat informasi profil desa.</p>
-              </div>
-            )}
-          </div>
+
+            </div>
+          ) : (
+            <div className="p-16 text-center h-full flex flex-col items-center justify-center text-gray-400">
+              <Info className="w-16 h-16 mb-4 text-gray-300" />
+              <p className="text-xl font-medium">Data profil belum tersedia.</p>
+            </div>
+          )}
         </div>
       </div>
 
