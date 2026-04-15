@@ -34,7 +34,7 @@ const initialBerita = [
   }
 ];
 
-// Data awal perangkat desa
+// Data awal perangkat desa (Tampilan Card)
 const initialPerangkat = [
   { id: 1, nama: "Pendi.", jabatan: "Kepala Desa", foto: "https://lh3.googleusercontent.com/d/1L5Y15w_obbihHFz4rUMrOAci5V7TtAIz" },
   { id: 2, nama: "Ahmad Yani, S.IP.", jabatan: "Sekretaris Desa", foto: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
@@ -42,6 +42,14 @@ const initialPerangkat = [
   { id: 4, nama: "Budi Santoso", jabatan: "Kaur Perencanaan", foto: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
   { id: 5, nama: "Dewi Lestari", jabatan: "Kasi Pemerintahan", foto: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
   { id: 6, nama: "Herman Pelani", jabatan: "Kasi Kesejahteraan", foto: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
+];
+
+// Data awal lembaga pemerintahan desa lainnya (Tampilan Tabel)
+const initialLembaga = [
+  { id: 1, kategori: 'bpd', nama: 'Suryadi, S.H.', jabatan: 'Ketua BPD', jenisKelamin: 'Laki-laki', umur: 45, foto: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80' },
+  { id: 2, kategori: 'pkk', nama: 'Ibu Ratna', jabatan: 'Ketua Tim Penggerak PKK', jenisKelamin: 'Perempuan', umur: 42, foto: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80' },
+  { id: 3, kategori: 'kadus', nama: 'Bambang Irawan', jabatan: 'Kepala Dusun I', jenisKelamin: 'Laki-laki', umur: 50, foto: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80' },
+  { id: 4, kategori: 'rt', nama: 'Suharto', jabatan: 'Ketua RT 01', jenisKelamin: 'Laki-laki', umur: 48, foto: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80' }
 ];
 
 // Data awal profil desa
@@ -79,6 +87,7 @@ const initialProfil = [
 // Data awal konten beranda
 const initialBeranda = {
   heroBg: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
+  logoHero: "", // State untuk Logo Hero (Atas)
   namaDesa: "Delta Upang",
   deskripsiDesa: "Kecamatan Makarti Jaya, Kabupaten Banyuasin \nProvinsi Sumatera Selatan",
   fotoKades: "https://lh3.googleusercontent.com/d/1L5Y15w_obbihHFz4rUMrOAci5V7TtAIz",
@@ -96,11 +105,16 @@ const initialBeranda = {
 export default function App() {
   const [currentPage, setCurrentPage] = useState('beranda');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activeProfilTab, setActiveProfilTab] = useState<number | null>(null);
   
-  // States untuk mengatur dropdown klik
+  // State Active Tabs
+  const [activeProfilTab, setActiveProfilTab] = useState<number | null>(null);
+  const [activePemerintahTab, setActivePemerintahTab] = useState<string>('perangkat');
+  
+  // States untuk mengatur dropdown
   const [isDesktopProfilOpen, setIsDesktopProfilOpen] = useState(false);
   const [isMobileProfilOpen, setIsMobileProfilOpen] = useState(false);
+  const [isDesktopPemerintahOpen, setIsDesktopPemerintahOpen] = useState(false);
+  const [isMobilePemerintahOpen, setIsMobilePemerintahOpen] = useState(false);
   
   // State Admin
   const [isAdmin, setIsAdmin] = useState(() => {
@@ -119,13 +133,18 @@ export default function App() {
     return saved ? JSON.parse(saved) : initialPerangkat;
   });
 
+  const [daftarLembaga, setDaftarLembaga] = useState(() => {
+    const saved = localStorage.getItem('desa_data_lembaga_v1');
+    return saved ? JSON.parse(saved) : initialLembaga;
+  });
+
   const [daftarProfil, setDaftarProfil] = useState(() => {
     const saved = localStorage.getItem('desa_data_profil_v1');
     return saved ? JSON.parse(saved) : initialProfil;
   });
   
   const [dataBeranda, setDataBeranda] = useState(() => {
-    const saved = localStorage.getItem('desa_data_beranda_v2');
+    const saved = localStorage.getItem('desa_data_beranda_v3');
     return saved ? JSON.parse(saved) : initialBeranda;
   });
 
@@ -133,31 +152,40 @@ export default function App() {
   useEffect(() => {
     const handleOutsideClick = () => {
       setIsDesktopProfilOpen(false);
+      setIsDesktopPemerintahOpen(false);
     };
     document.addEventListener('click', handleOutsideClick);
     return () => document.removeEventListener('click', handleOutsideClick);
   }, []);
 
-  // Saat halaman atau tab profil berubah, otomatis scroll ke atas agar informasi yang dipilih langsung terlihat
+  // Saat halaman atau tab berubah, otomatis scroll ke atas agar informasi yang dipilih langsung terlihat
   useEffect(() => { 
     window.scrollTo(0, 0); 
-  }, [currentPage, activeProfilTab]);
+  }, [currentPage, activeProfilTab, activePemerintahTab]);
 
   useEffect(() => { localStorage.setItem('desa_admin_status', isAdmin.toString()); }, [isAdmin]);
   useEffect(() => { localStorage.setItem('desa_data_berita_v2', JSON.stringify(daftarBerita)); }, [daftarBerita]);
   useEffect(() => { localStorage.setItem('desa_data_perangkat_v2', JSON.stringify(daftarPerangkat)); }, [daftarPerangkat]);
+  useEffect(() => { localStorage.setItem('desa_data_lembaga_v1', JSON.stringify(daftarLembaga)); }, [daftarLembaga]);
   useEffect(() => { localStorage.setItem('desa_data_profil_v1', JSON.stringify(daftarProfil)); }, [daftarProfil]);
-  useEffect(() => { localStorage.setItem('desa_data_beranda_v2', JSON.stringify(dataBeranda)); }, [dataBeranda]);
+  useEffect(() => { localStorage.setItem('desa_data_beranda_v3', JSON.stringify(dataBeranda)); }, [dataBeranda]);
 
-  const navigateTo = (page: string, tabId: number | null = null) => {
+  const navigateTo = (page: string, tabId: any = null) => {
     setCurrentPage(page);
+    
     if (page === 'profil' && tabId !== null) {
       setActiveProfilTab(tabId);
     }
+    if (page === 'pemerintah' && tabId !== null) {
+      setActivePemerintahTab(tabId);
+    }
+
     // Menutup menu mobile & dropdown saat pindah halaman atau selesai memilih
     setIsMobileMenuOpen(false);
     setIsMobileProfilOpen(false);
     setIsDesktopProfilOpen(false);
+    setIsMobilePemerintahOpen(false);
+    setIsDesktopPemerintahOpen(false);
   };
 
   const handleLogin = (e: any) => {
@@ -178,6 +206,15 @@ export default function App() {
       setIsAdmin(false);
     }
   };
+
+  // Daftar Menu Dropdown Pemerintah
+  const menuPemerintah = [
+    { id: 'perangkat', label: 'Perangkat Desa' },
+    { id: 'bpd', label: 'BPD' },
+    { id: 'pkk', label: 'PKK' },
+    { id: 'kadus', label: 'Kepala Dusun' },
+    { id: 'rt', label: 'Ketua RT' }
+  ];
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-gray-50 text-gray-800 relative selection:bg-emerald-200 selection:text-emerald-900">
@@ -203,10 +240,11 @@ export default function App() {
             <nav className="hidden lg:flex space-x-1 items-center bg-black/20 p-1.5 rounded-2xl backdrop-blur-md border border-white/10">
               <NavButton active={currentPage === 'beranda'} onClick={() => navigateTo('beranda')} icon={<Home className="w-4 h-4 mr-2" />}>Beranda</NavButton>
               
-              {/* Dropdown Profil Desa (Click Based) */}
+              {/* Dropdown Profil Desa */}
               <div className="relative" onClick={(e) => e.stopPropagation()}>
                 <button
                   onClick={() => {
+                    setIsDesktopPemerintahOpen(false);
                     if (currentPage === 'profil') {
                       setIsDesktopProfilOpen(!isDesktopProfilOpen);
                     } else {
@@ -225,12 +263,11 @@ export default function App() {
                   <ChevronDown className={`w-4 h-4 ml-1 opacity-70 transition-transform duration-300 ${isDesktopProfilOpen ? 'rotate-180' : ''}`} />
                 </button>
 
-                {/* Dropdown Menu Elegan */}
                 <div className={`absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.15)] border border-gray-100 transition-all duration-300 transform origin-top z-50 overflow-hidden ${
                   isDesktopProfilOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'
                 }`}>
                   <div className="flex flex-col py-1.5">
-                    {daftarProfil.map((profil: any, index: number) => (
+                    {daftarProfil.map((profil: any) => (
                       <button
                         key={profil.id}
                         onClick={(e) => {
@@ -253,7 +290,56 @@ export default function App() {
                 </div>
               </div>
 
-              <NavButton active={currentPage === 'perangkat'} onClick={() => navigateTo('perangkat')} icon={<Users className="w-4 h-4 mr-2" />}>Perangkat Desa</NavButton>
+              {/* Dropdown Pemerintah Desa */}
+              <div className="relative" onClick={(e) => e.stopPropagation()}>
+                <button
+                  onClick={() => {
+                    setIsDesktopProfilOpen(false);
+                    if (currentPage === 'pemerintah') {
+                      setIsDesktopPemerintahOpen(!isDesktopPemerintahOpen);
+                    } else {
+                      navigateTo('pemerintah', 'perangkat');
+                      setIsDesktopPemerintahOpen(true);
+                    }
+                  }}
+                  className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
+                    currentPage === 'pemerintah'
+                      ? 'bg-white text-emerald-900 shadow-md'
+                      : 'text-white hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  <Users className="w-4 h-4 mr-2" />
+                  Pemerintah Desa
+                  <ChevronDown className={`w-4 h-4 ml-1 opacity-70 transition-transform duration-300 ${isDesktopPemerintahOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                <div className={`absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.15)] border border-gray-100 transition-all duration-300 transform origin-top z-50 overflow-hidden ${
+                  isDesktopPemerintahOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'
+                }`}>
+                  <div className="flex flex-col py-1.5">
+                    {menuPemerintah.map((menu: any) => (
+                      <button
+                        key={menu.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigateTo('pemerintah', menu.id);
+                        }}
+                        className={`text-left px-5 py-3 text-sm font-bold transition-all duration-200 relative overflow-hidden ${
+                           activePemerintahTab === menu.id && currentPage === 'pemerintah'
+                             ? 'text-emerald-700 bg-emerald-50/80'
+                             : 'text-gray-600 hover:bg-gray-50 hover:text-emerald-600'
+                        }`}
+                      >
+                         {activePemerintahTab === menu.id && currentPage === 'pemerintah' && (
+                           <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-400 to-emerald-600"></span>
+                         )}
+                         {menu.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               <NavButton active={currentPage === 'berita'} onClick={() => navigateTo('berita')} icon={<Newspaper className="w-4 h-4 mr-2" />}>Berita</NavButton>
               <NavButton active={currentPage === 'kontak'} onClick={() => navigateTo('kontak')} icon={<Phone className="w-4 h-4 mr-2" />}>Kontak</NavButton>
               
@@ -301,7 +387,10 @@ export default function App() {
               {/* Dropdown Profil Desa Mobile */}
               <div>
                 <button
-                  onClick={() => setIsMobileProfilOpen(!isMobileProfilOpen)}
+                  onClick={() => {
+                    setIsMobileProfilOpen(!isMobileProfilOpen);
+                    setIsMobilePemerintahOpen(false);
+                  }}
                   className={`flex items-center justify-between w-full text-left px-5 py-4 rounded-xl text-lg font-bold transition-all ${
                     currentPage === 'profil' || isMobileProfilOpen
                       ? 'bg-emerald-800 text-white border-l-4 border-emerald-400 shadow-inner'
@@ -316,9 +405,7 @@ export default function App() {
                     {daftarProfil.map((profil: any) => (
                       <button
                         key={profil.id}
-                        onClick={() => {
-                          navigateTo('profil', profil.id);
-                        }}
+                        onClick={() => navigateTo('profil', profil.id)}
                         className={`text-left px-6 py-3.5 text-sm font-bold transition-colors border-l-2 ${
                           activeProfilTab === profil.id && currentPage === 'profil'
                             ? 'border-emerald-400 text-white bg-emerald-800/50'
@@ -332,7 +419,41 @@ export default function App() {
                 )}
               </div>
 
-              <MobileNavButton active={currentPage === 'perangkat'} onClick={() => navigateTo('perangkat')}>Perangkat Desa</MobileNavButton>
+              {/* Dropdown Pemerintah Desa Mobile */}
+              <div>
+                <button
+                  onClick={() => {
+                    setIsMobilePemerintahOpen(!isMobilePemerintahOpen);
+                    setIsMobileProfilOpen(false);
+                  }}
+                  className={`flex items-center justify-between w-full text-left px-5 py-4 rounded-xl text-lg font-bold transition-all ${
+                    currentPage === 'pemerintah' || isMobilePemerintahOpen
+                      ? 'bg-emerald-800 text-white border-l-4 border-emerald-400 shadow-inner'
+                      : 'text-emerald-100 hover:bg-emerald-800/80 hover:text-white'
+                  }`}
+                >
+                  <span>Pemerintah Desa</span>
+                  <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isMobilePemerintahOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {isMobilePemerintahOpen && (
+                  <div className="flex flex-col bg-emerald-900/50 rounded-xl mt-2 mx-2 overflow-hidden border border-white/5 animate-in slide-in-from-top-2 duration-200">
+                    {menuPemerintah.map((menu: any) => (
+                      <button
+                        key={menu.id}
+                        onClick={() => navigateTo('pemerintah', menu.id)}
+                        className={`text-left px-6 py-3.5 text-sm font-bold transition-colors border-l-2 ${
+                          activePemerintahTab === menu.id && currentPage === 'pemerintah'
+                            ? 'border-emerald-400 text-white bg-emerald-800/50'
+                            : 'border-transparent text-emerald-200 hover:bg-emerald-800 hover:text-white'
+                        }`}
+                      >
+                        {menu.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <MobileNavButton active={currentPage === 'berita'} onClick={() => navigateTo('berita')}>Berita</MobileNavButton>
               <MobileNavButton active={currentPage === 'kontak'} onClick={() => navigateTo('kontak')}>Kontak</MobileNavButton>
             </div>
@@ -366,11 +487,14 @@ export default function App() {
             navigateTo={navigateTo}
           />
         )}
-        {currentPage === 'perangkat' && (
-          <HalamanPerangkatDesa 
+        {currentPage === 'pemerintah' && (
+          <HalamanPemerintahan 
             isAdmin={isAdmin}
+            activeTab={activePemerintahTab}
             daftarPerangkat={daftarPerangkat}
             setDaftarPerangkat={setDaftarPerangkat}
+            daftarLembaga={daftarLembaga}
+            setDaftarLembaga={setDaftarLembaga}
           />
         )}
         {currentPage === 'berita' && (
@@ -405,7 +529,7 @@ export default function App() {
               <ul className="space-y-3">
                 <li><button onClick={() => navigateTo('beranda')} className="text-gray-400 hover:text-emerald-400 font-medium flex items-center transition duration-200 hover:translate-x-2"><ChevronRight className="w-4 h-4 mr-2 text-emerald-500"/> Beranda</button></li>
                 <li><button onClick={() => navigateTo('profil', daftarProfil[0]?.id)} className="text-gray-400 hover:text-emerald-400 font-medium flex items-center transition duration-200 hover:translate-x-2"><ChevronRight className="w-4 h-4 mr-2 text-emerald-500"/> Profil Desa</button></li>
-                <li><button onClick={() => navigateTo('perangkat')} className="text-gray-400 hover:text-emerald-400 font-medium flex items-center transition duration-200 hover:translate-x-2"><ChevronRight className="w-4 h-4 mr-2 text-emerald-500"/> Perangkat Desa</button></li>
+                <li><button onClick={() => navigateTo('pemerintah', 'perangkat')} className="text-gray-400 hover:text-emerald-400 font-medium flex items-center transition duration-200 hover:translate-x-2"><ChevronRight className="w-4 h-4 mr-2 text-emerald-500"/> Pemerintah Desa</button></li>
                 <li><button onClick={() => navigateTo('berita')} className="text-gray-400 hover:text-emerald-400 font-medium flex items-center transition duration-200 hover:translate-x-2"><ChevronRight className="w-4 h-4 mr-2 text-emerald-500"/> Berita Desa</button></li>
               </ul>
             </div>
@@ -514,6 +638,17 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
     }
   };
 
+  const handleLogoHeroChange = (e: any) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEditForm((prev: any) => ({ ...prev, logoHero: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleFotoKadesUpload = (e: any) => {
     const file = e.target.files[0];
     if (file) {
@@ -547,7 +682,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
             alt="Pemandangan Desa" 
             className="w-full h-full object-cover transition-transform duration-[10s] hover:scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/70 to-transparent"></div>
         </div>
 
         {isAdmin && (
@@ -571,10 +706,21 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
           </>
         )}
         
-        <div className="container mx-auto px-4 lg:px-8 relative z-10 text-center text-white mt-16">
-          <span className="inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-emerald-600/80 backdrop-blur-md border border-emerald-400/30 text-sm font-bold mb-6 tracking-widest uppercase shadow-lg">
-            <Landmark className="w-4 h-4" /> Selamat Datang di Website Resmi
-          </span>
+        <div className="container mx-auto px-4 lg:px-8 relative z-10 text-center text-white mt-12 md:mt-16">
+          
+          {/* FItur Logo Custom di Hero Atas */}
+          {dataBeranda.logoHero ? (
+            <img 
+              src={dataBeranda.logoHero} 
+              alt="Logo" 
+              className="h-28 md:h-36 mx-auto mb-6 drop-shadow-2xl object-contain animate-in zoom-in duration-700" 
+            />
+          ) : (
+            <span className="inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-emerald-600/80 backdrop-blur-md border border-emerald-400/30 text-sm font-bold mb-6 tracking-widest uppercase shadow-lg">
+              <Landmark className="w-4 h-4" /> Selamat Datang di Website Resmi
+            </span>
+          )}
+
           <h1 className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight drop-shadow-2xl">
             Desa <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-emerald-100">{dataBeranda.namaDesa}</span>
           </h1>
@@ -689,7 +835,26 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
                 <h4 className="font-extrabold text-lg text-emerald-800 mb-4 flex items-center">
                    <span className="w-6 h-1 bg-emerald-500 rounded-full mr-3"></span> Bagian Hero (Atas)
                 </h4>
-                <div className="grid grid-cols-1 gap-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="col-span-full">
+                    <label className="block text-sm font-bold text-gray-700 mb-3">Logo Hero (Opsional)</label>
+                    <div className="flex items-center gap-5">
+                      {editForm.logoHero ? (
+                         <img src={editForm.logoHero} alt="Preview Logo" className="w-24 h-24 object-contain bg-gray-200 rounded-xl shadow-sm border border-gray-300 p-2" />
+                      ) : (
+                         <div className="w-24 h-24 bg-gray-200 rounded-xl flex items-center justify-center border border-gray-300 border-dashed">
+                           <ImageIcon className="w-6 h-6 text-gray-400" />
+                         </div>
+                      )}
+                      <div className="flex-1">
+                        <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 px-5 py-2 rounded-xl font-bold flex items-center justify-center transition-all w-max shadow-sm">
+                          <Upload className="w-5 h-5 mr-2" /> {editForm.logoHero ? 'Ganti Logo' : 'Upload Logo'}
+                          <input type="file" accept="image/*" className="hidden" onChange={handleLogoHeroChange} />
+                        </label>
+                        <p className="text-sm text-gray-500 mt-2 font-medium">Bisa menggunakan file berformat PNG transparan.</p>
+                      </div>
+                    </div>
+                  </div>
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">Nama Desa</label>
                     <input 
@@ -699,7 +864,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
                       className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" 
                     />
                   </div>
-                  <div>
+                  <div className="col-span-full">
                     <label className="block text-sm font-bold text-gray-700 mb-2">Deskripsi / Sub-judul (Gunakan Enter untuk baris baru)</label>
                     <textarea 
                       required rows={3}
@@ -827,7 +992,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
   );
 }
 
-// ============== KOMPONEN BARU: HALAMAN PROFIL DESA ==============
+// ============== KOMPONEN PROFIL DESA ==============
 function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabId, navigateTo }: any) {
   const [activeTabId, setActiveTabId] = useState(initialTabId || daftarProfil[0]?.id);
   const [showEditor, setShowEditor] = useState(false);
@@ -866,7 +1031,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
     } else {
       const newProfil = { ...editData, id: Date.now() };
       setDaftarProfil([...daftarProfil, newProfil]);
-      setActiveTabId(newProfil.id); // Otomatis buka tab yang baru dibuat
+      setActiveTabId(newProfil.id); 
     }
     setShowEditor(false);
   };
@@ -882,7 +1047,6 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
     }
   };
 
-  // Helper untuk me-render icon string ke komponen Icon Lucide
   const renderIcon = (iconName: string, className: string) => {
     switch (iconName) {
       case 'Target': return <Target className={className} />;
@@ -893,7 +1057,6 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
     }
   };
 
-  // Logika Khusus untuk mem-parsing format Visi & Misi yang dinamis
   const isVisiMisi = activeProfil && activeProfil.judul.toLowerCase().includes('visi');
   let visiText = "";
   let misiList: string[] = [];
@@ -905,7 +1068,6 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
     if (misiIndex !== -1) {
         visiText = text.substring(0, misiIndex).replace(/VISI KAMI:/i, '').replace(/"/g, '').trim();
         const rawMisiText = text.substring(misiIndex);
-        // Membersihkan awalan "MISI DESA:" atau "MISI:" dan angka urutan
         const cleanMisiText = rawMisiText.replace(/^MISI( DESA)?:\s*/i, '');
         misiList = cleanMisiText.split('\n').map((m: string) => m.replace(/^\d+[\.\)]\s*/, '').trim()).filter((m: string) => m);
     } else {
@@ -917,7 +1079,6 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
     <div className="animate-in fade-in zoom-in-95 duration-500 py-16 bg-gray-50 min-h-[70vh]">
       <div className="container mx-auto px-4 lg:px-8 flex flex-col items-center justify-center">
         
-        {/* Header Halaman */}
         <div className="text-center mb-10 w-full max-w-4xl mx-auto">
           <span className="text-emerald-600 font-bold tracking-widest uppercase text-sm mb-2 block">Informasi Publik</span>
           <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">Profil Desa</h2>
@@ -927,7 +1088,6 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
           </p>
         </div>
 
-        {/* Tombol Tambah Bagian Profil (Khusus Admin) */}
         {isAdmin && (
           <div className="w-full max-w-5xl mb-6 flex justify-end">
             <button 
@@ -939,12 +1099,10 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
           </div>
         )}
 
-        {/* KONTEN TENGAH YANG DIPILIH (FULL WIDTH / CENTERED) */}
         <div className="w-full max-w-5xl bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden relative min-h-[500px] flex flex-col mx-auto">
           {activeProfil ? (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 flex-grow flex flex-col">
               
-              {/* Kontrol Admin untuk Konten Aktif */}
               {isAdmin && (
                 <div className="absolute top-4 right-4 z-20 flex gap-2">
                   <button onClick={() => openEditor(activeProfil)} className="bg-amber-500 hover:bg-amber-600 text-white p-2.5 rounded-xl shadow-lg transition">
@@ -956,7 +1114,6 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                 </div>
               )}
 
-              {/* Gambar Konten Profil */}
               {activeProfil.gambar && (
                 <div className="relative w-full h-64 md:h-96 overflow-hidden bg-gray-100 flex-shrink-0">
                   <img 
@@ -978,7 +1135,6 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                 </div>
               )}
 
-              {/* Teks Konten Profil & Tombol Kembali */}
               <div className={`p-6 md:p-12 flex-grow flex flex-col ${!activeProfil.gambar && 'pt-16 md:pt-20'}`}>
                 {!activeProfil.gambar && (
                    <div className="mb-10 text-center">
@@ -991,11 +1147,9 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                    </div>
                 )}
                 
-                {/* RENDERER KHUSUS VISI & MISI ATAU TEKS STANDAR */}
                 <div className="flex-grow max-w-4xl mx-auto w-full">
                   {isVisiMisi ? (
                     <div className="space-y-12">
-                      {/* Visi */}
                       <div className="bg-gradient-to-br from-emerald-800 to-emerald-950 rounded-3xl shadow-2xl p-8 md:p-14 text-center transform hover:scale-[1.02] transition-transform duration-300">
                         <h3 className="text-2xl font-extrabold text-white mb-6 tracking-widest">VISI KAMI</h3>
                         <p className="text-xl md:text-3xl text-emerald-50 font-medium leading-tight italic drop-shadow-md">
@@ -1003,7 +1157,6 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                         </p>
                       </div>
 
-                      {/* Misi */}
                       <div className="bg-white rounded-3xl shadow-xl p-8 md:p-14 border border-gray-100 relative overflow-hidden">
                          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-bl-[100px] -z-10"></div>
                         <h3 className="text-2xl md:text-3xl font-extrabold text-emerald-900 mb-8 text-center tracking-widest">MISI DESA</h3>
@@ -1026,7 +1179,6 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                   )}
                 </div>
 
-                {/* Tombol Kembali ke Halaman Beranda (Pojok Bawah) */}
                 <div className="mt-16 pt-8 border-t border-gray-100 flex justify-end w-full max-w-4xl mx-auto">
                   <button 
                     onClick={() => navigateTo('beranda')}
@@ -1047,7 +1199,6 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
         </div>
       </div>
 
-      {/* MODAL EDITOR PROFIL KHUSUS ADMIN */}
       {showEditor && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full p-8 max-h-[90vh] overflow-y-auto border border-emerald-100 animate-in zoom-in-95">
@@ -1145,43 +1296,94 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
   );
 }
 
-function HalamanPerangkatDesa({ isAdmin, daftarPerangkat, setDaftarPerangkat }: any) {
-  const [showEditor, setShowEditor] = useState(false);
-  const [editData, setEditData] = useState<any>(null);
+// ============== KOMPONEN BARU: HALAMAN PEMERINTAHAN (GABUNGAN PERANGKAT & LEMBAGA DESA) ==============
+function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPerangkat, daftarLembaga, setDaftarLembaga }: any) {
+  const isPerangkat = activeTab === 'perangkat' || !activeTab;
+  
+  // States Khusus Perangkat (Tampilan Card)
+  const [showEditorPerangkat, setShowEditorPerangkat] = useState(false);
+  const [editDataPerangkat, setEditDataPerangkat] = useState<any>(null);
 
-  const handleDelete = (id: any) => {
+  // States Khusus Lembaga (Tampilan Tabel)
+  const [showEditorLembaga, setShowEditorLembaga] = useState(false);
+  const [editDataLembaga, setEditDataLembaga] = useState<any>(null);
+
+  const getTabTitle = (tabId: string) => {
+    switch(tabId) {
+      case 'bpd': return 'Badan Permusyawaratan Desa (BPD)';
+      case 'pkk': return 'Pemberdayaan Kesejahteraan Keluarga (PKK)';
+      case 'kadus': return 'Daftar Kepala Dusun';
+      case 'rt': return 'Daftar Ketua RT';
+      default: return 'Struktur Organisasi';
+    }
+  };
+
+  const getTabSubtitle = (tabId: string) => {
+    switch(tabId) {
+      case 'bpd': return 'Daftar anggota BPD yang bertugas menyalurkan aspirasi masyarakat.';
+      case 'pkk': return 'Tim Penggerak PKK yang berfokus pada pemberdayaan dan kesejahteraan keluarga.';
+      case 'kadus': return 'Daftar perangkat kewilayahan yang bertugas membantu Kepala Desa di wilayah Dusun.';
+      case 'rt': return 'Daftar Ketua Rukun Tetangga (RT) yang menjadi ujung tombak pelayanan masyarakat.';
+      default: return 'Struktur Organisasi dan Tata Kerja (SOTK) Pemerintah Desa Delta Upang.';
+    }
+  };
+
+  /* ==== LOGIKA UNTUK PERANGKAT DESA (CARD) ==== */
+  const handleDeletePerangkat = (id: any) => {
     if (window.confirm('Yakin ingin menghapus perangkat desa ini?')) {
       setDaftarPerangkat(daftarPerangkat.filter((p: any) => p.id !== id));
     }
   };
-
-  const openEditor = (perangkat: any = null) => {
-    if (perangkat) {
-      setEditData(perangkat);
-    } else {
-      setEditData({ id: null, nama: '', jabatan: '', foto: '' });
-    }
-    setShowEditor(true);
+  const openEditorPerangkat = (perangkat: any = null) => {
+    if (perangkat) setEditDataPerangkat(perangkat);
+    else setEditDataPerangkat({ id: null, nama: '', jabatan: '', foto: '' });
+    setShowEditorPerangkat(true);
   };
-
-  const handleSave = (e: any) => {
+  const handleSavePerangkat = (e: any) => {
     e.preventDefault();
-    if (editData.id) {
-      setDaftarPerangkat(daftarPerangkat.map((p: any) => p.id === editData.id ? editData : p));
+    if (editDataPerangkat.id) {
+      setDaftarPerangkat(daftarPerangkat.map((p: any) => p.id === editDataPerangkat.id ? editDataPerangkat : p));
     } else {
-      const newPerangkat = { ...editData, id: Date.now() };
-      setDaftarPerangkat([...daftarPerangkat, newPerangkat]);
+      setDaftarPerangkat([...daftarPerangkat, { ...editDataPerangkat, id: Date.now() }]);
     }
-    setShowEditor(false);
+    setShowEditorPerangkat(false);
   };
-
-  const handleImageUpload = (e: any) => {
+  const handleImageUploadPerangkat = (e: any) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setEditData({ ...editData, foto: reader.result });
-      };
+      reader.onloadend = () => setEditDataPerangkat({ ...editDataPerangkat, foto: reader.result });
+      reader.readAsDataURL(file);
+    }
+  };
+
+  /* ==== LOGIKA UNTUK LEMBAGA (TABEL) ==== */
+  const filteredLembaga = daftarLembaga.filter((l: any) => l.kategori === activeTab);
+  
+  const handleDeleteLembaga = (id: any) => {
+    if (window.confirm('Yakin ingin menghapus data ini?')) {
+      setDaftarLembaga(daftarLembaga.filter((l: any) => l.id !== id));
+    }
+  };
+  const openEditorLembaga = (lembaga: any = null) => {
+    if (lembaga) setEditDataLembaga(lembaga);
+    else setEditDataLembaga({ id: null, kategori: activeTab, nama: '', jabatan: '', jenisKelamin: 'Laki-laki', umur: '', foto: '' });
+    setShowEditorLembaga(true);
+  };
+  const handleSaveLembaga = (e: any) => {
+    e.preventDefault();
+    if (editDataLembaga.id) {
+      setDaftarLembaga(daftarLembaga.map((l: any) => l.id === editDataLembaga.id ? editDataLembaga : l));
+    } else {
+      setDaftarLembaga([...daftarLembaga, { ...editDataLembaga, id: Date.now() }]);
+    }
+    setShowEditorLembaga(false);
+  };
+  const handleImageUploadLembaga = (e: any) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setEditDataLembaga({ ...editDataLembaga, foto: reader.result });
       reader.readAsDataURL(file);
     }
   };
@@ -1189,66 +1391,146 @@ function HalamanPerangkatDesa({ isAdmin, daftarPerangkat, setDaftarPerangkat }: 
   return (
     <div className="animate-in fade-in zoom-in-95 duration-500 py-16 bg-gray-50 min-h-[70vh]">
       <div className="container mx-auto px-4 lg:px-8 relative">
+        
+        {/* Header Bersama */}
         <div className="text-center mb-16">
-          <span className="text-emerald-600 font-bold tracking-widest uppercase text-sm mb-2 block">Struktur Organisasi</span>
-          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">Perangkat Desa</h2>
+          <span className="text-emerald-600 font-bold tracking-widest uppercase text-sm mb-2 block">
+            Pemerintahan Desa
+          </span>
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">
+            {getTabTitle(activeTab)}
+          </h2>
           <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-600 to-emerald-400 mx-auto rounded-full"></div>
           <p className="mt-6 text-gray-600 max-w-2xl mx-auto text-lg leading-relaxed">
-            Struktur Organisasi dan Tata Kerja (SOTK) Pemerintah Desa Delta Upang.
+            {getTabSubtitle(activeTab)}
           </p>
         </div>
 
-        {isAdmin && (
-          <div className="mb-10 flex justify-end bg-emerald-50 p-4 rounded-2xl border border-emerald-100 shadow-sm">
-            <button 
-              onClick={() => openEditor()} 
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 px-8 rounded-xl shadow-[0_8px_20px_rgba(5,150,105,0.3)] hover:shadow-[0_10px_25px_rgba(5,150,105,0.4)] hover:-translate-y-0.5 flex items-center transition-all"
-            >
-              <Plus className="w-5 h-5 mr-2" /> Tambah Perangkat
-            </button>
+        {/* =========== TAMPILAN PERANGKAT DESA (CARD) =========== */}
+        {isPerangkat && (
+          <div className="animate-in fade-in duration-500">
+            {isAdmin && (
+              <div className="mb-10 flex justify-end bg-emerald-50 p-4 rounded-2xl border border-emerald-100 shadow-sm">
+                <button 
+                  onClick={() => openEditorPerangkat()} 
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 px-8 rounded-xl shadow-[0_8px_20px_rgba(5,150,105,0.3)] hover:shadow-[0_10px_25px_rgba(5,150,105,0.4)] hover:-translate-y-0.5 flex items-center transition-all"
+                >
+                  <Plus className="w-5 h-5 mr-2" /> Tambah Perangkat
+                </button>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
+              {daftarPerangkat.length === 0 && (
+                 <div className="col-span-full text-center text-gray-500 py-20 bg-white rounded-3xl border border-dashed border-gray-300 font-medium text-lg">Belum ada data perangkat desa.</div>
+              )}
+
+              {daftarPerangkat.map((p: any) => (
+                <div key={p.id} className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden border border-gray-100 group relative">
+                  {isAdmin && (
+                    <div className="absolute top-4 right-4 z-20 flex gap-2">
+                      <button onClick={() => openEditorPerangkat(p)} className="bg-amber-500 hover:bg-amber-600 text-white p-2.5 rounded-xl shadow-lg transition">
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => handleDeletePerangkat(p.id)} className="bg-rose-500 hover:bg-rose-600 text-white p-2.5 rounded-xl shadow-lg transition">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                  <div className="relative h-80 overflow-hidden">
+                    <img 
+                      src={p.foto} 
+                      alt={p.nama} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={(e: any) => { e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&q=80' }} 
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </div>
+                  <div className="p-8 text-center relative bg-white -mt-4 rounded-t-3xl z-10">
+                    <h3 className="text-2xl font-extrabold text-gray-900 mb-2">{p.nama}</h3>
+                    <span className="inline-block bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm px-4 py-1.5 rounded-full font-bold">
+                      {p.jabatan}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
-          {daftarPerangkat.length === 0 && (
-             <div className="col-span-full text-center text-gray-500 py-20 bg-white rounded-3xl border border-dashed border-gray-300 font-medium text-lg">Belum ada data perangkat desa.</div>
-          )}
+        {/* =========== TAMPILAN LEMBAGA/LAINNYA (TABEL) =========== */}
+        {!isPerangkat && (
+          <div className="animate-in slide-in-from-bottom-4 duration-500 max-w-6xl mx-auto">
+            {isAdmin && (
+              <div className="mb-6 flex justify-end">
+                <button 
+                  onClick={() => openEditorLembaga()} 
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center transition-all"
+                >
+                  <Plus className="w-5 h-5 mr-2" /> Tambah Data
+                </button>
+              </div>
+            )}
 
-          {daftarPerangkat.map((p: any) => (
-            <div key={p.id} className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden border border-gray-100 group relative">
-              
-              {isAdmin && (
-                <div className="absolute top-4 right-4 z-20 flex gap-2">
-                  <button onClick={() => openEditor(p)} className="bg-amber-500 hover:bg-amber-600 text-white p-2.5 rounded-xl shadow-lg transition">
-                    <Edit className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => handleDelete(p.id)} className="bg-rose-500 hover:bg-rose-600 text-white p-2.5 rounded-xl shadow-lg transition">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+            <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+              {filteredLembaga.length === 0 ? (
+                 <div className="text-center text-gray-500 py-16 bg-white font-medium text-lg">Belum ada data tersedia.</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left whitespace-nowrap">
+                    <thead>
+                      <tr className="bg-emerald-50 text-emerald-800 text-sm tracking-wide uppercase border-b-2 border-emerald-100">
+                        <th className="px-6 py-5 font-bold">No</th>
+                        <th className="px-6 py-5 font-bold">Foto</th>
+                        <th className="px-6 py-5 font-bold">Nama Lengkap</th>
+                        <th className="px-6 py-5 font-bold">Jabatan</th>
+                        <th className="px-6 py-5 font-bold">Jenis Kelamin</th>
+                        <th className="px-6 py-5 font-bold">Umur</th>
+                        {isAdmin && <th className="px-6 py-5 font-bold text-center">Aksi</th>}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {filteredLembaga.map((item: any, index: number) => (
+                        <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-6 py-4 font-bold text-gray-500">{index + 1}</td>
+                          <td className="px-6 py-4">
+                            <img 
+                              src={item.foto || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=150&q=80'} 
+                              alt={item.nama} 
+                              className="w-14 h-14 rounded-xl object-cover shadow-sm border border-gray-200 bg-white"
+                              onError={(e: any) => { e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=150&q=80' }}
+                            />
+                          </td>
+                          <td className="px-6 py-4 font-extrabold text-gray-900 text-base">{item.nama}</td>
+                          <td className="px-6 py-4 text-emerald-700 font-bold bg-emerald-50/50 rounded-lg inline-block mt-3.5 mb-1.5 ml-4 px-3 py-1 border border-emerald-100/50">{item.jabatan}</td>
+                          <td className="px-6 py-4 font-medium text-gray-700">{item.jenisKelamin}</td>
+                          <td className="px-6 py-4 font-medium text-gray-700">{item.umur} Thn</td>
+                          {isAdmin && (
+                            <td className="px-6 py-4">
+                              <div className="flex justify-center gap-2">
+                                <button onClick={() => openEditorLembaga(item)} className="p-2 text-amber-500 hover:bg-amber-50 rounded-lg transition" title="Edit">
+                                  <Edit className="w-5 h-5" />
+                                </button>
+                                <button onClick={() => handleDeleteLembaga(item.id)} className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition" title="Hapus">
+                                  <Trash2 className="w-5 h-5" />
+                                </button>
+                              </div>
+                            </td>
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
-
-              <div className="relative h-80 overflow-hidden">
-                <img 
-                  src={p.foto} 
-                  alt={p.nama} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  onError={(e: any) => { e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&q=80' }} 
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </div>
-              <div className="p-8 text-center relative bg-white -mt-4 rounded-t-3xl z-10">
-                <h3 className="text-2xl font-extrabold text-gray-900 mb-2">{p.nama}</h3>
-                <span className="inline-block bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm px-4 py-1.5 rounded-full font-bold">
-                  {p.jabatan}
-                </span>
-              </div>
             </div>
-          ))}
-        </div>
+          </div>
+        )}
+
       </div>
 
-      {showEditor && (
+      {/* ================= MODAL EDITOR PERANGKAT DESA ================= */}
+      {showEditorPerangkat && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-xl w-full p-8 max-h-[90vh] overflow-y-auto border border-emerald-100 animate-in zoom-in-95">
             <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-100">
@@ -1256,21 +1538,21 @@ function HalamanPerangkatDesa({ isAdmin, daftarPerangkat, setDaftarPerangkat }: 
                 <div className="bg-emerald-100 p-2 rounded-xl mr-3">
                    <Users className="w-6 h-6 text-emerald-600" />
                 </div>
-                {editData.id ? 'Edit Perangkat' : 'Tambah Perangkat Baru'}
+                {editDataPerangkat.id ? 'Edit Perangkat' : 'Tambah Perangkat Baru'}
               </h3>
-              <button onClick={() => setShowEditor(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
+              <button onClick={() => setShowEditorPerangkat(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
                 <X className="w-5 h-5" />
               </button>
             </div>
             
-            <form onSubmit={handleSave} className="space-y-6">
+            <form onSubmit={handleSavePerangkat} className="space-y-6">
               <div className="grid grid-cols-1 gap-6">
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">Nama Lengkap</label>
                   <input 
                     type="text" required
-                    value={editData.nama}
-                    onChange={(e) => setEditData({...editData, nama: e.target.value})}
+                    value={editDataPerangkat.nama}
+                    onChange={(e) => setEditDataPerangkat({...editDataPerangkat, nama: e.target.value})}
                     placeholder="Contoh: Bapak Fulan, S.E."
                     className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" 
                   />
@@ -1279,8 +1561,8 @@ function HalamanPerangkatDesa({ isAdmin, daftarPerangkat, setDaftarPerangkat }: 
                   <label className="block text-sm font-bold text-gray-700 mb-2">Jabatan</label>
                   <input 
                     type="text" required
-                    value={editData.jabatan}
-                    onChange={(e) => setEditData({...editData, jabatan: e.target.value})}
+                    value={editDataPerangkat.jabatan}
+                    onChange={(e) => setEditDataPerangkat({...editDataPerangkat, jabatan: e.target.value})}
                     placeholder="Contoh: Sekretaris Desa"
                     className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" 
                   />
@@ -1289,8 +1571,8 @@ function HalamanPerangkatDesa({ isAdmin, daftarPerangkat, setDaftarPerangkat }: 
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-3">Foto Profil</label>
                   <div className="flex items-center gap-5 bg-gray-50 p-4 rounded-2xl border border-gray-200">
-                    {editData.foto ? (
-                      <img src={editData.foto} alt="Preview" className="w-24 h-24 object-cover rounded-xl shadow-sm border border-gray-200" />
+                    {editDataPerangkat.foto ? (
+                      <img src={editDataPerangkat.foto} alt="Preview" className="w-24 h-24 object-cover rounded-xl shadow-sm border border-gray-200" />
                     ) : (
                       <div className="w-24 h-24 bg-gray-200 rounded-xl flex items-center justify-center border border-gray-300 border-dashed">
                         <ImageIcon className="w-6 h-6 text-gray-400" />
@@ -1299,7 +1581,7 @@ function HalamanPerangkatDesa({ isAdmin, daftarPerangkat, setDaftarPerangkat }: 
                     <div className="flex-1">
                       <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 hover:border-emerald-300 px-5 py-3 rounded-xl font-bold flex items-center justify-center transition-all shadow-sm">
                         <Upload className="w-5 h-5 mr-2" /> Upload Foto Baru
-                        <input type="file" accept="image/*" required={!editData.foto} className="hidden" onChange={handleImageUpload} />
+                        <input type="file" accept="image/*" required={!editDataPerangkat.foto} className="hidden" onChange={handleImageUploadPerangkat} />
                       </label>
                       <p className="text-sm text-gray-500 mt-3 font-medium">Format: JPG, PNG. Maksimal 2MB.</p>
                     </div>
@@ -1308,7 +1590,105 @@ function HalamanPerangkatDesa({ isAdmin, daftarPerangkat, setDaftarPerangkat }: 
               </div>
               
               <div className="flex justify-end gap-4 pt-6 border-t border-gray-100">
-                <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
+                <button type="button" onClick={() => setShowEditorPerangkat(false)} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
+                  Batal
+                </button>
+                <button type="submit" className="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(5,150,105,0.3)] hover:shadow-[0_10px_25px_rgba(5,150,105,0.4)] hover:-translate-y-0.5">
+                  <Save className="w-5 h-5 mr-2" /> Simpan Data
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL EDITOR LEMBAGA DESA (TABEL) ================= */}
+      {showEditorLembaga && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto border border-emerald-100 animate-in zoom-in-95">
+            <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-100">
+              <h3 className="text-2xl font-extrabold text-gray-900 flex items-center">
+                <div className="bg-emerald-100 p-2 rounded-xl mr-3">
+                   <Users className="w-6 h-6 text-emerald-600" />
+                </div>
+                {editDataLembaga.id ? 'Edit Data' : 'Tambah Data Baru'}
+              </h3>
+              <button onClick={() => setShowEditorLembaga(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleSaveLembaga} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="col-span-full">
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Nama Lengkap</label>
+                  <input 
+                    type="text" required
+                    value={editDataLembaga.nama}
+                    onChange={(e) => setEditDataLembaga({...editDataLembaga, nama: e.target.value})}
+                    placeholder="Masukkan nama lengkap"
+                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Jabatan</label>
+                  <input 
+                    type="text" required
+                    value={editDataLembaga.jabatan}
+                    onChange={(e) => setEditDataLembaga({...editDataLembaga, jabatan: e.target.value})}
+                    placeholder="Contoh: Ketua RT 01"
+                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Jenis Kelamin</label>
+                  <div className="relative">
+                    <select 
+                      required
+                      value={editDataLembaga.jenisKelamin}
+                      onChange={(e) => setEditDataLembaga({...editDataLembaga, jenisKelamin: e.target.value})}
+                      className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium appearance-none"
+                    >
+                      <option value="Laki-laki">Laki-laki</option>
+                      <option value="Perempuan">Perempuan</option>
+                    </select>
+                    <ChevronDown className="absolute right-4 top-3.5 w-5 h-5 text-gray-400 pointer-events-none" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Umur (Tahun)</label>
+                  <input 
+                    type="number" required min="18" max="90"
+                    value={editDataLembaga.umur}
+                    onChange={(e) => setEditDataLembaga({...editDataLembaga, umur: e.target.value})}
+                    placeholder="Contoh: 45"
+                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" 
+                  />
+                </div>
+
+                <div className="col-span-full">
+                  <label className="block text-sm font-bold text-gray-700 mb-3">Foto Profil</label>
+                  <div className="flex items-center gap-5 bg-gray-50 p-4 rounded-2xl border border-gray-200">
+                    {editDataLembaga.foto ? (
+                      <img src={editDataLembaga.foto} alt="Preview" className="w-24 h-24 object-cover rounded-xl shadow-sm border border-gray-200" />
+                    ) : (
+                      <div className="w-24 h-24 bg-gray-200 rounded-xl flex items-center justify-center border border-gray-300 border-dashed">
+                        <ImageIcon className="w-6 h-6 text-gray-400" />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 hover:border-emerald-300 px-5 py-3 rounded-xl font-bold flex items-center justify-center transition-all shadow-sm w-max">
+                        <Upload className="w-5 h-5 mr-2" /> Upload Foto Baru
+                        <input type="file" accept="image/*" className="hidden" onChange={handleImageUploadLembaga} />
+                      </label>
+                      <p className="text-sm text-gray-500 mt-2 font-medium">Opsional. Biarkan kosong jika tidak ada foto.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex justify-end gap-4 pt-6 border-t border-gray-100">
+                <button type="button" onClick={() => setShowEditorLembaga(false)} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
                   Batal
                 </button>
                 <button type="submit" className="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(5,150,105,0.3)] hover:shadow-[0_10px_25px_rgba(5,150,105,0.4)] hover:-translate-y-0.5">
