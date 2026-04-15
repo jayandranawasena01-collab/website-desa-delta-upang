@@ -79,7 +79,7 @@ const Navbar = ({ onLoginClick, isLoggedIn, onLogout, scrollToSection, onViewDas
     { name: 'Beranda', id: 'home' },
     { name: 'Visi Misi', id: 'visimisi' },
     { name: 'Statistik', id: 'stats' },
-    { name: 'Tenaga Pendidik', id: 'teachers' },
+    { name: 'Pemerintah Desa', id: 'teachers' },
     { name: 'Berita', id: 'news' },
   ];
 
@@ -307,7 +307,7 @@ const Teachers = ({ teachers }: { teachers: Teacher[] }) => {
     <section id="teachers" className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Tenaga Pendidik</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Pemerintah Desa</h2>
           <div className="w-20 h-1 bg-blue-600 mx-auto rounded-full"></div>
           <p className="mt-4 text-gray-600">Guru-guru profesional yang siap membimbing putra-putri Anda.</p>
         </div>
