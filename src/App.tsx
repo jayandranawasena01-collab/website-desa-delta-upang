@@ -6,6 +6,43 @@ import {
   BookOpen, Target, Map, Building2, ChevronDown
 } from 'lucide-react';
 
+// ================= FUNGSI KOMPRESI GAMBAR OTOMATIS =================
+// Fungsi ini mencegah memori browser penuh (Blank Screen) dengan cara 
+// mengecilkan ukuran gambar sebelum disimpan ke LocalStorage
+const compressImage = (file: File, maxWidth: number, isLogo: boolean, callback: (base64: string) => void) => {
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = (event) => {
+    const img = new Image();
+    img.src = event.target?.result as string;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+
+      // Mengecilkan dimensi gambar jika terlalu besar
+      if (width > maxWidth) {
+        height = Math.round((height * maxWidth) / width);
+        width = maxWidth;
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(img, 0, 0, width, height);
+        // Jika logo, gunakan PNG agar background transparan tetap ada. Jika bukan logo, gunakan JPEG yang dikompres 70%.
+        const format = isLogo ? 'image/png' : 'image/jpeg';
+        const quality = isLogo ? undefined : 0.7;
+        const compressedBase64 = canvas.toDataURL(format, quality);
+        callback(compressedBase64);
+      } else {
+        callback(img.src); // Fallback jika gagal compress
+      }
+    };
+  };
+};
+
 // Data awal berita
 const initialBerita = [
   {
@@ -123,29 +160,29 @@ export default function App() {
   });
   const [showLoginModal, setShowLoginModal] = useState(false);
   
-  // States Data
+  // States Data (Diperbarui kuncinya agar me-reset data rusak sebelumnya)
   const [daftarBerita, setDaftarBerita] = useState(() => {
-    const saved = localStorage.getItem('desa_data_berita_v2');
+    const saved = localStorage.getItem('desa_data_berita_v3');
     return saved ? JSON.parse(saved) : initialBerita;
   });
   
   const [daftarPerangkat, setDaftarPerangkat] = useState(() => {
-    const saved = localStorage.getItem('desa_data_perangkat_v2');
+    const saved = localStorage.getItem('desa_data_perangkat_v3');
     return saved ? JSON.parse(saved) : initialPerangkat;
   });
 
   const [daftarLembaga, setDaftarLembaga] = useState(() => {
-    const saved = localStorage.getItem('desa_data_lembaga_v1');
+    const saved = localStorage.getItem('desa_data_lembaga_v2');
     return saved ? JSON.parse(saved) : initialLembaga;
   });
 
   const [daftarProfil, setDaftarProfil] = useState(() => {
-    const saved = localStorage.getItem('desa_data_profil_v1');
+    const saved = localStorage.getItem('desa_data_profil_v2');
     return saved ? JSON.parse(saved) : initialProfil;
   });
   
   const [dataBeranda, setDataBeranda] = useState(() => {
-    const saved = localStorage.getItem('desa_data_beranda_v5');
+    const saved = localStorage.getItem('desa_data_beranda_v6');
     return saved ? JSON.parse(saved) : initialBeranda;
   });
 
@@ -170,26 +207,26 @@ export default function App() {
   }, [isAdmin]);
   
   useEffect(() => { 
-    try { localStorage.setItem('desa_data_berita_v2', JSON.stringify(daftarBerita)); } catch(e){ console.error(e); } 
+    try { localStorage.setItem('desa_data_berita_v3', JSON.stringify(daftarBerita)); } catch(e){ console.error(e); } 
   }, [daftarBerita]);
   
   useEffect(() => { 
-    try { localStorage.setItem('desa_data_perangkat_v2', JSON.stringify(daftarPerangkat)); } catch(e){ console.error(e); } 
+    try { localStorage.setItem('desa_data_perangkat_v3', JSON.stringify(daftarPerangkat)); } catch(e){ console.error(e); } 
   }, [daftarPerangkat]);
   
   useEffect(() => { 
-    try { localStorage.setItem('desa_data_lembaga_v1', JSON.stringify(daftarLembaga)); } catch(e){ console.error(e); } 
+    try { localStorage.setItem('desa_data_lembaga_v2', JSON.stringify(daftarLembaga)); } catch(e){ console.error(e); } 
   }, [daftarLembaga]);
   
   useEffect(() => { 
-    try { localStorage.setItem('desa_data_profil_v1', JSON.stringify(daftarProfil)); } catch(e){ console.error(e); } 
+    try { localStorage.setItem('desa_data_profil_v2', JSON.stringify(daftarProfil)); } catch(e){ console.error(e); } 
   }, [daftarProfil]);
   
   useEffect(() => { 
     try { 
-      localStorage.setItem('desa_data_beranda_v5', JSON.stringify(dataBeranda)); 
+      localStorage.setItem('desa_data_beranda_v6', JSON.stringify(dataBeranda)); 
     } catch (e) {
-      alert("Gagal menyimpan perubahan: Memori browser penuh. Pastikan ukuran foto/logo yang di-upload tidak terlalu besar.");
+      alert("Gagal menyimpan perubahan: Memori browser penuh. Namun sistem kompresi seharusnya mencegah hal ini.");
     }
   }, [dataBeranda]);
 
@@ -680,48 +717,36 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
   const handleHeroBgChange = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) { alert("Gagal: Ukuran gambar latar maksimal 2MB."); return; }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setDataBeranda((prev: any) => ({ ...prev, heroBg: reader.result }));
-      };
-      reader.readAsDataURL(file);
+      compressImage(file, 1920, false, (base64) => {
+        setEditForm((prev: any) => ({ ...prev, heroBg: base64 }));
+      });
     }
   };
 
   const handleLogoHeroChange = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 1 * 1024 * 1024) { alert("Gagal: Ukuran logo maksimal 1MB."); return; }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setEditForm((prev: any) => ({ ...prev, logoHero: reader.result }));
-      };
-      reader.readAsDataURL(file);
+      compressImage(file, 400, true, (base64) => {
+        setEditForm((prev: any) => ({ ...prev, logoHero: base64 }));
+      });
     }
   };
 
   const handleHeaderLogoChange = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 1 * 1024 * 1024) { alert("Gagal: Ukuran logo header maksimal 1MB."); return; }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setEditForm((prev: any) => ({ ...prev, headerLogo: reader.result }));
-      };
-      reader.readAsDataURL(file);
+      compressImage(file, 400, true, (base64) => {
+        setEditForm((prev: any) => ({ ...prev, headerLogo: base64 }));
+      });
     }
   };
 
   const handleFotoKadesUpload = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 1 * 1024 * 1024) { alert("Gagal: Ukuran foto maksimal 1MB."); return; }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setEditForm((prev: any) => ({ ...prev, fotoKades: reader.result }));
-      };
-      reader.readAsDataURL(file);
+      compressImage(file, 600, false, (base64) => {
+        setEditForm((prev: any) => ({ ...prev, fotoKades: base64 }));
+      });
     }
   };
 
@@ -1133,12 +1158,9 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
   const handleImageUpload = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 1.5 * 1024 * 1024) { alert("Gagal: Ukuran gambar maksimal 1.5MB."); return; }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setEditData({ ...editData, gambar: reader.result });
-      };
-      reader.readAsDataURL(file);
+      compressImage(file, 1200, false, (base64) => {
+        setEditData({ ...editData, gambar: base64 });
+      });
     }
   };
 
@@ -1446,10 +1468,9 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
   const handleImageUploadPerangkat = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 1.5 * 1024 * 1024) { alert("Gagal: Ukuran gambar maksimal 1.5MB."); return; }
-      const reader = new FileReader();
-      reader.onloadend = () => setEditDataPerangkat({ ...editDataPerangkat, foto: reader.result });
-      reader.readAsDataURL(file);
+      compressImage(file, 600, false, (base64) => {
+        setEditDataPerangkat({ ...editDataPerangkat, foto: base64 });
+      });
     }
   };
 
@@ -1478,10 +1499,9 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
   const handleImageUploadLembaga = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 1.5 * 1024 * 1024) { alert("Gagal: Ukuran gambar maksimal 1.5MB."); return; }
-      const reader = new FileReader();
-      reader.onloadend = () => setEditDataLembaga({ ...editDataLembaga, foto: reader.result });
-      reader.readAsDataURL(file);
+      compressImage(file, 400, false, (base64) => {
+        setEditDataLembaga({ ...editDataLembaga, foto: base64 });
+      });
     }
   };
 
@@ -1837,12 +1857,9 @@ function HalamanBerita({ isAdmin, daftarBerita, setDaftarBerita }: any) {
   const handleImageUpload = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 1.5 * 1024 * 1024) { alert("Gagal: Ukuran gambar maksimal 1.5MB."); return; }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setEditData({ ...editData, gambar: reader.result });
-      };
-      reader.readAsDataURL(file);
+      compressImage(file, 800, false, (base64) => {
+        setEditData({ ...editData, gambar: base64 });
+      });
     }
   };
 
@@ -2030,7 +2047,7 @@ function HalamanBerita({ isAdmin, daftarBerita, setDaftarBerita }: any) {
                         <Upload className="w-5 h-5 mr-2" /> Upload Foto Baru
                         <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
                       </label>
-                      <p className="text-sm text-gray-500 mt-3 font-medium">Format: JPG, PNG. Maksimal 2MB.</p>
+                      <p className="text-sm text-gray-500 mt-3 font-medium">Otomatis di-compress agar memori tidak penuh.</p>
                     </div>
                   </div>
                 </div>
