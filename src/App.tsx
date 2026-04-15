@@ -8,7 +8,7 @@ import {
 
 // ================= FUNGSI KOMPRESI GAMBAR OTOMATIS =================
 // Fungsi ini mencegah memori browser penuh (Blank Screen) dengan cara 
-// mengecilkan ukuran gambar sebelum disimpan ke LocalStorage
+// mengecilkan ukuran gambar jauh lebih agresif sebelum disimpan ke LocalStorage
 const compressImage = (file: File, maxWidth: number, isLogo: boolean, callback: (base64: string) => void) => {
   const reader = new FileReader();
   reader.readAsDataURL(file);
@@ -20,7 +20,7 @@ const compressImage = (file: File, maxWidth: number, isLogo: boolean, callback: 
       let width = img.width;
       let height = img.height;
 
-      // Mengecilkan dimensi gambar jika terlalu besar
+      // Mengecilkan dimensi gambar secara ketat agar size base64 menjadi sangat kecil
       if (width > maxWidth) {
         height = Math.round((height * maxWidth) / width);
         width = maxWidth;
@@ -31,9 +31,9 @@ const compressImage = (file: File, maxWidth: number, isLogo: boolean, callback: 
       const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.drawImage(img, 0, 0, width, height);
-        // Jika logo, gunakan PNG agar background transparan tetap ada. Jika bukan logo, gunakan JPEG yang dikompres 70%.
+        // Logo menggunakan PNG agar transparan, gambar biasa menggunakan WebP/JPEG dengan kualitas rendah 0.5 (50%)
         const format = isLogo ? 'image/png' : 'image/jpeg';
-        const quality = isLogo ? undefined : 0.7;
+        const quality = isLogo ? undefined : 0.5;
         const compressedBase64 = canvas.toDataURL(format, quality);
         callback(compressedBase64);
       } else {
@@ -160,7 +160,7 @@ export default function App() {
   });
   const [showLoginModal, setShowLoginModal] = useState(false);
   
-  // States Data (Diperbarui kuncinya agar me-reset data rusak sebelumnya)
+  // States Data (Diperbarui versi kuncinya agar me-reset data yang menyebabkan blank screen)
   const [daftarBerita, setDaftarBerita] = useState(() => {
     const saved = localStorage.getItem('desa_data_berita_v3');
     return saved ? JSON.parse(saved) : initialBerita;
@@ -182,9 +182,33 @@ export default function App() {
   });
   
   const [dataBeranda, setDataBeranda] = useState(() => {
-    const saved = localStorage.getItem('desa_data_beranda_v6');
+    const saved = localStorage.getItem('desa_data_beranda_v8');
     return saved ? JSON.parse(saved) : initialBeranda;
   });
+
+  // SKRIP SAPU JAGAT (AUTO-CLEANUP): Menghapus file sampah memori browser versi lama yang bikin memori penuh
+  useEffect(() => {
+    try {
+      const currentKeys = [
+        'desa_admin_status',
+        'desa_data_berita_v3',
+        'desa_data_perangkat_v3',
+        'desa_data_lembaga_v2',
+        'desa_data_profil_v2',
+        'desa_data_beranda_v8'
+      ];
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('desa_') && !currentKeys.includes(key)) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(k => localStorage.removeItem(k));
+    } catch (e) {
+      console.error("Cleanup error:", e);
+    }
+  }, []);
 
   // Efek klik di luar untuk menutup dropdown desktop
   useEffect(() => {
@@ -201,7 +225,7 @@ export default function App() {
     window.scrollTo(0, 0); 
   }, [currentPage, activeProfilTab, activePemerintahTab]);
 
-  // Efek Penyimpanan ke LocalStorage dengan Try...Catch untuk mencegah "Blank Screen" (QuotaExceededError)
+  // Efek Penyimpanan ke LocalStorage dengan Try...Catch yang lebih aman
   useEffect(() => { 
     try { localStorage.setItem('desa_admin_status', isAdmin.toString()); } catch(e){} 
   }, [isAdmin]);
@@ -224,9 +248,9 @@ export default function App() {
   
   useEffect(() => { 
     try { 
-      localStorage.setItem('desa_data_beranda_v6', JSON.stringify(dataBeranda)); 
+      localStorage.setItem('desa_data_beranda_v8', JSON.stringify(dataBeranda)); 
     } catch (e) {
-      alert("Gagal menyimpan perubahan: Memori browser penuh. Namun sistem kompresi seharusnya mencegah hal ini.");
+      alert("Gagal menyimpan perubahan: Memori browser penuh. Harap muat ulang (refresh) halaman ini.");
     }
   }, [dataBeranda]);
 
@@ -717,36 +741,43 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
   const handleHeroBgChange = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      compressImage(file, 1920, false, (base64) => {
+      compressImage(file, 1080, false, (base64) => {
+        // Langsung perbarui latar belakang di belakang form agar terlihat preview instant
+        setDataBeranda((prev: any) => ({ ...prev, heroBg: base64 }));
         setEditForm((prev: any) => ({ ...prev, heroBg: base64 }));
       });
+      // Mengosongkan input agar bisa mengupload file yang sama jika batal
+      e.target.value = '';
     }
   };
 
   const handleLogoHeroChange = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      compressImage(file, 400, true, (base64) => {
+      compressImage(file, 300, true, (base64) => {
         setEditForm((prev: any) => ({ ...prev, logoHero: base64 }));
       });
+      e.target.value = '';
     }
   };
 
   const handleHeaderLogoChange = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      compressImage(file, 400, true, (base64) => {
+      compressImage(file, 200, true, (base64) => {
         setEditForm((prev: any) => ({ ...prev, headerLogo: base64 }));
       });
+      e.target.value = '';
     }
   };
 
   const handleFotoKadesUpload = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      compressImage(file, 600, false, (base64) => {
+      compressImage(file, 400, false, (base64) => {
         setEditForm((prev: any) => ({ ...prev, fotoKades: base64 }));
       });
+      e.target.value = '';
     }
   };
 
@@ -1161,6 +1192,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
       compressImage(file, 1200, false, (base64) => {
         setEditData({ ...editData, gambar: base64 });
       });
+      e.target.value = '';
     }
   };
 
@@ -1471,6 +1503,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
       compressImage(file, 600, false, (base64) => {
         setEditDataPerangkat({ ...editDataPerangkat, foto: base64 });
       });
+      e.target.value = '';
     }
   };
 
@@ -1502,6 +1535,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
       compressImage(file, 400, false, (base64) => {
         setEditDataLembaga({ ...editDataLembaga, foto: base64 });
       });
+      e.target.value = '';
     }
   };
 
@@ -1700,7 +1734,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                         <Upload className="w-5 h-5 mr-2" /> Upload Foto Baru
                         <input type="file" accept="image/*" required={!editDataPerangkat.foto} className="hidden" onChange={handleImageUploadPerangkat} />
                       </label>
-                      <p className="text-sm text-gray-500 mt-3 font-medium">Format: JPG, PNG. Maksimal 2MB.</p>
+                      <p className="text-sm text-gray-500 mt-3 font-medium">Otomatis dikecilkan agar memori aman.</p>
                     </div>
                   </div>
                 </div>
@@ -1798,7 +1832,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                         <Upload className="w-5 h-5 mr-2" /> Upload Foto Baru
                         <input type="file" accept="image/*" className="hidden" onChange={handleImageUploadLembaga} />
                       </label>
-                      <p className="text-sm text-gray-500 mt-2 font-medium">Opsional. Biarkan kosong jika tidak ada foto.</p>
+                      <p className="text-sm text-gray-500 mt-2 font-medium">Opsional. Otomatis dikecilkan agar aman.</p>
                     </div>
                   </div>
                 </div>
@@ -1860,6 +1894,7 @@ function HalamanBerita({ isAdmin, daftarBerita, setDaftarBerita }: any) {
       compressImage(file, 800, false, (base64) => {
         setEditData({ ...editData, gambar: base64 });
       });
+      e.target.value = '';
     }
   };
 
