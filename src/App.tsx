@@ -35,7 +35,7 @@ const initialBerita = [
 
 // Data awal perangkat desa
 const initialPerangkat = [
-  { id: 1, nama: "Pendi.", jabatan: "Kepala Desa", foto: "https://drive.google.com/file/d/1PgwPZsA8eKAr-h3IQ0Dt-S7eX13xLKtQ/view?usp=drive_link" },
+  { id: 1, nama: "Pendi.", jabatan: "Kepala Desa", foto: "https://drive.google.com/uc?export=view&id=1L5Y15w_obbihHFz4rUMrOAci5V7TtAIz" },
   { id: 2, nama: "Ahmad Yani, S.IP.", jabatan: "Sekretaris Desa", foto: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
   { id: 3, nama: "Siti Rahmawati", jabatan: "Kaur Keuangan", foto: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
   { id: 4, nama: "Budi Santoso", jabatan: "Kaur Perencanaan", foto: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
@@ -48,7 +48,7 @@ const initialBeranda = {
   heroBg: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
   namaDesa: "Delta Upang",
   deskripsiDesa: "Kecamatan Makarti Jaya, Kabupaten Banyuasin \nProvinsi Sumatera Selatan",
-  fotoKades: "https://images.unsplash.com/photo-1552058544-f2b08422138a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+  fotoKades: "https://drive.google.com/uc?export=view&id=1L5Y15w_obbihHFz4rUMrOAci5V7TtAIz",
   namaKades: "Bapak Fulan, S.E.",
   jabatanKades: "Kepala Desa Delta Upang",
   sambutanKades: "Assalamu'alaikum Warahmatullahi Wabarakatuh. Puji syukur kita panjatkan ke hadirat Allah SWT. Selamat datang di website resmi Desa Delta Upang. Melalui media ini, kami berupaya mewujudkan transparansi dan kemudahan akses informasi bagi seluruh warga dan masyarakat luas mengenai program kerja, kegiatan, dan pembangunan di desa kita tercinta.",
@@ -421,8 +421,8 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }) {
           <>
             <div className="absolute top-6 left-6 z-20">
                <button 
-                  onClick={() => { setEditForm(dataBeranda); setShowEditor(true); }} 
-                  className="cursor-pointer bg-white/90 backdrop-blur hover:bg-white text-emerald-800 px-6 py-3 rounded-2xl font-bold flex items-center shadow-[0_8px_30px_rgba(0,0,0,0.3)] transition-all hover:scale-105 border border-white/50"
+                 onClick={() => { setEditForm(dataBeranda); setShowEditor(true); }} 
+                 className="cursor-pointer bg-white/90 backdrop-blur hover:bg-white text-emerald-800 px-6 py-3 rounded-2xl font-bold flex items-center shadow-[0_8px_30px_rgba(0,0,0,0.3)] transition-all hover:scale-105 border border-white/50"
                >
                   <Edit className="w-5 h-5 mr-3 text-emerald-600" /> 
                   Edit Konten Beranda
