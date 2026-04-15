@@ -118,7 +118,7 @@ export default function App() {
     const username = e.target.username.value;
     const password = e.target.password.value;
     
-    if (username === 'admin' && password === 'admin123') {
+    if (username === '1603142311930004' && password === 'admin123') {
       setIsAdmin(true);
       setShowLoginModal(false);
     } else {
@@ -320,6 +320,7 @@ export default function App() {
             <form onSubmit={handleLogin} className="space-y-5">
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Username</label>
+                <label className="block text-sm font text-gray-500 mb-2">Hubungi admin untuk mendapatkan username dan password</label>
                 <input 
                   type="text" 
                   name="username" 
