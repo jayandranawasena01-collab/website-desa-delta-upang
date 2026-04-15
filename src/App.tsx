@@ -145,7 +145,6 @@ export default function App() {
   });
   
   const [dataBeranda, setDataBeranda] = useState(() => {
-    // V5: Memicu pembaruan teks nama Kades secara otomatis
     const saved = localStorage.getItem('desa_data_beranda_v5');
     return saved ? JSON.parse(saved) : initialBeranda;
   });
@@ -165,12 +164,34 @@ export default function App() {
     window.scrollTo(0, 0); 
   }, [currentPage, activeProfilTab, activePemerintahTab]);
 
-  useEffect(() => { localStorage.setItem('desa_admin_status', isAdmin.toString()); }, [isAdmin]);
-  useEffect(() => { localStorage.setItem('desa_data_berita_v2', JSON.stringify(daftarBerita)); }, [daftarBerita]);
-  useEffect(() => { localStorage.setItem('desa_data_perangkat_v2', JSON.stringify(daftarPerangkat)); }, [daftarPerangkat]);
-  useEffect(() => { localStorage.setItem('desa_data_lembaga_v1', JSON.stringify(daftarLembaga)); }, [daftarLembaga]);
-  useEffect(() => { localStorage.setItem('desa_data_profil_v1', JSON.stringify(daftarProfil)); }, [daftarProfil]);
-  useEffect(() => { localStorage.setItem('desa_data_beranda_v5', JSON.stringify(dataBeranda)); }, [dataBeranda]);
+  // Efek Penyimpanan ke LocalStorage dengan Try...Catch untuk mencegah "Blank Screen" (QuotaExceededError)
+  useEffect(() => { 
+    try { localStorage.setItem('desa_admin_status', isAdmin.toString()); } catch(e){} 
+  }, [isAdmin]);
+  
+  useEffect(() => { 
+    try { localStorage.setItem('desa_data_berita_v2', JSON.stringify(daftarBerita)); } catch(e){ console.error(e); } 
+  }, [daftarBerita]);
+  
+  useEffect(() => { 
+    try { localStorage.setItem('desa_data_perangkat_v2', JSON.stringify(daftarPerangkat)); } catch(e){ console.error(e); } 
+  }, [daftarPerangkat]);
+  
+  useEffect(() => { 
+    try { localStorage.setItem('desa_data_lembaga_v1', JSON.stringify(daftarLembaga)); } catch(e){ console.error(e); } 
+  }, [daftarLembaga]);
+  
+  useEffect(() => { 
+    try { localStorage.setItem('desa_data_profil_v1', JSON.stringify(daftarProfil)); } catch(e){ console.error(e); } 
+  }, [daftarProfil]);
+  
+  useEffect(() => { 
+    try { 
+      localStorage.setItem('desa_data_beranda_v5', JSON.stringify(dataBeranda)); 
+    } catch (e) {
+      alert("Gagal menyimpan perubahan: Memori browser penuh. Pastikan ukuran foto/logo yang di-upload tidak terlalu besar.");
+    }
+  }, [dataBeranda]);
 
   const navigateTo = (page: string, tabId: any = null) => {
     setCurrentPage(page);
@@ -659,6 +680,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
   const handleHeroBgChange = (e: any) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > 2 * 1024 * 1024) { alert("Gagal: Ukuran gambar latar maksimal 2MB."); return; }
       const reader = new FileReader();
       reader.onloadend = () => {
         setDataBeranda((prev: any) => ({ ...prev, heroBg: reader.result }));
@@ -670,6 +692,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
   const handleLogoHeroChange = (e: any) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > 1 * 1024 * 1024) { alert("Gagal: Ukuran logo maksimal 1MB."); return; }
       const reader = new FileReader();
       reader.onloadend = () => {
         setEditForm((prev: any) => ({ ...prev, logoHero: reader.result }));
@@ -681,6 +704,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
   const handleHeaderLogoChange = (e: any) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > 1 * 1024 * 1024) { alert("Gagal: Ukuran logo header maksimal 1MB."); return; }
       const reader = new FileReader();
       reader.onloadend = () => {
         setEditForm((prev: any) => ({ ...prev, headerLogo: reader.result }));
@@ -692,6 +716,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
   const handleFotoKadesUpload = (e: any) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > 1 * 1024 * 1024) { alert("Gagal: Ukuran foto maksimal 1MB."); return; }
       const reader = new FileReader();
       reader.onloadend = () => {
         setEditForm((prev: any) => ({ ...prev, fotoKades: reader.result }));
@@ -1108,6 +1133,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
   const handleImageUpload = (e: any) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > 1.5 * 1024 * 1024) { alert("Gagal: Ukuran gambar maksimal 1.5MB."); return; }
       const reader = new FileReader();
       reader.onloadend = () => {
         setEditData({ ...editData, gambar: reader.result });
@@ -1420,6 +1446,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
   const handleImageUploadPerangkat = (e: any) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > 1.5 * 1024 * 1024) { alert("Gagal: Ukuran gambar maksimal 1.5MB."); return; }
       const reader = new FileReader();
       reader.onloadend = () => setEditDataPerangkat({ ...editDataPerangkat, foto: reader.result });
       reader.readAsDataURL(file);
@@ -1451,6 +1478,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
   const handleImageUploadLembaga = (e: any) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > 1.5 * 1024 * 1024) { alert("Gagal: Ukuran gambar maksimal 1.5MB."); return; }
       const reader = new FileReader();
       reader.onloadend = () => setEditDataLembaga({ ...editDataLembaga, foto: reader.result });
       reader.readAsDataURL(file);
@@ -1809,6 +1837,7 @@ function HalamanBerita({ isAdmin, daftarBerita, setDaftarBerita }: any) {
   const handleImageUpload = (e: any) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > 1.5 * 1024 * 1024) { alert("Gagal: Ukuran gambar maksimal 1.5MB."); return; }
       const reader = new FileReader();
       reader.onloadend = () => {
         setEditData({ ...editData, gambar: reader.result });
