@@ -455,7 +455,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
         
         <div className="container mx-auto px-4 lg:px-8 relative z-10 text-center text-white mt-16">
           <span className="inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-emerald-600/80 backdrop-blur-md border border-emerald-400/30 text-sm font-bold mb-6 tracking-widest uppercase shadow-lg">
-            <Landmark className="w-4 h-4" /> Selamat Datang di Website Resmi
+            <Landmark className="w-4 h-4" /> Selamat Datang di Website Resmi kami saja gitu loh
           </span>
           <h1 className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight drop-shadow-2xl">
             Desa <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-emerald-100">{dataBeranda.namaDesa}</span>
