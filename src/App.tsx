@@ -88,6 +88,7 @@ const initialProfil = [
 const initialBeranda = {
   heroBg: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
   logoHero: "", // State untuk Logo Hero (Atas)
+  headerLogo: "", // State untuk Logo di Header (Kiri Atas)
   namaDesa: "Delta Upang",
   deskripsiDesa: "Kecamatan Makarti Jaya, Kabupaten Banyuasin \nProvinsi Sumatera Selatan",
   fotoKades: "https://lh3.googleusercontent.com/d/1L5Y15w_obbihHFz4rUMrOAci5V7TtAIz",
@@ -144,7 +145,7 @@ export default function App() {
   });
   
   const [dataBeranda, setDataBeranda] = useState(() => {
-    const saved = localStorage.getItem('desa_data_beranda_v3');
+    const saved = localStorage.getItem('desa_data_beranda_v4');
     return saved ? JSON.parse(saved) : initialBeranda;
   });
 
@@ -168,7 +169,7 @@ export default function App() {
   useEffect(() => { localStorage.setItem('desa_data_perangkat_v2', JSON.stringify(daftarPerangkat)); }, [daftarPerangkat]);
   useEffect(() => { localStorage.setItem('desa_data_lembaga_v1', JSON.stringify(daftarLembaga)); }, [daftarLembaga]);
   useEffect(() => { localStorage.setItem('desa_data_profil_v1', JSON.stringify(daftarProfil)); }, [daftarProfil]);
-  useEffect(() => { localStorage.setItem('desa_data_beranda_v3', JSON.stringify(dataBeranda)); }, [dataBeranda]);
+  useEffect(() => { localStorage.setItem('desa_data_beranda_v4', JSON.stringify(dataBeranda)); }, [dataBeranda]);
 
   const navigateTo = (page: string, tabId: any = null) => {
     setCurrentPage(page);
@@ -218,6 +219,29 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-gray-50 text-gray-800 relative selection:bg-emerald-200 selection:text-emerald-900">
+      
+      {/* Styles for Animations */}
+      <style>
+        {`
+          @keyframes float-animation {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+          }
+          .animate-float {
+            animation: float-animation 3.5s ease-in-out infinite;
+          }
+          @keyframes roll-left {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+          }
+          .animate-roll {
+            display: inline-block;
+            white-space: nowrap;
+            animation: roll-left 15s linear infinite;
+          }
+        `}
+      </style>
+
       {/* Header & Navbar */}
       <header className="bg-gradient-to-r from-emerald-900 to-emerald-800 text-white sticky top-0 z-40 shadow-xl border-b border-emerald-700">
         <div className="container mx-auto px-4 lg:px-8">
@@ -227,8 +251,12 @@ export default function App() {
               className="flex items-center gap-4 cursor-pointer group"
               onClick={() => navigateTo('beranda')}
             >
-              <div className="bg-white/10 backdrop-blur-sm p-2.5 rounded-xl border border-white/20 group-hover:bg-white transition duration-300">
-                <Landmark className="h-7 w-7 text-white group-hover:text-emerald-800 transition duration-300" />
+              <div className="bg-white/10 backdrop-blur-sm p-1.5 rounded-xl border border-white/20 group-hover:bg-white transition duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden">
+                {dataBeranda.headerLogo ? (
+                  <img src={dataBeranda.headerLogo} alt="Logo" className="w-full h-full object-contain" />
+                ) : (
+                  <Landmark className="h-6 w-6 md:h-7 md:w-7 text-white group-hover:text-emerald-800 transition duration-300" />
+                )}
               </div>
               <div className="hidden sm:block">
                 <h1 className="text-2xl font-extrabold tracking-tight leading-none drop-shadow-md">Desa Delta Upang</h1>
@@ -649,6 +677,17 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
     }
   };
 
+  const handleHeaderLogoChange = (e: any) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEditForm((prev: any) => ({ ...prev, headerLogo: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleFotoKadesUpload = (e: any) => {
     const file = e.target.files[0];
     if (file) {
@@ -708,18 +747,23 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
         
         <div className="container mx-auto px-4 lg:px-8 relative z-10 text-center text-white mt-12 md:mt-16">
           
-          {/* FItur Logo Custom di Hero Atas */}
-          {dataBeranda.logoHero ? (
+          {/* Logo Custom di Hero Atas dengan Animasi Naik Turun (Float) */}
+          {dataBeranda.logoHero && (
             <img 
               src={dataBeranda.logoHero} 
               alt="Logo" 
-              className="h-28 md:h-36 mx-auto mb-6 drop-shadow-2xl object-contain animate-in zoom-in duration-700" 
+              className="h-28 md:h-36 mx-auto drop-shadow-2xl object-contain animate-float" 
             />
-          ) : (
-            <span className="inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-emerald-600/80 backdrop-blur-md border border-emerald-400/30 text-sm font-bold mb-6 tracking-widest uppercase shadow-lg">
-              <Landmark className="w-4 h-4" /> Selamat Datang di Website Resmi
-            </span>
           )}
+
+          {/* Teks Berjalan (Marquee) di bawah Logo */}
+          <div className="w-full max-w-3xl mx-auto overflow-hidden relative mb-6 mt-4">
+            <div className="animate-roll whitespace-nowrap">
+              <span className="inline-flex items-center gap-2 py-1.5 px-6 rounded-full bg-emerald-600/80 backdrop-blur-md border border-emerald-400/30 text-sm font-bold tracking-widest uppercase shadow-lg text-white">
+                <Landmark className="w-4 h-4 flex-shrink-0" /> Selamat Datang di Website Resmi
+              </span>
+            </div>
+          </div>
 
           <h1 className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight drop-shadow-2xl">
             Desa <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-emerald-100">{dataBeranda.namaDesa}</span>
@@ -836,11 +880,33 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
                    <span className="w-6 h-1 bg-emerald-500 rounded-full mr-3"></span> Bagian Hero (Atas)
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  
+                  {/* Edit Logo Header */}
+                  <div className="col-span-full mb-2">
+                    <label className="block text-sm font-bold text-gray-700 mb-3">Logo Navigasi Header (Pojok Kiri Atas)</label>
+                    <div className="flex items-center gap-5">
+                      {editForm.headerLogo ? (
+                         <img src={editForm.headerLogo} alt="Preview Logo Header" className="w-16 h-16 object-contain bg-emerald-900 rounded-xl shadow-sm border border-emerald-800 p-2" />
+                      ) : (
+                         <div className="w-16 h-16 bg-gray-200 rounded-xl flex items-center justify-center border border-gray-300 border-dashed">
+                           <Landmark className="w-6 h-6 text-gray-400" />
+                         </div>
+                      )}
+                      <div className="flex-1">
+                        <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 px-5 py-2 rounded-xl font-bold flex items-center justify-center transition-all w-max shadow-sm">
+                          <Upload className="w-5 h-5 mr-2" /> {editForm.headerLogo ? 'Ganti Logo Header' : 'Upload Logo Header'}
+                          <input type="file" accept="image/*" className="hidden" onChange={handleHeaderLogoChange} />
+                        </label>
+                        <p className="text-sm text-gray-500 mt-2 font-medium">Logo untuk navigasi pojok kiri atas. Bebas atau biarkan default.</p>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="col-span-full">
-                    <label className="block text-sm font-bold text-gray-700 mb-3">Logo Hero (Opsional)</label>
+                    <label className="block text-sm font-bold text-gray-700 mb-3">Logo Teks Hero (Bagian Tengah)</label>
                     <div className="flex items-center gap-5">
                       {editForm.logoHero ? (
-                         <img src={editForm.logoHero} alt="Preview Logo" className="w-24 h-24 object-contain bg-gray-200 rounded-xl shadow-sm border border-gray-300 p-2" />
+                         <img src={editForm.logoHero} alt="Preview Logo Hero" className="w-24 h-24 object-contain bg-gray-200 rounded-xl shadow-sm border border-gray-300 p-2" />
                       ) : (
                          <div className="w-24 h-24 bg-gray-200 rounded-xl flex items-center justify-center border border-gray-300 border-dashed">
                            <ImageIcon className="w-6 h-6 text-gray-400" />
@@ -848,7 +914,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
                       )}
                       <div className="flex-1">
                         <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 px-5 py-2 rounded-xl font-bold flex items-center justify-center transition-all w-max shadow-sm">
-                          <Upload className="w-5 h-5 mr-2" /> {editForm.logoHero ? 'Ganti Logo' : 'Upload Logo'}
+                          <Upload className="w-5 h-5 mr-2" /> {editForm.logoHero ? 'Ganti Logo Hero' : 'Upload Logo Hero'}
                           <input type="file" accept="image/*" className="hidden" onChange={handleLogoHeroChange} />
                         </label>
                         <p className="text-sm text-gray-500 mt-2 font-medium">Bisa menggunakan file berformat PNG transparan.</p>
