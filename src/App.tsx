@@ -64,18 +64,49 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState('beranda');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // State Admin & Data
-  const [isAdmin, setIsAdmin] = useState(false);
+  // State Admin yang persisten (tidak logout saat refresh)
+  const [isAdmin, setIsAdmin] = useState(() => {
+    return localStorage.getItem('desa_admin_status') === 'true';
+  });
   const [showLoginModal, setShowLoginModal] = useState(false);
   
-  // State Data Tersimpan
-  const [daftarBerita, setDaftarBerita] = useState(initialBerita);
-  const [daftarPerangkat, setDaftarPerangkat] = useState(initialPerangkat);
-  const [dataBeranda, setDataBeranda] = useState(initialBeranda);
+  // State Data Tersimpan dengan LocalStorage agar terkunci setelah di-refresh
+  const [daftarBerita, setDaftarBerita] = useState(() => {
+    const saved = localStorage.getItem('desa_data_berita');
+    return saved ? JSON.parse(saved) : initialBerita;
+  });
+  
+  const [daftarPerangkat, setDaftarPerangkat] = useState(() => {
+    const saved = localStorage.getItem('desa_data_perangkat');
+    return saved ? JSON.parse(saved) : initialPerangkat;
+  });
+  
+  const [dataBeranda, setDataBeranda] = useState(() => {
+    const saved = localStorage.getItem('desa_data_beranda');
+    return saved ? JSON.parse(saved) : initialBeranda;
+  });
 
+  // Efek untuk otomatis scroll ke atas saat pindah halaman
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [currentPage]);
+
+  // Efek untuk otomatis menyimpan data ke LocalStorage jika ada perubahan (saat tombol simpan ditekan)
+  useEffect(() => {
+    localStorage.setItem('desa_admin_status', isAdmin);
+  }, [isAdmin]);
+
+  useEffect(() => {
+    localStorage.setItem('desa_data_berita', JSON.stringify(daftarBerita));
+  }, [daftarBerita]);
+
+  useEffect(() => {
+    localStorage.setItem('desa_data_perangkat', JSON.stringify(daftarPerangkat));
+  }, [daftarPerangkat]);
+
+  useEffect(() => {
+    localStorage.setItem('desa_data_beranda', JSON.stringify(dataBeranda));
+  }, [dataBeranda]);
 
   const navigateTo = (page) => {
     setCurrentPage(page);
@@ -87,7 +118,6 @@ export default function App() {
     const username = e.target.username.value;
     const password = e.target.password.value;
     
-    // Kredensial statis untuk demonstrasi
     if (username === 'admin' && password === 'admin123') {
       setIsAdmin(true);
       setShowLoginModal(false);
@@ -333,21 +363,27 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }) {
   const [showEditor, setShowEditor] = useState(false);
   const [editForm, setEditForm] = useState(dataBeranda);
 
-  // Fungsi mengganti latar belakang hero langsung (Khusus tombol upload cepat)
+  // Fungsi mengganti latar belakang hero mengubah file ke string format Base64 (agar aman di refresh)
   const handleHeroBgChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setDataBeranda(prev => ({ ...prev, heroBg: imageUrl }));
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setDataBeranda(prev => ({ ...prev, heroBg: reader.result }));
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  // Fungsi mengganti foto pada form edit modal
+  // Fungsi mengganti foto pada form edit modal ke format Base64
   const handleFotoKadesUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setEditForm(prev => ({ ...prev, fotoKades: imageUrl }));
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEditForm(prev => ({ ...prev, fotoKades: reader.result }));
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -714,11 +750,15 @@ function HalamanPerangkatDesa({ isAdmin, daftarPerangkat, setDaftarPerangkat }) 
     setShowEditor(false);
   };
 
+  // Diubah menggunakan Base64 agar foto tetap ada saat direfresh
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setEditData({ ...editData, foto: imageUrl });
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEditData({ ...editData, foto: reader.result });
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -892,11 +932,15 @@ function HalamanBerita({ isAdmin, daftarBerita, setDaftarBerita }) {
     setShowEditor(false);
   };
 
+  // Diubah menggunakan Base64 agar foto tetap ada saat direfresh
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setEditData({ ...editData, gambar: imageUrl });
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEditData({ ...editData, gambar: reader.result });
+      };
+      reader.readAsDataURL(file);
     }
   };
 
