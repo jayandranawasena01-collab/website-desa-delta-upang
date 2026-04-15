@@ -49,28 +49,28 @@ const initialProfil = [
   {
     id: 1,
     iconName: "BookOpen",
-    judul: "Sejarah Desa",
+    judul: "Sejarah",
     gambar: "https://images.unsplash.com/photo-1572005996025-06900f6b6474?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
     konten: "Desa Delta Upang memiliki sejarah panjang yang mengakar pada nilai-nilai perjuangan dan semangat gotong royong masyarakat pesisir. Sejak awal berdirinya, desa ini terus berkembang menjadi pusat harmoni sosial tempat bertemunya keberagaman budaya yang menyatu dalam kehangatan.\n\nPerjalanan panjang desa ini tidak lepas dari peran serta tetua adat dan tokoh masyarakat yang bahu-membahu membangun peradaban dari tanah yang dulunya terpencil menjadi kawasan yang kian maju dan terbuka terhadap inovasi."
   },
   {
     id: 2,
     iconName: "Target",
-    judul: "Visi dan Misi",
+    judul: "Visi & Misi",
     gambar: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
     konten: "VISI KAMI:\n\"Terwujudnya Desa Delta Upang yang Mandiri, Sejahtera, Religius, dan Berbudaya melalui Tata Kelola Pemerintahan yang Baik dan Inovatif.\"\n\nMISI DESA:\n1. Meningkatkan kualitas pelayanan publik administrasi kependudukan yang cepat, tepat, dan transparan.\n2. Meningkatkan pembangunan infrastruktur jalan, jembatan, dan fasilitas umum desa yang berkualitas dan merata.\n3. Memberdayakan ekonomi kerakyatan dan pertanian melalui optimalisasi BUMDes dan Kelompok Tani.\n4. Meningkatkan kualitas sumber daya manusia melalui dukungan pada sektor pendidikan dan kesehatan dasar.\n5. Melestarikan nilai-nilai gotong royong, budaya lokal, dan kerukunan antar umat beragama."
   },
   {
     id: 3,
     iconName: "Map",
-    judul: "Kondisi Geografis",
+    judul: "Kondisi geografis",
     gambar: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
     konten: "Terletak di bentang alam yang subur dan dialiri oleh perairan sungai yang strategis di Kecamatan Makarti Jaya, Desa Delta Upang menyimpan potensi agraris dan perikanan yang sangat melimpah.\n\nKondisi topografi dataran rendah dengan curah hujan yang seimbang menjadikan tanah di desa kami sangat cocok untuk pengembangan sektor pertanian unggulan. Suasana pedesaan yang asri, udara yang segar, serta hamparan alam yang masih terjaga menjadikan Delta Upang tidak hanya makmur secara ekonomi namun juga nyaman untuk ditinggali."
   },
   {
     id: 4,
     iconName: "Building2",
-    judul: "Struktur Organisasi",
+    judul: "Struktur organisasi",
     gambar: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
     konten: "Pemerintahan Desa Delta Upang didukung oleh struktur organisasi yang tangguh, responsif, dan adaptif terhadap kemajuan zaman. Diisi oleh putra-putri terbaik desa yang berdedikasi tinggi, kami melayani masyarakat dengan sepenuh hati.\n\nSetiap fungsi pemerintahan, mulai dari Kepala Desa, Sekretaris, jajaran Kepala Urusan (Kaur), Kepala Seksi (Kasi), hingga Kepala Dusun, berjalan secara sinergis dengan menjunjung tinggi prinsip transparansi dan profesionalisme demi kemajuan bersama seluruh elemen masyarakat Delta Upang."
   }
@@ -96,6 +96,8 @@ const initialBeranda = {
 export default function App() {
   const [currentPage, setCurrentPage] = useState('beranda');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeProfilTab, setActiveProfilTab] = useState<number | null>(null);
+  const [isMobileProfilOpen, setIsMobileProfilOpen] = useState(false);
   
   // State Admin
   const [isAdmin, setIsAdmin] = useState(() => {
@@ -131,8 +133,11 @@ export default function App() {
   useEffect(() => { localStorage.setItem('desa_data_profil_v1', JSON.stringify(daftarProfil)); }, [daftarProfil]);
   useEffect(() => { localStorage.setItem('desa_data_beranda_v2', JSON.stringify(dataBeranda)); }, [dataBeranda]);
 
-  const navigateTo = (page: string) => {
+  const navigateTo = (page: string, tabId: number | null = null) => {
     setCurrentPage(page);
+    if (page === 'profil' && tabId !== null) {
+      setActiveProfilTab(tabId);
+    }
     setIsMobileMenuOpen(false);
   };
 
@@ -178,7 +183,48 @@ export default function App() {
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex space-x-1 items-center bg-black/20 p-1.5 rounded-2xl backdrop-blur-md border border-white/10">
               <NavButton active={currentPage === 'beranda'} onClick={() => navigateTo('beranda')} icon={<Home className="w-4 h-4 mr-2" />}>Beranda</NavButton>
-              <NavButton active={currentPage === 'profil'} onClick={() => navigateTo('profil')} icon={<Info className="w-4 h-4 mr-2" />}>Profil Desa</NavButton>
+              
+              {/* Dropdown Profil Desa */}
+              <div className="relative group">
+                <button
+                  onClick={() => navigateTo('profil', daftarProfil[0]?.id)}
+                  className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
+                    currentPage === 'profil'
+                      ? 'bg-white text-emerald-900 shadow-md'
+                      : 'text-white hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  <Info className="w-4 h-4 mr-2" />
+                  Profil Desa
+                  <ChevronDown className="w-4 h-4 ml-1 opacity-70 group-hover:rotate-180 transition-transform duration-300" />
+                </button>
+
+                {/* Dropdown Menu Elegan */}
+                <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.15)] border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top translate-y-2 group-hover:translate-y-0 z-50 overflow-hidden">
+                  <div className="flex flex-col py-1.5">
+                    {daftarProfil.map((profil: any, index: number) => (
+                      <button
+                        key={profil.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigateTo('profil', profil.id);
+                        }}
+                        className={`text-left px-5 py-3 text-sm font-bold transition-all duration-200 relative overflow-hidden ${
+                           activeProfilTab === profil.id && currentPage === 'profil'
+                             ? 'text-emerald-700 bg-emerald-50/80'
+                             : 'text-gray-600 hover:bg-gray-50 hover:text-emerald-600'
+                        }`}
+                      >
+                         {activeProfilTab === profil.id && currentPage === 'profil' && (
+                           <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-400 to-emerald-600"></span>
+                         )}
+                         {profil.judul}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               <NavButton active={currentPage === 'perangkat'} onClick={() => navigateTo('perangkat')} icon={<Users className="w-4 h-4 mr-2" />}>Perangkat Desa</NavButton>
               <NavButton active={currentPage === 'berita'} onClick={() => navigateTo('berita')} icon={<Newspaper className="w-4 h-4 mr-2" />}>Berita</NavButton>
               <NavButton active={currentPage === 'kontak'} onClick={() => navigateTo('kontak')} icon={<Phone className="w-4 h-4 mr-2" />}>Kontak</NavButton>
@@ -223,7 +269,41 @@ export default function App() {
           <div className="lg:hidden bg-emerald-950/95 backdrop-blur-xl border-t border-white/10">
             <div className="flex flex-col px-4 pt-2 pb-4 space-y-2">
               <MobileNavButton active={currentPage === 'beranda'} onClick={() => navigateTo('beranda')}>Beranda</MobileNavButton>
-              <MobileNavButton active={currentPage === 'profil'} onClick={() => navigateTo('profil')}>Profil Desa</MobileNavButton>
+              
+              {/* Dropdown Profil Desa Mobile */}
+              <div>
+                <button
+                  onClick={() => setIsMobileProfilOpen(!isMobileProfilOpen)}
+                  className={`flex items-center justify-between w-full text-left px-5 py-4 rounded-xl text-lg font-bold transition-all ${
+                    currentPage === 'profil' || isMobileProfilOpen
+                      ? 'bg-emerald-800 text-white border-l-4 border-emerald-400 shadow-inner'
+                      : 'text-emerald-100 hover:bg-emerald-800/80 hover:text-white'
+                  }`}
+                >
+                  <span>Profil Desa</span>
+                  <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isMobileProfilOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {isMobileProfilOpen && (
+                  <div className="flex flex-col bg-emerald-900/50 rounded-xl mt-2 mx-2 overflow-hidden border border-white/5 animate-in slide-in-from-top-2 duration-200">
+                    {daftarProfil.map((profil: any) => (
+                      <button
+                        key={profil.id}
+                        onClick={() => {
+                          navigateTo('profil', profil.id);
+                        }}
+                        className={`text-left px-6 py-3.5 text-sm font-bold transition-colors border-l-2 ${
+                          activeProfilTab === profil.id && currentPage === 'profil'
+                            ? 'border-emerald-400 text-white bg-emerald-800/50'
+                            : 'border-transparent text-emerald-200 hover:bg-emerald-800 hover:text-white'
+                        }`}
+                      >
+                        {profil.judul}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <MobileNavButton active={currentPage === 'perangkat'} onClick={() => navigateTo('perangkat')}>Perangkat Desa</MobileNavButton>
               <MobileNavButton active={currentPage === 'berita'} onClick={() => navigateTo('berita')}>Berita</MobileNavButton>
               <MobileNavButton active={currentPage === 'kontak'} onClick={() => navigateTo('kontak')}>Kontak</MobileNavButton>
@@ -254,6 +334,8 @@ export default function App() {
             isAdmin={isAdmin}
             daftarProfil={daftarProfil}
             setDaftarProfil={setDaftarProfil}
+            initialTabId={activeProfilTab}
+            navigateTo={navigateTo}
           />
         )}
         {currentPage === 'perangkat' && (
@@ -294,7 +376,7 @@ export default function App() {
               </h4>
               <ul className="space-y-3">
                 <li><button onClick={() => navigateTo('beranda')} className="text-gray-400 hover:text-emerald-400 font-medium flex items-center transition duration-200 hover:translate-x-2"><ChevronRight className="w-4 h-4 mr-2 text-emerald-500"/> Beranda</button></li>
-                <li><button onClick={() => navigateTo('profil')} className="text-gray-400 hover:text-emerald-400 font-medium flex items-center transition duration-200 hover:translate-x-2"><ChevronRight className="w-4 h-4 mr-2 text-emerald-500"/> Profil Desa</button></li>
+                <li><button onClick={() => navigateTo('profil', daftarProfil[0]?.id)} className="text-gray-400 hover:text-emerald-400 font-medium flex items-center transition duration-200 hover:translate-x-2"><ChevronRight className="w-4 h-4 mr-2 text-emerald-500"/> Profil Desa</button></li>
                 <li><button onClick={() => navigateTo('perangkat')} className="text-gray-400 hover:text-emerald-400 font-medium flex items-center transition duration-200 hover:translate-x-2"><ChevronRight className="w-4 h-4 mr-2 text-emerald-500"/> Perangkat Desa</button></li>
                 <li><button onClick={() => navigateTo('berita')} className="text-gray-400 hover:text-emerald-400 font-medium flex items-center transition duration-200 hover:translate-x-2"><ChevronRight className="w-4 h-4 mr-2 text-emerald-500"/> Berita Desa</button></li>
               </ul>
@@ -718,17 +800,19 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
 }
 
 // ============== KOMPONEN BARU: HALAMAN PROFIL DESA ==============
-function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil }: any) {
-  const [activeTabId, setActiveTabId] = useState(daftarProfil[0]?.id);
+function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabId, navigateTo }: any) {
+  const [activeTabId, setActiveTabId] = useState(initialTabId || daftarProfil[0]?.id);
   const [showEditor, setShowEditor] = useState(false);
   const [editData, setEditData] = useState<any>(null);
 
-  // Pastikan ada tab yang aktif
+  // Pastikan ada tab yang aktif & sinkron dengan klik dari Dropdown Navbar
   useEffect(() => {
-    if (daftarProfil.length > 0 && !daftarProfil.find((p: any) => p.id === activeTabId)) {
+    if (initialTabId) {
+      setActiveTabId(initialTabId);
+    } else if (daftarProfil.length > 0 && !daftarProfil.find((p: any) => p.id === activeTabId)) {
       setActiveTabId(daftarProfil[0].id);
     }
-  }, [daftarProfil, activeTabId]);
+  }, [initialTabId, daftarProfil, activeTabId]);
 
   const activeProfil = daftarProfil.find((p: any) => p.id === activeTabId);
 
@@ -840,9 +924,9 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil }: any) {
           </div>
 
           {/* KANAN: Konten Detail yang Dipilih */}
-          <div className="w-full lg:w-2/3 bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden relative min-h-[500px]">
+          <div className="w-full lg:w-2/3 bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden relative min-h-[500px] flex flex-col">
             {activeProfil ? (
-              <div className="animate-in fade-in slide-in-from-right-4 duration-500 h-full flex flex-col">
+              <div className="animate-in fade-in slide-in-from-right-4 duration-500 flex-grow flex flex-col">
                 
                 {/* Kontrol Admin untuk Konten Aktif */}
                 {isAdmin && (
@@ -858,7 +942,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil }: any) {
 
                 {/* Gambar Konten Profil */}
                 {activeProfil.gambar && (
-                  <div className="relative w-full h-64 md:h-80 overflow-hidden bg-gray-100">
+                  <div className="relative w-full h-64 md:h-80 overflow-hidden bg-gray-100 flex-shrink-0">
                     <img 
                       src={activeProfil.gambar} 
                       alt={activeProfil.judul} 
@@ -874,15 +958,25 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil }: any) {
                   </div>
                 )}
 
-                {/* Teks Konten Profil */}
-                <div className={`p-8 md:p-10 flex-grow ${!activeProfil.gambar && 'pt-12'}`}>
+                {/* Teks Konten Profil & Tombol Kembali */}
+                <div className={`p-8 md:p-10 flex-grow flex flex-col ${!activeProfil.gambar && 'pt-12'}`}>
                   {!activeProfil.gambar && (
                      <h3 className="text-3xl md:text-4xl font-extrabold text-emerald-900 tracking-tight mb-8 pb-4 border-b-2 border-emerald-100">
                        {activeProfil.judul}
                      </h3>
                   )}
-                  <div className="text-gray-700 text-lg leading-relaxed whitespace-pre-wrap font-medium">
+                  <div className="text-gray-700 text-lg leading-relaxed whitespace-pre-wrap font-medium flex-grow">
                     {activeProfil.konten}
+                  </div>
+
+                  {/* Tombol Kembali ke Halaman Beranda (Pojok Bawah) */}
+                  <div className="mt-12 pt-6 border-t border-gray-100 flex justify-end">
+                    <button 
+                      onClick={() => navigateTo('beranda')}
+                      className="flex items-center text-sm font-bold text-gray-500 hover:text-emerald-700 bg-gray-50 hover:bg-emerald-50 px-5 py-3 rounded-xl border border-gray-200 hover:border-emerald-200 transition-all shadow-sm hover:shadow"
+                    >
+                      <ArrowRight className="w-4 h-4 mr-2 rotate-180" /> Kembali ke Halaman Utama
+                    </button>
                   </div>
                 </div>
 
