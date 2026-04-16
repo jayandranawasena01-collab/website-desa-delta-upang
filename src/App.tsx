@@ -905,22 +905,23 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1592982537447-6f2a6a0a091c?w=1920&q=80')", backgroundSize: 'cover', backgroundPosition: 'center', filter: 'grayscale(100%)' }}></div>
         
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-8 text-center">
             {dataBeranda.stats.map((stat: any) => (
-              <div key={stat.id} className="p-6 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.1)] hover:bg-white/10 transition-colors flex flex-col justify-center h-full relative overflow-hidden">
-                <div className="text-5xl font-extrabold text-white mb-2 drop-shadow-md">{stat.num}</div>
-                <div className="text-emerald-200 font-bold text-lg tracking-wide">{stat.label}</div>
+              <div key={stat.id} className="p-4 sm:p-6 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.1)] hover:bg-white/10 transition-colors flex flex-col justify-center h-full relative overflow-hidden">
+                {/* Disesuaikan font responsif agar tidak tumpah di HP */}
+                <div className="text-3xl sm:text-5xl font-extrabold text-white mb-1 sm:mb-2 drop-shadow-md">{stat.num}</div>
+                <div className="text-emerald-200 font-bold text-xs sm:text-lg tracking-wide">{stat.label}</div>
 
                 {stat.id === 1 && (
-                  <div className="flex justify-center gap-6 mt-4 pt-4 border-t border-white/10 w-full">
+                  <div className="flex justify-center gap-2 sm:gap-6 mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-white/10 w-full">
                     <div className="flex flex-col items-center">
-                      <span className="font-extrabold text-white text-xl">{stat.subLaki || "1.650"}</span>
-                      <span className="text-[11px] text-emerald-100/90 font-bold uppercase tracking-wider mt-0.5">Laki-laki</span>
+                      <span className="font-extrabold text-white text-sm sm:text-xl">{stat.subLaki || "1.650"}</span>
+                      <span className="text-[9px] sm:text-[11px] text-emerald-100/90 font-bold uppercase tracking-wider mt-0.5 text-center break-words">Laki-laki</span>
                     </div>
                     <div className="w-px bg-white/20"></div>
                     <div className="flex flex-col items-center">
-                      <span className="font-extrabold text-white text-xl">{stat.subPerempuan || "1.600"}</span>
-                      <span className="text-[11px] text-emerald-100/90 font-bold uppercase tracking-wider mt-0.5">Perempuan</span>
+                      <span className="font-extrabold text-white text-sm sm:text-xl">{stat.subPerempuan || "1.600"}</span>
+                      <span className="text-[9px] sm:text-[11px] text-emerald-100/90 font-bold uppercase tracking-wider mt-0.5 text-center break-words">Perempuan</span>
                     </div>
                   </div>
                 )}
