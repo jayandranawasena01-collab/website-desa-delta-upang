@@ -158,7 +158,7 @@ const initialBeranda = {
   jabatanKades: "Kepala Desa Delta Upang",
   sambutanKades: "Assalamu'alaikum Warahmatullahi Wabarakatuh. Puji syukur kita panjatkan ke hadirat Allah SWT. Selamat datang di website resmi Desa Delta Upang. Melalui media ini, kami berupaya mewujudkan transparansi dan kemudahan akses informasi bagi seluruh warga dan masyarakat luas mengenai program kerja, kegiatan, dan pembangunan di desa kita tercinta.",
   stats: [
-    { id: 1, num: "3.250", label: "Total Penduduk", subLaki: "1.874", subPerempuan: "1.815" },
+    { id: 1, num: "3.689", label: "Total Penduduk", subLaki: "1.874", subPerempuan: "1.815" },
     { id: 2, num: "800", label: "Kepala Keluarga" },
     { id: 3, num: "4", label: "Dusun" },
     { id: 4, num: "16", label: "Rukun Tetangga (RT)" }
