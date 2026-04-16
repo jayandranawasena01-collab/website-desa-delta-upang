@@ -793,7 +793,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
 
   return (
     <div className="animate-in fade-in duration-700">
-      <section className="relative h-[600px] flex items-center overflow-hidden">
+      <section className="relative min-h-[100svh] md:min-h-[700px] flex items-center justify-center overflow-hidden py-32 md:py-20">
         <div className="absolute inset-0 z-0">
           <img 
             src={dataBeranda.heroBg} 
@@ -804,18 +804,20 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
         </div>
 
         {isAdmin && (
-          <div className="absolute top-6 left-6 z-20">
+          <div className="absolute top-6 left-6 z-30 group flex items-center">
              <button 
                onClick={() => { setEditForm(dataBeranda); setShowEditor(true); }} 
-               className="cursor-pointer bg-white/90 backdrop-blur hover:bg-white text-emerald-800 px-6 py-3 rounded-2xl font-bold flex items-center shadow-[0_8px_30px_rgba(0,0,0,0.3)] transition-all hover:scale-105 border border-white/50"
+               className="cursor-pointer bg-white/90 backdrop-blur hover:bg-white text-emerald-800 p-3.5 rounded-2xl font-bold flex items-center justify-center shadow-[0_8px_30px_rgba(0,0,0,0.3)] transition-all hover:scale-110 border border-white/50"
              >
-                <Edit className="w-5 h-5 mr-3 text-emerald-600" /> 
-                Edit Konten Beranda
+                <Edit className="w-6 h-6 text-emerald-600" /> 
              </button>
+             <div className="absolute left-full ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white text-emerald-800 px-4 py-2 rounded-xl font-bold shadow-lg pointer-events-none whitespace-nowrap">
+               Edit Konten Beranda
+             </div>
           </div>
         )}
         
-        <div className="container mx-auto px-4 lg:px-8 relative z-10 text-center text-white mt-12 md:mt-16">
+        <div className="container mx-auto px-4 lg:px-8 relative z-10 text-center text-white pb-10">
           
           {/* Logo Custom di Hero Atas dengan Animasi Naik Turun (Float) */}
           {dataBeranda.logoHero && (
