@@ -74,7 +74,7 @@ const initialBerita = [
 // Data awal perangkat desa (Tampilan Card)
 const initialPerangkat = [
   { id: 1, nama: "Zaenal Efendi, S.IP", jabatan: "Kepala Desa", foto: "https://lh3.googleusercontent.com/d/1L5Y15w_obbihHFz4rUMrOAci5V7TtAIz" },
-  { id: 2, nama: "Ahmad Yani, S.IP.", jabatan: "Sekretaris Desa", foto: "https://lh3.googleusercontent.com/d/1X-AHk2zbETCD85uTxPT0PCaa3LMVyttE" },
+  { id: 2, nama: "Gunarjo, S.Pd.", jabatan: "Sekretaris Desa", foto: "https://lh3.googleusercontent.com/d/1X-AHk2zbETCD85uTxPT0PCaa3LMVyttE" },
   { id: 3, nama: "Siti Rahmawati", jabatan: "Kaur Keuangan", foto: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
   { id: 4, nama: "Budi Santoso", jabatan: "Kaur Perencanaan", foto: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
   { id: 5, nama: "Dewi Lestari", jabatan: "Kasi Pemerintahan", foto: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
