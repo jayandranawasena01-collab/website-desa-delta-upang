@@ -9,19 +9,29 @@ import {
 // ================= FIREBASE CLOUD STORAGE SETUP =================
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
-import { initializeFirestore, doc, setDoc, onSnapshot, collection } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, onSnapshot, collection } from 'firebase/firestore';
 
 // Deklarasi global agar TypeScript di Vercel tidak error
 declare const __firebase_config: any;
 declare const __app_id: any;
 declare const __initial_auth_token: any;
 
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-// Memaksa Long Polling untuk menghindari error timeout (Backend didn't respond within 10 seconds)
-const db = initializeFirestore(app, { experimentalForceLongPolling: true });
+let app: any = null;
+let auth: any = null;
+let db: any = null;
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'desa-delta-upang';
+
+try {
+  const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+  // Hanya inisialisasi Firebase jika config tersedia (mencegah timeout error saat build di Vercel)
+  if (firebaseConfig && Object.keys(firebaseConfig).length > 0) {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+  }
+} catch (err) {
+  console.warn("Menjalankan aplikasi dalam mode lokal (tanpa Firebase).");
+}
 
 // ================= FUNGSI KOMPRESI GAMBAR OTOMATIS =================
 const compressImage = (file: any, maxWidth: any, isLogo: any, callback: any) => {
@@ -182,6 +192,7 @@ export default function App() {
 
   // ================= INIT FIREBASE & FETCH DATA CLOUD =================
   useEffect(() => {
+    if (!auth) return;
     const initAuth = async () => {
       try {
         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -199,7 +210,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !db) return;
 
     const unsubBeranda = onSnapshot(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_beranda'), 'main'), (snap) => {
       if(snap.exists()) setDataBeranda(snap.data().value);
@@ -228,23 +239,23 @@ export default function App() {
 
   const updateBeranda = async (newData: any) => {
     setDataBeranda(newData);
-    if(user) await setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_beranda'), 'main'), { value: newData });
+    if(user && db) await setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_beranda'), 'main'), { value: newData });
   };
   const updateBerita = async (newData: any) => {
     setDaftarBerita(newData);
-    if(user) await setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_berita'), 'main'), { value: newData });
+    if(user && db) await setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_berita'), 'main'), { value: newData });
   };
   const updatePerangkat = async (newData: any) => {
     setDaftarPerangkat(newData);
-    if(user) await setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_perangkat'), 'main'), { value: newData });
+    if(user && db) await setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_perangkat'), 'main'), { value: newData });
   };
   const updateLembaga = async (newData: any) => {
     setDaftarLembaga(newData);
-    if(user) await setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_lembaga'), 'main'), { value: newData });
+    if(user && db) await setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_lembaga'), 'main'), { value: newData });
   };
   const updateProfil = async (newData: any) => {
     setDaftarProfil(newData);
-    if(user) await setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_profil'), 'main'), { value: newData });
+    if(user && db) await setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_profil'), 'main'), { value: newData });
   };
 
   useEffect(() => {
