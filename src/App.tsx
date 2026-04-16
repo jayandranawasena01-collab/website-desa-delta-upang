@@ -9,7 +9,7 @@ import {
 // ================= FIREBASE CLOUD STORAGE SETUP =================
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, doc, setDoc, onSnapshot, collection } from 'firebase/firestore';
+import { initializeFirestore, doc, setDoc, onSnapshot, collection } from 'firebase/firestore';
 
 // Deklarasi global agar TypeScript di Vercel tidak error
 declare const __firebase_config: any;
@@ -19,18 +19,24 @@ declare const __initial_auth_token: any;
 let app: any = null;
 let auth: any = null;
 let db: any = null;
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'desa-delta-upang';
+let appId = 'desa-delta-upang';
 
-try {
-  const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-  // Hanya inisialisasi Firebase jika config tersedia (mencegah timeout error saat build di Vercel)
-  if (firebaseConfig && Object.keys(firebaseConfig).length > 0) {
-    app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    db = getFirestore(app);
+// Mencegah Firebase berjalan saat proses "Build" di server Vercel (SSR) untuk menghindari Timeout 10 detik
+if (typeof window !== 'undefined') {
+  try {
+    appId = typeof __app_id !== 'undefined' ? __app_id : 'desa-delta-upang';
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+    
+    // Hanya inisialisasi Firebase jika config tersedia dan berjalan di browser
+    if (firebaseConfig && Object.keys(firebaseConfig).length > 0) {
+      app = initializeApp(firebaseConfig);
+      auth = getAuth(app);
+      // Memaksa Long Polling agar koneksi lolos dari pemblokiran jaringan
+      db = initializeFirestore(app, { experimentalForceLongPolling: true });
+    }
+  } catch (err) {
+    console.warn("Menjalankan aplikasi dalam mode lokal (tanpa Firebase).");
   }
-} catch (err) {
-  console.warn("Menjalankan aplikasi dalam mode lokal (tanpa Firebase).");
 }
 
 // ================= FUNGSI KOMPRESI GAMBAR OTOMATIS =================
@@ -175,7 +181,12 @@ export default function App() {
   const [isMobilePemerintahOpen, setIsMobilePemerintahOpen] = useState(false);
   
   // State Admin
-  const [isAdmin, setIsAdmin] = useState(() => localStorage.getItem('desa_admin_status') === 'true');
+  const [isAdmin, setIsAdmin] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('desa_admin_status') === 'true';
+    }
+    return false;
+  });
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   // Custom Modal Alert/Confirm
@@ -207,6 +218,7 @@ export default function App() {
     initAuth();
     const unsubscribe = onAuthStateChanged(auth, setUser);
     return () => unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -235,6 +247,7 @@ export default function App() {
     return () => {
       unsubBeranda(); unsubBerita(); unsubPerangkat(); unsubLembaga(); unsubProfil();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const updateBeranda = async (newData: any) => {
@@ -259,17 +272,19 @@ export default function App() {
   };
 
   useEffect(() => {
-    try {
-      const keysToRemove = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith('desa_') && key !== 'desa_admin_status') {
-          keysToRemove.push(key);
+    if (typeof window !== 'undefined') {
+      try {
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('desa_') && key !== 'desa_admin_status') {
+            keysToRemove.push(key);
+          }
         }
+        keysToRemove.forEach(k => localStorage.removeItem(k));
+      } catch (e) {
+        console.error("Cleanup error:", e);
       }
-      keysToRemove.forEach(k => localStorage.removeItem(k));
-    } catch (e) {
-      console.error("Cleanup error:", e);
     }
   }, []);
 
@@ -283,11 +298,15 @@ export default function App() {
   }, []);
 
   useEffect(() => { 
-    window.scrollTo(0, 0); 
+    if (typeof window !== 'undefined') {
+      window.scrollTo(0, 0); 
+    }
   }, [currentPage, activeProfilTab, activePemerintahTab]);
 
   useEffect(() => { 
-    try { localStorage.setItem('desa_admin_status', isAdmin.toString()); } catch(e){} 
+    if (typeof window !== 'undefined') {
+      try { localStorage.setItem('desa_admin_status', isAdmin.toString()); } catch(e){} 
+    }
   }, [isAdmin]);
 
   const navigateTo = (page: string, tabId: any = null) => {
