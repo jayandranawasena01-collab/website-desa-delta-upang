@@ -653,7 +653,7 @@ export default function App() {
                   <div className="bg-white/5 p-2 rounded-lg group-hover:bg-emerald-900/50 transition mr-4">
                     <MapPin className="w-5 h-5 text-emerald-400" />
                   </div>
-                  <span className="pt-1">Jl. Poros Desa Delta Upang, Kec. Makarti Jaya, Kab. Banyuasin, Sumsel 30972</span>
+                  <span className="pt-1">Jl. Sunan Kalijaga Dusun II, Kec. Makarti Jaya, Kab. Banyuasin, Sumsel 30972</span>
                 </li>
                 <li className="flex items-center group">
                   <div className="bg-white/5 p-2 rounded-lg group-hover:bg-emerald-900/50 transition mr-4">
@@ -2151,7 +2151,7 @@ function HalamanKontak() {
                   <div className="pt-1">
                     <h4 className="font-extrabold text-gray-900 text-xl">Alamat Kantor Desa</h4>
                     <p className="text-gray-600 leading-relaxed mt-2 text-lg">
-                      Jl. Poros Desa Delta Upang, Rt. 01 Rw. 01<br/>
+                      Jl. Sunan Kalijaga Dusun II, Rt. 01 Rw. 01<br/>
                       Kecamatan Makarti Jaya, Kabupaten Banyuasin<br/>
                       Provinsi Sumatera Selatan, 30972
                     </p>
@@ -2163,7 +2163,7 @@ function HalamanKontak() {
                   </div>
                   <div className="pt-1">
                     <h4 className="font-extrabold text-gray-900 text-xl">Telepon / WhatsApp</h4>
-                    <p className="text-gray-600 mt-2 text-lg font-medium">(0711) XXXXXXX / 0812-XXXX-XXXX</p>
+                    <p className="text-gray-600 mt-2 text-lg font-medium">+62 822-6876-4585</p>
                   </div>
                 </div>
                 <div className="flex items-start group">
