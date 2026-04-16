@@ -765,7 +765,7 @@ export default function App() {
                   <div className="bg-white/5 p-2 rounded-lg group-hover:bg-emerald-900/50 transition mr-4">
                     <Phone className="w-5 h-5 text-emerald-400" />
                   </div>
-                  <span>0823-7666-6646</span>
+                  <span>0822-6876-4585</span>
                 </li>
                 <li className="flex items-center group">
                   <div className="bg-white/5 p-2 rounded-lg group-hover:bg-emerald-900/50 transition mr-4">
