@@ -721,7 +721,7 @@ export default function App() {
               </button>
               <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100 mt-4">
                 <p className="text-xs text-emerald-800 text-center font-medium">
-                  Peringatan!:<br/>Jangan berikan informasi apapun mengenai username dan password ke pada siapapun: <b></b><b></b>
+                  Peringatan! :<br/>Jangan berikan informasi apapun mengenai username dan password kepada pihak yang tidak bertanggung jawab<b></b><b></b>
                 </p>
               </div>
             </form>
