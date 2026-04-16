@@ -9,7 +9,7 @@ import {
 // ================= FIREBASE CLOUD STORAGE SETUP =================
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, doc, setDoc, onSnapshot, collection } from 'firebase/firestore';
+import { initializeFirestore, doc, setDoc, onSnapshot, collection } from 'firebase/firestore';
 
 // Deklarasi global agar TypeScript di Vercel tidak error
 declare const __firebase_config: any;
@@ -19,7 +19,8 @@ declare const __initial_auth_token: any;
 const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
+// Memaksa Long Polling untuk menghindari error timeout (Backend didn't respond within 10 seconds)
+const db = initializeFirestore(app, { experimentalForceLongPolling: true });
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'desa-delta-upang';
 
 // ================= FUNGSI KOMPRESI GAMBAR OTOMATIS =================
