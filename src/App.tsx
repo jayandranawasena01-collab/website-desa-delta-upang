@@ -73,7 +73,7 @@ const initialBerita = [
 
 // Data awal perangkat desa (Tampilan Card)
 const initialPerangkat = [
-  { id: 1, nama: "Pendi.", jabatan: "Kepala Desa", foto: "https://lh3.googleusercontent.com/d/1L5Y15w_obbihHFz4rUMrOAci5V7TtAIz" },
+  { id: 1, nama: "Zaenal Efendi, S.IP", jabatan: "Kepala Desa", foto: "https://lh3.googleusercontent.com/d/1L5Y15w_obbihHFz4rUMrOAci5V7TtAIz" },
   { id: 2, nama: "Ahmad Yani, S.IP.", jabatan: "Sekretaris Desa", foto: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
   { id: 3, nama: "Siti Rahmawati", jabatan: "Kaur Keuangan", foto: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
   { id: 4, nama: "Budi Santoso", jabatan: "Kaur Perencanaan", foto: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
@@ -129,7 +129,7 @@ const initialBeranda = {
   namaDesa: "Delta Upang",
   deskripsiDesa: "Kecamatan Makarti Jaya, Kabupaten Banyuasin \nProvinsi Sumatera Selatan",
   fotoKades: "https://lh3.googleusercontent.com/d/1L5Y15w_obbihHFz4rUMrOAci5V7TtAIz",
-  namaKades: "PENDI.",
+  namaKades: "Zaenal Efendi, S.IP",
   jabatanKades: "Kepala Desa Delta Upang",
   sambutanKades: "Assalamu'alaikum Warahmatullahi Wabarakatuh. Puji syukur kita panjatkan ke hadirat Allah SWT. Selamat datang di website resmi Desa Delta Upang. Melalui media ini, kami berupaya mewujudkan transparansi dan kemudahan akses informasi bagi seluruh warga dan masyarakat luas mengenai program kerja, kegiatan, dan pembangunan di desa kita tercinta.",
   stats: [
