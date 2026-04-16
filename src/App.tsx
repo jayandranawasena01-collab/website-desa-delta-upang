@@ -11,6 +11,11 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, setDoc, onSnapshot, collection } from 'firebase/firestore';
 
+// Deklarasi global agar TypeScript di Vercel tidak error
+declare const __firebase_config: any;
+declare const __app_id: any;
+declare const __initial_auth_token: any;
+
 const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -18,10 +23,10 @@ const db = getFirestore(app);
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'desa-delta-upang';
 
 // ================= FUNGSI KOMPRESI GAMBAR OTOMATIS =================
-const compressImage = (file, maxWidth, isLogo, callback) => {
+const compressImage = (file: any, maxWidth: any, isLogo: any, callback: any) => {
   const reader = new FileReader();
   reader.readAsDataURL(file);
-  reader.onload = (event) => {
+  reader.onload = (event: any) => {
     const img = new Image();
     img.src = event.target.result;
     img.onload = () => {
@@ -144,12 +149,12 @@ const initialBeranda = {
 };
 
 export default function App() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState('beranda');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // State Active Tabs
-  const [activeProfilTab, setActiveProfilTab] = useState(null);
+  const [activeProfilTab, setActiveProfilTab] = useState<any>(null);
   const [activePemerintahTab, setActivePemerintahTab] = useState('perangkat');
   
   // States untuk mengatur dropdown
@@ -163,11 +168,11 @@ export default function App() {
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   // Custom Modal Alert/Confirm
-  const [dialog, setDialog] = useState({ isOpen: false, type: 'alert', message: '', onConfirm: null });
-  const showAlert = (message) => setDialog({ isOpen: true, type: 'alert', message, onConfirm: null });
-  const showConfirm = (message, onConfirm) => setDialog({ isOpen: true, type: 'confirm', message, onConfirm });
+  const [dialog, setDialog] = useState<any>({ isOpen: false, type: 'alert', message: '', onConfirm: null });
+  const showAlert = (message: string) => setDialog({ isOpen: true, type: 'alert', message, onConfirm: null });
+  const showConfirm = (message: string, onConfirm: any) => setDialog({ isOpen: true, type: 'confirm', message, onConfirm });
   
-  // States Data (Diinisialisasi dengan data awal sebelum load dari cloud)
+  // States Data
   const [daftarBerita, setDaftarBerita] = useState(initialBerita);
   const [daftarPerangkat, setDaftarPerangkat] = useState(initialPerangkat);
   const [daftarLembaga, setDaftarLembaga] = useState(initialLembaga);
@@ -195,7 +200,6 @@ export default function App() {
   useEffect(() => {
     if (!user) return;
 
-    // Mendengarkan perubahan data secara realtime dari Cloud Firestore
     const unsubBeranda = onSnapshot(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_beranda'), 'main'), (snap) => {
       if(snap.exists()) setDataBeranda(snap.data().value);
     }, console.error);
@@ -221,29 +225,27 @@ export default function App() {
     };
   }, [user]);
 
-  // Fungsi Update Data ke Firestore
-  const updateBeranda = async (newData) => {
+  const updateBeranda = async (newData: any) => {
     setDataBeranda(newData);
     if(user) await setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_beranda'), 'main'), { value: newData });
   };
-  const updateBerita = async (newData) => {
+  const updateBerita = async (newData: any) => {
     setDaftarBerita(newData);
     if(user) await setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_berita'), 'main'), { value: newData });
   };
-  const updatePerangkat = async (newData) => {
+  const updatePerangkat = async (newData: any) => {
     setDaftarPerangkat(newData);
     if(user) await setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_perangkat'), 'main'), { value: newData });
   };
-  const updateLembaga = async (newData) => {
+  const updateLembaga = async (newData: any) => {
     setDaftarLembaga(newData);
     if(user) await setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_lembaga'), 'main'), { value: newData });
   };
-  const updateProfil = async (newData) => {
+  const updateProfil = async (newData: any) => {
     setDaftarProfil(newData);
     if(user) await setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_profil'), 'main'), { value: newData });
   };
 
-  // Bersihkan cache sampah lokal peninggalan versi lama
   useEffect(() => {
     try {
       const keysToRemove = [];
@@ -259,7 +261,6 @@ export default function App() {
     }
   }, []);
 
-  // Efek klik di luar untuk menutup dropdown desktop
   useEffect(() => {
     const handleOutsideClick = () => {
       setIsDesktopProfilOpen(false);
@@ -277,7 +278,7 @@ export default function App() {
     try { localStorage.setItem('desa_admin_status', isAdmin.toString()); } catch(e){} 
   }, [isAdmin]);
 
-  const navigateTo = (page, tabId = null) => {
+  const navigateTo = (page: string, tabId: any = null) => {
     setCurrentPage(page);
     if (page === 'profil' && tabId !== null) setActiveProfilTab(tabId);
     if (page === 'pemerintah' && tabId !== null) setActivePemerintahTab(tabId);
@@ -289,7 +290,7 @@ export default function App() {
     setIsDesktopPemerintahOpen(false);
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = (e: any) => {
     e.preventDefault();
     const username = e.target.username.value;
     const password = e.target.password.value;
@@ -393,7 +394,7 @@ export default function App() {
               <NavButton active={currentPage === 'beranda'} onClick={() => navigateTo('beranda')} icon={<Home className="w-4 h-4 mr-2" />}>Beranda</NavButton>
               
               {/* Dropdown Profil Desa */}
-              <div className="relative" onClick={(e) => e.stopPropagation()}>
+              <div className="relative" onClick={(e: any) => e.stopPropagation()}>
                 <button
                   onClick={() => {
                     setIsDesktopPemerintahOpen(false);
@@ -422,7 +423,7 @@ export default function App() {
                     {daftarProfil.map((profil) => (
                       <button
                         key={profil.id}
-                        onClick={(e) => {
+                        onClick={(e: any) => {
                           e.stopPropagation();
                           navigateTo('profil', profil.id);
                         }}
@@ -443,7 +444,7 @@ export default function App() {
               </div>
 
               {/* Dropdown Pemerintah Desa */}
-              <div className="relative" onClick={(e) => e.stopPropagation()}>
+              <div className="relative" onClick={(e: any) => e.stopPropagation()}>
                 <button
                   onClick={() => {
                     setIsDesktopProfilOpen(false);
@@ -472,7 +473,7 @@ export default function App() {
                     {menuPemerintah.map((menu) => (
                       <button
                         key={menu.id}
-                        onClick={(e) => {
+                        onClick={(e: any) => {
                           e.stopPropagation();
                           navigateTo('pemerintah', menu.id);
                         }}
@@ -801,58 +802,58 @@ export default function App() {
 
 /* ================= Komponen Halaman ================= */
 
-function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, showAlert }) {
+function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, showAlert }: any) {
   const [showEditor, setShowEditor] = useState(false);
   const [editForm, setEditForm] = useState(dataBeranda);
 
-  const handleHeroBgChange = (e) => {
+  const handleHeroBgChange = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      compressImage(file, 1200, false, (base64) => {
-        setEditForm((prev) => ({ ...prev, heroBg: base64 }));
+      compressImage(file, 1200, false, (base64: any) => {
+        setEditForm((prev: any) => ({ ...prev, heroBg: base64 }));
       });
       e.target.value = '';
     }
   };
 
-  const handleLogoHeroChange = (e) => {
+  const handleLogoHeroChange = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      compressImage(file, 400, true, (base64) => {
-        setEditForm((prev) => ({ ...prev, logoHero: base64 }));
+      compressImage(file, 400, true, (base64: any) => {
+        setEditForm((prev: any) => ({ ...prev, logoHero: base64 }));
       });
       e.target.value = '';
     }
   };
 
-  const handleHeaderLogoChange = (e) => {
+  const handleHeaderLogoChange = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      compressImage(file, 300, true, (base64) => {
-        setEditForm((prev) => ({ ...prev, headerLogo: base64 }));
+      compressImage(file, 300, true, (base64: any) => {
+        setEditForm((prev: any) => ({ ...prev, headerLogo: base64 }));
       });
       e.target.value = '';
     }
   };
 
-  const handleFotoKadesUpload = (e) => {
+  const handleFotoKadesUpload = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      compressImage(file, 400, false, (base64) => {
-        setEditForm((prev) => ({ ...prev, fotoKades: base64 }));
+      compressImage(file, 400, false, (base64: any) => {
+        setEditForm((prev: any) => ({ ...prev, fotoKades: base64 }));
       });
       e.target.value = '';
     }
   };
 
-  const handleStatChange = (id, field, value) => {
-    setEditForm((prev) => ({
+  const handleStatChange = (id: any, field: any, value: any) => {
+    setEditForm((prev: any) => ({
       ...prev,
-      stats: prev.stats.map((s) => s.id === id ? { ...s, [field]: value } : s)
+      stats: prev.stats.map((s: any) => s.id === id ? { ...s, [field]: value } : s)
     }));
   };
 
-  const handleSave = (e) => {
+  const handleSave = (e: any) => {
     e.preventDefault();
     setDataBeranda(editForm);
     setShowEditor(false);
@@ -949,7 +950,11 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, show
                   src={dataBeranda.fotoKades} 
                   alt="Foto Kepala Desa" 
                   className="relative rounded-2xl shadow-xl w-64 h-80 object-cover z-10 border-4 border-white"
-                  onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1552058544-f2b08422138a?w=400&q=80' }}
+                  onError={(e: any) => { 
+                    if (e.target.src !== 'https://images.unsplash.com/photo-1552058544-f2b08422138a?w=400&q=80') {
+                      e.target.src = 'https://images.unsplash.com/photo-1552058544-f2b08422138a?w=400&q=80';
+                    }
+                  }}
                 />
               </div>
             </div>
@@ -976,7 +981,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, show
         
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-8 text-center">
-            {dataBeranda.stats.map((stat) => (
+            {dataBeranda.stats.map((stat: any) => (
               <div key={stat.id} className="p-4 sm:p-6 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.1)] hover:bg-white/10 transition-colors flex flex-col justify-center h-full relative overflow-hidden">
                 <div className="text-3xl sm:text-5xl font-extrabold text-white mb-1 sm:mb-2 drop-shadow-md">{stat.num}</div>
                 <div className="text-emerald-200 font-bold text-xs sm:text-lg tracking-wide">{stat.label}</div>
@@ -1158,7 +1163,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, show
                    <span className="w-6 h-1 bg-emerald-500 rounded-full mr-3"></span> Pengaturan Angka Statistik Dasar
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {editForm.stats.map((stat, index) => (
+                  {editForm.stats.map((stat: any, index: number) => (
                     <div key={stat.id} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col gap-3">
                       <div className="font-bold text-gray-500 text-sm border-b pb-1">Kolom {index + 1}</div>
                       <div>
@@ -1223,28 +1228,28 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, show
 }
 
 // ============== KOMPONEN PROFIL DESA ==============
-function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabId, navigateTo, showConfirm }) {
-  const [activeTabId, setActiveTabId] = useState(initialTabId || daftarProfil[0]?.id);
+function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabId, navigateTo, showConfirm }: any) {
+  const [activeTabId, setActiveTabId] = useState<any>(initialTabId || daftarProfil[0]?.id);
   const [showEditor, setShowEditor] = useState(false);
-  const [editData, setEditData] = useState(null);
+  const [editData, setEditData] = useState<any>(null);
 
   useEffect(() => {
     if (initialTabId) {
       setActiveTabId(initialTabId);
-    } else if (daftarProfil.length > 0 && !daftarProfil.find((p) => p.id === activeTabId)) {
+    } else if (daftarProfil.length > 0 && !daftarProfil.find((p: any) => p.id === activeTabId)) {
       setActiveTabId(daftarProfil[0].id);
     }
   }, [initialTabId, daftarProfil, activeTabId]);
 
-  const activeProfil = daftarProfil.find((p) => p.id === activeTabId);
+  const activeProfil = daftarProfil.find((p: any) => p.id === activeTabId);
 
-  const handleDelete = (id) => {
+  const handleDelete = (id: any) => {
     showConfirm('Yakin ingin menghapus bagian profil ini?', () => {
-      setDaftarProfil(daftarProfil.filter((p) => p.id !== id));
+      setDaftarProfil(daftarProfil.filter((p: any) => p.id !== id));
     });
   };
 
-  const openEditor = (profil = null) => {
+  const openEditor = (profil: any = null) => {
     if (profil) {
       setEditData(profil);
     } else {
@@ -1253,10 +1258,10 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
     setShowEditor(true);
   };
 
-  const handleSave = (e) => {
+  const handleSave = (e: any) => {
     e.preventDefault();
     if (editData.id) {
-      setDaftarProfil(daftarProfil.map((p) => p.id === editData.id ? editData : p));
+      setDaftarProfil(daftarProfil.map((p: any) => p.id === editData.id ? editData : p));
     } else {
       const newProfil = { ...editData, id: Date.now() };
       setDaftarProfil([...daftarProfil, newProfil]);
@@ -1265,17 +1270,17 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
     setShowEditor(false);
   };
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      compressImage(file, 1200, false, (base64) => {
+      compressImage(file, 1200, false, (base64: any) => {
         setEditData({ ...editData, gambar: base64 });
       });
       e.target.value = '';
     }
   };
 
-  const renderIcon = (iconName, className) => {
+  const renderIcon = (iconName: string, className: string) => {
     switch (iconName) {
       case 'Target': return <Target className={className} />;
       case 'Map': return <Map className={className} />;
@@ -1287,7 +1292,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
 
   const isVisiMisi = activeProfil && activeProfil.judul.toLowerCase().includes('visi');
   let visiText = "";
-  let misiList = [];
+  let misiList: string[] = [];
 
   if (isVisiMisi && activeProfil) {
     const text = activeProfil.konten;
@@ -1297,7 +1302,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
         visiText = text.substring(0, misiIndex).replace(/VISI KAMI:/i, '').replace(/"/g, '').trim();
         const rawMisiText = text.substring(misiIndex);
         const cleanMisiText = rawMisiText.replace(/^MISI( DESA)?:\s*/i, '');
-        misiList = cleanMisiText.split('\n').map((m) => m.replace(/^\d+[\.\)]\s*/, '').trim()).filter((m) => m);
+        misiList = cleanMisiText.split('\n').map((m: string) => m.replace(/^\d+[\.\)]\s*/, '').trim()).filter((m: string) => m);
     } else {
         visiText = text;
     }
@@ -1348,7 +1353,11 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                     src={activeProfil.gambar} 
                     alt={activeProfil.judul} 
                     className="w-full h-full object-cover"
-                    onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=1200&q=80' }}
+                    onError={(e: any) => {
+                      if (e.target.src !== 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=1200&q=80') {
+                        e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=1200&q=80';
+                      }
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-gray-900/30 to-transparent"></div>
                   <div className="absolute bottom-0 left-0 p-8 md:p-12 w-full">
@@ -1363,7 +1372,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                 </div>
               )}
 
-              <div className={`p-6 md:p-12 flex-grow flex flex-col ${!activeProfil.gambar && 'pt-16 md:pt-20'}`}>
+              <div className={`p-6 md:p-12 flex-grow flex flex-col ${!activeProfil.gambar ? 'pt-16 md:pt-20' : ''}`}>
                 {!activeProfil.gambar && (
                    <div className="mb-10 text-center">
                      <div className="inline-flex justify-center items-center bg-emerald-100 text-emerald-600 p-4 rounded-2xl mb-6 shadow-sm">
@@ -1525,16 +1534,16 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
 }
 
 // ============== HALAMAN PEMERINTAHAN ==============
-function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPerangkat, daftarLembaga, setDaftarLembaga, showConfirm }) {
+function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPerangkat, daftarLembaga, setDaftarLembaga, showConfirm }: any) {
   const isPerangkat = activeTab === 'perangkat' || !activeTab;
   
   const [showEditorPerangkat, setShowEditorPerangkat] = useState(false);
-  const [editDataPerangkat, setEditDataPerangkat] = useState(null);
+  const [editDataPerangkat, setEditDataPerangkat] = useState<any>(null);
 
   const [showEditorLembaga, setShowEditorLembaga] = useState(false);
-  const [editDataLembaga, setEditDataLembaga] = useState(null);
+  const [editDataLembaga, setEditDataLembaga] = useState<any>(null);
 
-  const getTabTitle = (tabId) => {
+  const getTabTitle = (tabId: string) => {
     switch(tabId) {
       case 'bpd': return 'Badan Permusyawaratan Desa (BPD)';
       case 'pkk': return 'Pemberdayaan Kesejahteraan Keluarga (PKK)';
@@ -1544,7 +1553,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
     }
   };
 
-  const getTabSubtitle = (tabId) => {
+  const getTabSubtitle = (tabId: string) => {
     switch(tabId) {
       case 'bpd': return 'Daftar anggota BPD yang bertugas menyalurkan aspirasi masyarakat.';
       case 'pkk': return 'Tim Penggerak PKK yang berfokus pada pemberdayaan dan kesejahteraan keluarga.';
@@ -1554,60 +1563,60 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
     }
   };
 
-  const handleDeletePerangkat = (id) => {
+  const handleDeletePerangkat = (id: any) => {
     showConfirm('Yakin ingin menghapus perangkat desa ini?', () => {
-      setDaftarPerangkat(daftarPerangkat.filter((p) => p.id !== id));
+      setDaftarPerangkat(daftarPerangkat.filter((p: any) => p.id !== id));
     });
   };
-  const openEditorPerangkat = (perangkat = null) => {
+  const openEditorPerangkat = (perangkat: any = null) => {
     if (perangkat) setEditDataPerangkat(perangkat);
     else setEditDataPerangkat({ id: null, nama: '', jabatan: '', foto: '' });
     setShowEditorPerangkat(true);
   };
-  const handleSavePerangkat = (e) => {
+  const handleSavePerangkat = (e: any) => {
     e.preventDefault();
     if (editDataPerangkat.id) {
-      setDaftarPerangkat(daftarPerangkat.map((p) => p.id === editDataPerangkat.id ? editDataPerangkat : p));
+      setDaftarPerangkat(daftarPerangkat.map((p: any) => p.id === editDataPerangkat.id ? editDataPerangkat : p));
     } else {
       setDaftarPerangkat([...daftarPerangkat, { ...editDataPerangkat, id: Date.now() }]);
     }
     setShowEditorPerangkat(false);
   };
-  const handleImageUploadPerangkat = (e) => {
+  const handleImageUploadPerangkat = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      compressImage(file, 600, false, (base64) => {
+      compressImage(file, 600, false, (base64: any) => {
         setEditDataPerangkat({ ...editDataPerangkat, foto: base64 });
       });
       e.target.value = '';
     }
   };
 
-  const filteredLembaga = daftarLembaga.filter((l) => l.kategori === activeTab);
+  const filteredLembaga = daftarLembaga.filter((l: any) => l.kategori === activeTab);
   
-  const handleDeleteLembaga = (id) => {
+  const handleDeleteLembaga = (id: any) => {
     showConfirm('Yakin ingin menghapus data ini?', () => {
-      setDaftarLembaga(daftarLembaga.filter((l) => l.id !== id));
+      setDaftarLembaga(daftarLembaga.filter((l: any) => l.id !== id));
     });
   };
-  const openEditorLembaga = (lembaga = null) => {
+  const openEditorLembaga = (lembaga: any = null) => {
     if (lembaga) setEditDataLembaga(lembaga);
     else setEditDataLembaga({ id: null, kategori: activeTab, nama: '', jabatan: '', jenisKelamin: 'Laki-laki', umur: '', foto: '' });
     setShowEditorLembaga(true);
   };
-  const handleSaveLembaga = (e) => {
+  const handleSaveLembaga = (e: any) => {
     e.preventDefault();
     if (editDataLembaga.id) {
-      setDaftarLembaga(daftarLembaga.map((l) => l.id === editDataLembaga.id ? editDataLembaga : l));
+      setDaftarLembaga(daftarLembaga.map((l: any) => l.id === editDataLembaga.id ? editDataLembaga : l));
     } else {
       setDaftarLembaga([...daftarLembaga, { ...editDataLembaga, id: Date.now() }]);
     }
     setShowEditorLembaga(false);
   };
-  const handleImageUploadLembaga = (e) => {
+  const handleImageUploadLembaga = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      compressImage(file, 400, false, (base64) => {
+      compressImage(file, 400, false, (base64: any) => {
         setEditDataLembaga({ ...editDataLembaga, foto: base64 });
       });
       e.target.value = '';
@@ -1650,7 +1659,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                  <div className="col-span-full text-center text-gray-500 py-20 bg-white rounded-3xl border border-dashed border-gray-300 font-medium text-lg">Belum ada data perangkat desa.</div>
               )}
 
-              {daftarPerangkat.map((p) => (
+              {daftarPerangkat.map((p: any) => (
                 <div key={p.id} className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden border border-gray-100 group relative">
                   {isAdmin && (
                     <div className="absolute top-4 right-4 z-20 flex gap-2">
@@ -1667,7 +1676,11 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                       src={p.foto} 
                       alt={p.nama} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&q=80' }} 
+                      onError={(e: any) => {
+                        if (e.target.src !== 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&q=80') {
+                          e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&q=80';
+                        }
+                      }} 
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </div>
@@ -1715,7 +1728,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {filteredLembaga.map((item, index) => (
+                      {filteredLembaga.map((item: any, index: number) => (
                         <tr key={item.id} className="hover:bg-gray-50 transition-colors">
                           <td className="px-6 py-4 font-bold text-gray-500">{index + 1}</td>
                           <td className="px-6 py-4">
@@ -1723,7 +1736,11 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                               src={item.foto || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=150&q=80'} 
                               alt={item.nama} 
                               className="w-14 h-14 rounded-xl object-cover shadow-sm border border-gray-200 bg-white"
-                              onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=150&q=80' }}
+                              onError={(e: any) => { 
+                                if (e.target.src !== 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=150&q=80') {
+                                  e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=150&q=80';
+                                }
+                              }}
                             />
                           </td>
                           <td className="px-6 py-4 font-extrabold text-gray-900 text-base">{item.nama}</td>
@@ -1926,18 +1943,18 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
   );
 }
 
-function HalamanBerita({ isAdmin, daftarBerita, setDaftarBerita, showConfirm }) {
+function HalamanBerita({ isAdmin, daftarBerita, setDaftarBerita, showConfirm }: any) {
   const [showEditor, setShowEditor] = useState(false);
-  const [editData, setEditData] = useState(null);
-  const [selectedBerita, setSelectedBerita] = useState(null);
+  const [editData, setEditData] = useState<any>(null);
+  const [selectedBerita, setSelectedBerita] = useState<any>(null);
 
-  const handleDelete = (id) => {
+  const handleDelete = (id: any) => {
     showConfirm('Yakin ingin menghapus berita ini?', () => {
-      setDaftarBerita(daftarBerita.filter((b) => b.id !== id));
+      setDaftarBerita(daftarBerita.filter((b: any) => b.id !== id));
     });
   };
 
-  const openEditor = (berita = null) => {
+  const openEditor = (berita: any = null) => {
     if (berita) {
       setEditData(berita);
     } else {
@@ -1946,10 +1963,10 @@ function HalamanBerita({ isAdmin, daftarBerita, setDaftarBerita, showConfirm }) 
     setShowEditor(true);
   };
 
-  const handleSave = (e) => {
+  const handleSave = (e: any) => {
     e.preventDefault();
     if (editData.id) {
-      setDaftarBerita(daftarBerita.map((b) => b.id === editData.id ? editData : b));
+      setDaftarBerita(daftarBerita.map((b: any) => b.id === editData.id ? editData : b));
       if (selectedBerita && selectedBerita.id === editData.id) {
         setSelectedBerita(editData);
       }
@@ -1960,10 +1977,10 @@ function HalamanBerita({ isAdmin, daftarBerita, setDaftarBerita, showConfirm }) 
     setShowEditor(false);
   };
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      compressImage(file, 800, false, (base64) => {
+      compressImage(file, 800, false, (base64: any) => {
         setEditData({ ...editData, gambar: base64 });
       });
       e.target.value = '';
@@ -1990,7 +2007,11 @@ function HalamanBerita({ isAdmin, daftarBerita, setDaftarBerita, showConfirm }) 
                  src={selectedBerita.gambar} 
                  alt={selectedBerita.judul} 
                  className="w-full h-full object-cover"
-                 onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=1200&q=80' }}
+                 onError={(e: any) => { 
+                   if (e.target.src !== 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=1200&q=80') {
+                     e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=1200&q=80';
+                   }
+                 }}
                />
             </div>
             
@@ -2038,7 +2059,7 @@ function HalamanBerita({ isAdmin, daftarBerita, setDaftarBerita, showConfirm }) 
                  <div className="col-span-full text-center text-gray-500 py-20 bg-white rounded-3xl border border-dashed border-gray-300 font-medium text-lg">Belum ada berita yang diterbitkan.</div>
               )}
 
-              {daftarBerita.map((berita) => (
+              {daftarBerita.map((berita: any) => (
                 <div key={berita.id} className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col relative border border-gray-100 group overflow-hidden">
                   {isAdmin && (
                     <div className="absolute top-4 right-4 z-20 flex gap-2">
@@ -2056,7 +2077,11 @@ function HalamanBerita({ isAdmin, daftarBerita, setDaftarBerita, showConfirm }) 
                       src={berita.gambar} 
                       alt={berita.judul} 
                       className="w-full h-full object-cover transition duration-700 group-hover:scale-110"
-                      onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&q=80' }}
+                      onError={(e: any) => { 
+                        if (e.target.src !== 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&q=80') {
+                          e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&q=80';
+                        }
+                      }}
                     />
                     <div className="absolute top-4 left-4 bg-white/90 backdrop-blur text-emerald-800 text-xs font-extrabold px-4 py-1.5 rounded-full shadow-sm border border-emerald-100">
                       {berita.kategori}
@@ -2274,7 +2299,7 @@ function HalamanKontak() {
 
 /* ================= Helper Components ================= */
 
-function NavButton({ children, active, onClick, icon }) {
+function NavButton({ children, active, onClick, icon }: any) {
   return (
     <button
       onClick={onClick}
@@ -2290,7 +2315,7 @@ function NavButton({ children, active, onClick, icon }) {
   );
 }
 
-function MobileNavButton({ children, active, onClick }) {
+function MobileNavButton({ children, active, onClick }: any) {
   return (
     <button
       onClick={onClick}
