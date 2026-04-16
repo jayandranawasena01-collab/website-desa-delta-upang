@@ -665,7 +665,7 @@ export default function App() {
                   <div className="bg-white/5 p-2 rounded-lg group-hover:bg-emerald-900/50 transition mr-4">
                     <Mail className="w-5 h-5 text-emerald-400" />
                   </div>
-                  <span>pemdes@deltaupang.desa.id</span>
+                  <span>deltaupang12@gmail.com</span>
                 </li>
               </ul>
             </div>
@@ -2172,7 +2172,7 @@ function HalamanKontak() {
                   </div>
                   <div className="pt-1">
                     <h4 className="font-extrabold text-gray-900 text-xl">Email</h4>
-                    <p className="text-gray-600 mt-2 text-lg font-medium">pemdes@deltaupang.desa.id</p>
+                    <p className="text-gray-600 mt-2 text-lg font-medium">deltaupang12@gmail.com</p>
                   </div>
                 </div>
               </div>
