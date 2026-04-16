@@ -6,21 +6,29 @@ import {
   BookOpen, Target, Map, Building2, ChevronDown
 } from 'lucide-react';
 
+// ================= FIREBASE CLOUD STORAGE SETUP =================
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, doc, setDoc, onSnapshot, collection } from 'firebase/firestore';
+
+const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'desa-delta-upang';
+
 // ================= FUNGSI KOMPRESI GAMBAR OTOMATIS =================
-// Fungsi ini mencegah memori browser penuh (Blank Screen) dengan cara 
-// mengecilkan ukuran gambar jauh lebih agresif sebelum disimpan ke LocalStorage
-const compressImage = (file: File, maxWidth: number, isLogo: boolean, callback: (base64: string) => void) => {
+const compressImage = (file, maxWidth, isLogo, callback) => {
   const reader = new FileReader();
   reader.readAsDataURL(file);
   reader.onload = (event) => {
     const img = new Image();
-    img.src = event.target?.result as string;
+    img.src = event.target.result;
     img.onload = () => {
       const canvas = document.createElement('canvas');
       let width = img.width;
       let height = img.height;
 
-      // Mengecilkan dimensi gambar secara ketat agar size base64 menjadi sangat kecil
       if (width > maxWidth) {
         height = Math.round((height * maxWidth) / width);
         width = maxWidth;
@@ -31,19 +39,18 @@ const compressImage = (file: File, maxWidth: number, isLogo: boolean, callback: 
       const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.drawImage(img, 0, 0, width, height);
-        // Logo menggunakan PNG agar transparan, gambar biasa menggunakan WebP/JPEG dengan kualitas rendah 0.5 (50%)
         const format = isLogo ? 'image/png' : 'image/jpeg';
         const quality = isLogo ? undefined : 0.5;
         const compressedBase64 = canvas.toDataURL(format, quality);
         callback(compressedBase64);
       } else {
-        callback(img.src); // Fallback jika gagal compress
+        callback(img.src);
       }
     };
   };
 };
 
-// Data awal berita
+// ================= DATA AWAL DEFAULT =================
 const initialBerita = [
   {
     id: 1,
@@ -71,7 +78,6 @@ const initialBerita = [
   }
 ];
 
-// Data awal perangkat desa (Tampilan Card)
 const initialPerangkat = [
   { id: 1, nama: "Zaenal Efendi, S.IP", jabatan: "Kepala Desa", foto: "https://lh3.googleusercontent.com/d/1L5Y15w_obbihHFz4rUMrOAci5V7TtAIz" },
   { id: 2, nama: "Gunarjo, S.Pd.", jabatan: "Sekretaris Desa", foto: "https://lh3.googleusercontent.com/d/1X-AHk2zbETCD85uTxPT0PCaa3LMVyttE" },
@@ -81,7 +87,6 @@ const initialPerangkat = [
   { id: 6, nama: "Herman Pelani", jabatan: "Kasi Kesejahteraan", foto: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
 ];
 
-// Data awal lembaga pemerintahan desa lainnya (Tampilan Tabel)
 const initialLembaga = [
   { id: 1, kategori: 'bpd', nama: 'Suryadi, S.H.', jabatan: 'Ketua BPD', jenisKelamin: 'Laki-laki', umur: 45, foto: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80' },
   { id: 2, kategori: 'pkk', nama: 'Ibu Ratna', jabatan: 'Ketua Tim Penggerak PKK', jenisKelamin: 'Perempuan', umur: 42, foto: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80' },
@@ -89,7 +94,6 @@ const initialLembaga = [
   { id: 4, kategori: 'rt', nama: 'Suharto', jabatan: 'Ketua RT 01', jenisKelamin: 'Laki-laki', umur: 48, foto: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80' }
 ];
 
-// Data awal profil desa
 const initialProfil = [
   {
     id: 1,
@@ -121,11 +125,10 @@ const initialProfil = [
   }
 ];
 
-// Data awal konten beranda
 const initialBeranda = {
   heroBg: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
-  logoHero: "", // State untuk Logo Hero (Atas)
-  headerLogo: "", // State untuk Logo di Header (Kiri Atas)
+  logoHero: "", 
+  headerLogo: "", 
   namaDesa: "Delta Upang",
   deskripsiDesa: "Kecamatan Makarti Jaya, Kabupaten Banyuasin \nProvinsi Sumatera Selatan",
   fotoKades: "https://lh3.googleusercontent.com/d/1L5Y15w_obbihHFz4rUMrOAci5V7TtAIz",
@@ -141,12 +144,13 @@ const initialBeranda = {
 };
 
 export default function App() {
+  const [user, setUser] = useState(null);
   const [currentPage, setCurrentPage] = useState('beranda');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // State Active Tabs
-  const [activeProfilTab, setActiveProfilTab] = useState<number | null>(null);
-  const [activePemerintahTab, setActivePemerintahTab] = useState<string>('perangkat');
+  const [activeProfilTab, setActiveProfilTab] = useState(null);
+  const [activePemerintahTab, setActivePemerintahTab] = useState('perangkat');
   
   // States untuk mengatur dropdown
   const [isDesktopProfilOpen, setIsDesktopProfilOpen] = useState(false);
@@ -155,52 +159,97 @@ export default function App() {
   const [isMobilePemerintahOpen, setIsMobilePemerintahOpen] = useState(false);
   
   // State Admin
-  const [isAdmin, setIsAdmin] = useState(() => {
-    return localStorage.getItem('desa_admin_status') === 'true';
-  });
+  const [isAdmin, setIsAdmin] = useState(() => localStorage.getItem('desa_admin_status') === 'true');
   const [showLoginModal, setShowLoginModal] = useState(false);
-  
-  // States Data (Diperbarui versi kuncinya agar me-reset data yang menyebabkan blank screen)
-  const [daftarBerita, setDaftarBerita] = useState(() => {
-    const saved = localStorage.getItem('desa_data_berita_v4');
-    return saved ? JSON.parse(saved) : initialBerita;
-  });
-  
-  const [daftarPerangkat, setDaftarPerangkat] = useState(() => {
-    const saved = localStorage.getItem('desa_data_perangkat_v4');
-    return saved ? JSON.parse(saved) : initialPerangkat;
-  });
 
-  const [daftarLembaga, setDaftarLembaga] = useState(() => {
-    const saved = localStorage.getItem('desa_data_lembaga_v3');
-    return saved ? JSON.parse(saved) : initialLembaga;
-  });
-
-  const [daftarProfil, setDaftarProfil] = useState(() => {
-    const saved = localStorage.getItem('desa_data_profil_v3');
-    return saved ? JSON.parse(saved) : initialProfil;
-  });
+  // Custom Modal Alert/Confirm
+  const [dialog, setDialog] = useState({ isOpen: false, type: 'alert', message: '', onConfirm: null });
+  const showAlert = (message) => setDialog({ isOpen: true, type: 'alert', message, onConfirm: null });
+  const showConfirm = (message, onConfirm) => setDialog({ isOpen: true, type: 'confirm', message, onConfirm });
   
-  const [dataBeranda, setDataBeranda] = useState(() => {
-    const saved = localStorage.getItem('desa_data_beranda_v9');
-    return saved ? JSON.parse(saved) : initialBeranda;
-  });
+  // States Data (Diinisialisasi dengan data awal sebelum load dari cloud)
+  const [daftarBerita, setDaftarBerita] = useState(initialBerita);
+  const [daftarPerangkat, setDaftarPerangkat] = useState(initialPerangkat);
+  const [daftarLembaga, setDaftarLembaga] = useState(initialLembaga);
+  const [daftarProfil, setDaftarProfil] = useState(initialProfil);
+  const [dataBeranda, setDataBeranda] = useState(initialBeranda);
 
-  // SKRIP SAPU JAGAT (AUTO-CLEANUP): Menghapus file sampah memori browser versi lama yang bikin memori penuh
+  // ================= INIT FIREBASE & FETCH DATA CLOUD =================
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+      } catch (error) {
+        console.error("Auth error", error);
+      }
+    };
+    initAuth();
+    const unsubscribe = onAuthStateChanged(auth, setUser);
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+
+    // Mendengarkan perubahan data secara realtime dari Cloud Firestore
+    const unsubBeranda = onSnapshot(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_beranda'), 'main'), (snap) => {
+      if(snap.exists()) setDataBeranda(snap.data().value);
+    }, console.error);
+
+    const unsubBerita = onSnapshot(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_berita'), 'main'), (snap) => {
+      if(snap.exists()) setDaftarBerita(snap.data().value);
+    }, console.error);
+
+    const unsubPerangkat = onSnapshot(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_perangkat'), 'main'), (snap) => {
+      if(snap.exists()) setDaftarPerangkat(snap.data().value);
+    }, console.error);
+
+    const unsubLembaga = onSnapshot(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_lembaga'), 'main'), (snap) => {
+      if(snap.exists()) setDaftarLembaga(snap.data().value);
+    }, console.error);
+
+    const unsubProfil = onSnapshot(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_profil'), 'main'), (snap) => {
+      if(snap.exists()) setDaftarProfil(snap.data().value);
+    }, console.error);
+
+    return () => {
+      unsubBeranda(); unsubBerita(); unsubPerangkat(); unsubLembaga(); unsubProfil();
+    };
+  }, [user]);
+
+  // Fungsi Update Data ke Firestore
+  const updateBeranda = async (newData) => {
+    setDataBeranda(newData);
+    if(user) await setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_beranda'), 'main'), { value: newData });
+  };
+  const updateBerita = async (newData) => {
+    setDaftarBerita(newData);
+    if(user) await setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_berita'), 'main'), { value: newData });
+  };
+  const updatePerangkat = async (newData) => {
+    setDaftarPerangkat(newData);
+    if(user) await setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_perangkat'), 'main'), { value: newData });
+  };
+  const updateLembaga = async (newData) => {
+    setDaftarLembaga(newData);
+    if(user) await setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_lembaga'), 'main'), { value: newData });
+  };
+  const updateProfil = async (newData) => {
+    setDaftarProfil(newData);
+    if(user) await setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_profil'), 'main'), { value: newData });
+  };
+
+  // Bersihkan cache sampah lokal peninggalan versi lama
   useEffect(() => {
     try {
-      const currentKeys = [
-        'desa_admin_status',
-        'desa_data_berita_v4',
-        'desa_data_perangkat_v4',
-        'desa_data_lembaga_v3',
-        'desa_data_profil_v3',
-        'desa_data_beranda_v9'
-      ];
       const keysToRemove = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && key.startsWith('desa_') && !currentKeys.includes(key)) {
+        if (key && key.startsWith('desa_') && key !== 'desa_admin_status') {
           keysToRemove.push(key);
         }
       }
@@ -220,51 +269,19 @@ export default function App() {
     return () => document.removeEventListener('click', handleOutsideClick);
   }, []);
 
-  // Saat halaman atau tab berubah, otomatis scroll ke atas agar informasi yang dipilih langsung terlihat
   useEffect(() => { 
     window.scrollTo(0, 0); 
   }, [currentPage, activeProfilTab, activePemerintahTab]);
 
-  // Efek Penyimpanan ke LocalStorage dengan Try...Catch yang lebih aman
   useEffect(() => { 
     try { localStorage.setItem('desa_admin_status', isAdmin.toString()); } catch(e){} 
   }, [isAdmin]);
-  
-  useEffect(() => { 
-    try { localStorage.setItem('desa_data_berita_v4', JSON.stringify(daftarBerita)); } catch(e){ console.error(e); } 
-  }, [daftarBerita]);
-  
-  useEffect(() => { 
-    try { localStorage.setItem('desa_data_perangkat_v4', JSON.stringify(daftarPerangkat)); } catch(e){ console.error(e); } 
-  }, [daftarPerangkat]);
-  
-  useEffect(() => { 
-    try { localStorage.setItem('desa_data_lembaga_v3', JSON.stringify(daftarLembaga)); } catch(e){ console.error(e); } 
-  }, [daftarLembaga]);
-  
-  useEffect(() => { 
-    try { localStorage.setItem('desa_data_profil_v3', JSON.stringify(daftarProfil)); } catch(e){ console.error(e); } 
-  }, [daftarProfil]);
-  
-  useEffect(() => { 
-    try { 
-      localStorage.setItem('desa_data_beranda_v9', JSON.stringify(dataBeranda)); 
-    } catch (e) {
-      alert("Gagal menyimpan perubahan: Memori browser masih penuh. Harap hapus cache secara manual.");
-    }
-  }, [dataBeranda]);
 
-  const navigateTo = (page: string, tabId: any = null) => {
+  const navigateTo = (page, tabId = null) => {
     setCurrentPage(page);
-    
-    if (page === 'profil' && tabId !== null) {
-      setActiveProfilTab(tabId);
-    }
-    if (page === 'pemerintah' && tabId !== null) {
-      setActivePemerintahTab(tabId);
-    }
+    if (page === 'profil' && tabId !== null) setActiveProfilTab(tabId);
+    if (page === 'pemerintah' && tabId !== null) setActivePemerintahTab(tabId);
 
-    // Menutup menu mobile & dropdown saat pindah halaman atau selesai memilih
     setIsMobileMenuOpen(false);
     setIsMobileProfilOpen(false);
     setIsDesktopProfilOpen(false);
@@ -272,7 +289,7 @@ export default function App() {
     setIsDesktopPemerintahOpen(false);
   };
 
-  const handleLogin = (e: any) => {
+  const handleLogin = (e) => {
     e.preventDefault();
     const username = e.target.username.value;
     const password = e.target.password.value;
@@ -281,24 +298,14 @@ export default function App() {
       setIsAdmin(true);
       setShowLoginModal(false);
     } else {
-      alert('Username atau password salah!');
+      showAlert('Username atau password salah!');
     }
   };
 
   const handleLogout = () => {
-    if(window.confirm('Yakin ingin keluar dari sesi Admin?')) {
-      setIsAdmin(false);
-    }
+    showConfirm('Yakin ingin keluar dari sesi Admin?', () => setIsAdmin(false));
   };
 
-  const handleResetCache = () => {
-    if(window.confirm('Yakin ingin menghapus cache lokal? Semua data di perangkat ini akan dikembalikan ke versi awal.')) {
-      localStorage.clear();
-      window.location.reload();
-    }
-  };
-
-  // Daftar Menu Dropdown Pemerintah
   const menuPemerintah = [
     { id: 'perangkat', label: 'Perangkat Desa' },
     { id: 'bpd', label: 'BPD' },
@@ -310,6 +317,33 @@ export default function App() {
   return (
     <div className="min-h-screen flex flex-col font-sans bg-gray-50 text-gray-800 relative selection:bg-emerald-200 selection:text-emerald-900">
       
+      {/* Dialog Kustom (Pengganti Alert & Confirm) */}
+      {dialog.isOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 animate-in zoom-in-95 border border-emerald-100">
+            <h3 className="text-xl font-extrabold text-gray-900 mb-4 flex items-center">
+              <Info className="w-6 h-6 mr-2 text-emerald-600"/>
+              {dialog.type === 'confirm' ? 'Konfirmasi' : 'Pemberitahuan'}
+            </h3>
+            <p className="text-gray-600 mb-8 font-medium">{dialog.message}</p>
+            <div className="flex justify-end gap-3">
+              {dialog.type === 'confirm' && (
+                <button onClick={() => setDialog({ isOpen: false, type: 'alert', message: '', onConfirm: null })} className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition">Batal</button>
+              )}
+              <button
+                onClick={() => {
+                  if (dialog.onConfirm) dialog.onConfirm();
+                  setDialog({ isOpen: false, type: 'alert', message: '', onConfirm: null });
+                }}
+                className={`px-5 py-2.5 text-white rounded-xl font-bold shadow-lg transition ${dialog.type === 'confirm' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-emerald-600 hover:bg-emerald-700'}`}
+              >
+                {dialog.type === 'confirm' ? 'Ya, Lanjutkan' : 'Tutup'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Styles for Animations */}
       <style>
         {`
@@ -385,7 +419,7 @@ export default function App() {
                   isDesktopProfilOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'
                 }`}>
                   <div className="flex flex-col py-1.5">
-                    {daftarProfil.map((profil: any) => (
+                    {daftarProfil.map((profil) => (
                       <button
                         key={profil.id}
                         onClick={(e) => {
@@ -435,7 +469,7 @@ export default function App() {
                   isDesktopPemerintahOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'
                 }`}>
                   <div className="flex flex-col py-1.5">
-                    {menuPemerintah.map((menu: any) => (
+                    {menuPemerintah.map((menu) => (
                       <button
                         key={menu.id}
                         onClick={(e) => {
@@ -465,9 +499,6 @@ export default function App() {
               <div className="pl-2 ml-1 border-l border-white/20 flex items-center gap-2">
                 {isAdmin ? (
                   <>
-                    <button onClick={handleResetCache} className="flex items-center text-sm font-bold bg-amber-500 hover:bg-amber-600 text-white px-3 py-2.5 rounded-xl transition shadow-[0_0_15px_rgba(245,158,11,0.4)]" title="Hapus Cache Data">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
                     <button onClick={handleLogout} className="flex items-center text-sm font-bold bg-rose-500 hover:bg-rose-600 text-white px-5 py-2.5 rounded-xl transition shadow-[0_0_15px_rgba(244,63,94,0.4)]">
                       <LogOut className="w-4 h-4 mr-2" /> Keluar
                     </button>
@@ -484,9 +515,6 @@ export default function App() {
             <div className="lg:hidden flex items-center gap-2">
                {isAdmin ? (
                   <>
-                    <button onClick={handleResetCache} className="p-2.5 bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.4)] rounded-xl text-white" title="Hapus Cache">
-                      <Trash2 className="w-5 h-5" />
-                    </button>
                     <button onClick={handleLogout} className="p-2.5 bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.4)] rounded-xl text-white" title="Keluar">
                       <LogOut className="w-5 h-5" />
                     </button>
@@ -530,7 +558,7 @@ export default function App() {
                 </button>
                 {isMobileProfilOpen && (
                   <div className="flex flex-col bg-emerald-900/50 rounded-xl mt-2 mx-2 overflow-hidden border border-white/5 animate-in slide-in-from-top-2 duration-200">
-                    {daftarProfil.map((profil: any) => (
+                    {daftarProfil.map((profil) => (
                       <button
                         key={profil.id}
                         onClick={() => navigateTo('profil', profil.id)}
@@ -565,7 +593,7 @@ export default function App() {
                 </button>
                 {isMobilePemerintahOpen && (
                   <div className="flex flex-col bg-emerald-900/50 rounded-xl mt-2 mx-2 overflow-hidden border border-white/5 animate-in slide-in-from-top-2 duration-200">
-                    {menuPemerintah.map((menu: any) => (
+                    {menuPemerintah.map((menu) => (
                       <button
                         key={menu.id}
                         onClick={() => navigateTo('pemerintah', menu.id)}
@@ -592,7 +620,7 @@ export default function App() {
       {/* Pesan Alert Login Admin Aktif */}
       {isAdmin && (
         <div className="bg-emerald-100 text-emerald-800 px-4 py-2 text-sm font-medium text-center shadow-inner flex items-center justify-center gap-2 z-30 relative">
-           <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Mode Admin Aktif: Anda dapat mengedit konten halaman ini.
+           <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Mode Admin Aktif: Anda dapat mengedit konten halaman ini dan akan terlihat oleh semua orang.
         </div>
       )}
 
@@ -603,16 +631,18 @@ export default function App() {
             navigateTo={navigateTo} 
             isAdmin={isAdmin} 
             dataBeranda={dataBeranda} 
-            setDataBeranda={setDataBeranda} 
+            setDataBeranda={updateBeranda} 
+            showAlert={showAlert}
           />
         )}
         {currentPage === 'profil' && (
           <HalamanProfilDesa 
             isAdmin={isAdmin}
             daftarProfil={daftarProfil}
-            setDaftarProfil={setDaftarProfil}
+            setDaftarProfil={updateProfil}
             initialTabId={activeProfilTab}
             navigateTo={navigateTo}
+            showConfirm={showConfirm}
           />
         )}
         {currentPage === 'pemerintah' && (
@@ -620,16 +650,18 @@ export default function App() {
             isAdmin={isAdmin}
             activeTab={activePemerintahTab}
             daftarPerangkat={daftarPerangkat}
-            setDaftarPerangkat={setDaftarPerangkat}
+            setDaftarPerangkat={updatePerangkat}
             daftarLembaga={daftarLembaga}
-            setDaftarLembaga={setDaftarLembaga}
+            setDaftarLembaga={updateLembaga}
+            showConfirm={showConfirm}
           />
         )}
         {currentPage === 'berita' && (
           <HalamanBerita 
             isAdmin={isAdmin} 
             daftarBerita={daftarBerita} 
-            setDaftarBerita={setDaftarBerita} 
+            setDaftarBerita={updateBerita}
+            showConfirm={showConfirm}
           />
         )}
         {currentPage === 'kontak' && <HalamanKontak />}
@@ -756,7 +788,7 @@ export default function App() {
               </button>
               <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100 mt-4">
                 <p className="text-xs text-emerald-800 text-center font-medium">
-                  Peringatan! :<br/>Jangan berikan informasi apapun mengenai username dan password kepada pihak yang tidak bertanggung jawab<b></b><b></b>
+                  Peringatan! :<br/>Jangan berikan informasi apapun mengenai username dan password kepada pihak yang tidak bertanggung jawab
                 </p>
               </div>
             </form>
@@ -769,61 +801,62 @@ export default function App() {
 
 /* ================= Komponen Halaman ================= */
 
-function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: any) {
+function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, showAlert }) {
   const [showEditor, setShowEditor] = useState(false);
   const [editForm, setEditForm] = useState(dataBeranda);
 
-  const handleHeroBgChange = (e: any) => {
+  const handleHeroBgChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       compressImage(file, 1200, false, (base64) => {
-        setEditForm((prev: any) => ({ ...prev, heroBg: base64 }));
+        setEditForm((prev) => ({ ...prev, heroBg: base64 }));
       });
       e.target.value = '';
     }
   };
 
-  const handleLogoHeroChange = (e: any) => {
+  const handleLogoHeroChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       compressImage(file, 400, true, (base64) => {
-        setEditForm((prev: any) => ({ ...prev, logoHero: base64 }));
+        setEditForm((prev) => ({ ...prev, logoHero: base64 }));
       });
       e.target.value = '';
     }
   };
 
-  const handleHeaderLogoChange = (e: any) => {
+  const handleHeaderLogoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       compressImage(file, 300, true, (base64) => {
-        setEditForm((prev: any) => ({ ...prev, headerLogo: base64 }));
+        setEditForm((prev) => ({ ...prev, headerLogo: base64 }));
       });
       e.target.value = '';
     }
   };
 
-  const handleFotoKadesUpload = (e: any) => {
+  const handleFotoKadesUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
       compressImage(file, 400, false, (base64) => {
-        setEditForm((prev: any) => ({ ...prev, fotoKades: base64 }));
+        setEditForm((prev) => ({ ...prev, fotoKades: base64 }));
       });
       e.target.value = '';
     }
   };
 
-  const handleStatChange = (id: any, field: string, value: any) => {
-    setEditForm((prev: any) => ({
+  const handleStatChange = (id, field, value) => {
+    setEditForm((prev) => ({
       ...prev,
-      stats: prev.stats.map((s: any) => s.id === id ? { ...s, [field]: value } : s)
+      stats: prev.stats.map((s) => s.id === id ? { ...s, [field]: value } : s)
     }));
   };
 
-  const handleSave = (e: any) => {
+  const handleSave = (e) => {
     e.preventDefault();
     setDataBeranda(editForm);
     setShowEditor(false);
+    showAlert("Perubahan Beranda berhasil disimpan ke server.");
   };
 
   return (
@@ -916,7 +949,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
                   src={dataBeranda.fotoKades} 
                   alt="Foto Kepala Desa" 
                   className="relative rounded-2xl shadow-xl w-64 h-80 object-cover z-10 border-4 border-white"
-                  onError={(e: any) => { e.target.src = 'https://images.unsplash.com/photo-1552058544-f2b08422138a?w=400&q=80' }}
+                  onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1552058544-f2b08422138a?w=400&q=80' }}
                 />
               </div>
             </div>
@@ -943,9 +976,8 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
         
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-8 text-center">
-            {dataBeranda.stats.map((stat: any) => (
+            {dataBeranda.stats.map((stat) => (
               <div key={stat.id} className="p-4 sm:p-6 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.1)] hover:bg-white/10 transition-colors flex flex-col justify-center h-full relative overflow-hidden">
-                {/* Disesuaikan font responsif agar tidak tumpah di HP */}
                 <div className="text-3xl sm:text-5xl font-extrabold text-white mb-1 sm:mb-2 drop-shadow-md">{stat.num}</div>
                 <div className="text-emerald-200 font-bold text-xs sm:text-lg tracking-wide">{stat.label}</div>
 
@@ -979,7 +1011,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
                 </div>
                 Pengaturan Konten Beranda
               </h3>
-              <button onClick={() => setShowEditor(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
+              <button type="button" onClick={() => setShowEditor(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -1126,7 +1158,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
                    <span className="w-6 h-1 bg-emerald-500 rounded-full mr-3"></span> Pengaturan Angka Statistik Dasar
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {editForm.stats.map((stat: any, index: number) => (
+                  {editForm.stats.map((stat, index) => (
                     <div key={stat.id} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col gap-3">
                       <div className="font-bold text-gray-500 text-sm border-b pb-1">Kolom {index + 1}</div>
                       <div>
@@ -1191,29 +1223,28 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda }: an
 }
 
 // ============== KOMPONEN PROFIL DESA ==============
-function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabId, navigateTo }: any) {
+function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabId, navigateTo, showConfirm }) {
   const [activeTabId, setActiveTabId] = useState(initialTabId || daftarProfil[0]?.id);
   const [showEditor, setShowEditor] = useState(false);
-  const [editData, setEditData] = useState<any>(null);
+  const [editData, setEditData] = useState(null);
 
-  // Pastikan ada tab yang aktif & sinkron dengan klik dari Dropdown Navbar
   useEffect(() => {
     if (initialTabId) {
       setActiveTabId(initialTabId);
-    } else if (daftarProfil.length > 0 && !daftarProfil.find((p: any) => p.id === activeTabId)) {
+    } else if (daftarProfil.length > 0 && !daftarProfil.find((p) => p.id === activeTabId)) {
       setActiveTabId(daftarProfil[0].id);
     }
   }, [initialTabId, daftarProfil, activeTabId]);
 
-  const activeProfil = daftarProfil.find((p: any) => p.id === activeTabId);
+  const activeProfil = daftarProfil.find((p) => p.id === activeTabId);
 
-  const handleDelete = (id: any) => {
-    if (window.confirm('Yakin ingin menghapus bagian profil ini?')) {
-      setDaftarProfil(daftarProfil.filter((p: any) => p.id !== id));
-    }
+  const handleDelete = (id) => {
+    showConfirm('Yakin ingin menghapus bagian profil ini?', () => {
+      setDaftarProfil(daftarProfil.filter((p) => p.id !== id));
+    });
   };
 
-  const openEditor = (profil: any = null) => {
+  const openEditor = (profil = null) => {
     if (profil) {
       setEditData(profil);
     } else {
@@ -1222,10 +1253,10 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
     setShowEditor(true);
   };
 
-  const handleSave = (e: any) => {
+  const handleSave = (e) => {
     e.preventDefault();
     if (editData.id) {
-      setDaftarProfil(daftarProfil.map((p: any) => p.id === editData.id ? editData : p));
+      setDaftarProfil(daftarProfil.map((p) => p.id === editData.id ? editData : p));
     } else {
       const newProfil = { ...editData, id: Date.now() };
       setDaftarProfil([...daftarProfil, newProfil]);
@@ -1234,7 +1265,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
     setShowEditor(false);
   };
 
-  const handleImageUpload = (e: any) => {
+  const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
       compressImage(file, 1200, false, (base64) => {
@@ -1244,7 +1275,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
     }
   };
 
-  const renderIcon = (iconName: string, className: string) => {
+  const renderIcon = (iconName, className) => {
     switch (iconName) {
       case 'Target': return <Target className={className} />;
       case 'Map': return <Map className={className} />;
@@ -1256,7 +1287,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
 
   const isVisiMisi = activeProfil && activeProfil.judul.toLowerCase().includes('visi');
   let visiText = "";
-  let misiList: string[] = [];
+  let misiList = [];
 
   if (isVisiMisi && activeProfil) {
     const text = activeProfil.konten;
@@ -1266,7 +1297,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
         visiText = text.substring(0, misiIndex).replace(/VISI KAMI:/i, '').replace(/"/g, '').trim();
         const rawMisiText = text.substring(misiIndex);
         const cleanMisiText = rawMisiText.replace(/^MISI( DESA)?:\s*/i, '');
-        misiList = cleanMisiText.split('\n').map((m: string) => m.replace(/^\d+[\.\)]\s*/, '').trim()).filter((m: string) => m);
+        misiList = cleanMisiText.split('\n').map((m) => m.replace(/^\d+[\.\)]\s*/, '').trim()).filter((m) => m);
     } else {
         visiText = text;
     }
@@ -1317,7 +1348,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                     src={activeProfil.gambar} 
                     alt={activeProfil.judul} 
                     className="w-full h-full object-cover"
-                    onError={(e: any) => { e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=1200&q=80' }}
+                    onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=1200&q=80' }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-gray-900/30 to-transparent"></div>
                   <div className="absolute bottom-0 left-0 p-8 md:p-12 w-full">
@@ -1358,7 +1389,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-bl-[100px] -z-10"></div>
                         <h3 className="text-2xl md:text-3xl font-extrabold text-emerald-900 mb-8 text-center tracking-widest">MISI DESA</h3>
                         <div className="space-y-5">
-                          {misiList.map((misi: string, index: number) => (
+                          {misiList.map((misi, index) => (
                             <div key={index} className="flex items-start bg-gray-50 hover:bg-emerald-50 p-5 md:p-6 rounded-2xl transition-colors duration-300 border border-gray-100 hover:border-emerald-200">
                               <div className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center font-black text-lg md:text-xl mr-4 md:mr-5 shadow-sm">
                                 {index + 1}
@@ -1406,7 +1437,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                 </div>
                 {editData.id ? 'Edit Bagian Profil' : 'Tambah Bagian Profil Baru'}
               </h3>
-              <button onClick={() => setShowEditor(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
+              <button type="button" onClick={() => setShowEditor(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -1493,19 +1524,17 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
   );
 }
 
-// ============== KOMPONEN BARU: HALAMAN PEMERINTAHAN (GABUNGAN PERANGKAT & LEMBAGA DESA) ==============
-function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPerangkat, daftarLembaga, setDaftarLembaga }: any) {
+// ============== HALAMAN PEMERINTAHAN ==============
+function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPerangkat, daftarLembaga, setDaftarLembaga, showConfirm }) {
   const isPerangkat = activeTab === 'perangkat' || !activeTab;
   
-  // States Khusus Perangkat (Tampilan Card)
   const [showEditorPerangkat, setShowEditorPerangkat] = useState(false);
-  const [editDataPerangkat, setEditDataPerangkat] = useState<any>(null);
+  const [editDataPerangkat, setEditDataPerangkat] = useState(null);
 
-  // States Khusus Lembaga (Tampilan Tabel)
   const [showEditorLembaga, setShowEditorLembaga] = useState(false);
-  const [editDataLembaga, setEditDataLembaga] = useState<any>(null);
+  const [editDataLembaga, setEditDataLembaga] = useState(null);
 
-  const getTabTitle = (tabId: string) => {
+  const getTabTitle = (tabId) => {
     switch(tabId) {
       case 'bpd': return 'Badan Permusyawaratan Desa (BPD)';
       case 'pkk': return 'Pemberdayaan Kesejahteraan Keluarga (PKK)';
@@ -1515,7 +1544,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
     }
   };
 
-  const getTabSubtitle = (tabId: string) => {
+  const getTabSubtitle = (tabId) => {
     switch(tabId) {
       case 'bpd': return 'Daftar anggota BPD yang bertugas menyalurkan aspirasi masyarakat.';
       case 'pkk': return 'Tim Penggerak PKK yang berfokus pada pemberdayaan dan kesejahteraan keluarga.';
@@ -1525,27 +1554,26 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
     }
   };
 
-  /* ==== LOGIKA UNTUK PERANGKAT DESA (CARD) ==== */
-  const handleDeletePerangkat = (id: any) => {
-    if (window.confirm('Yakin ingin menghapus perangkat desa ini?')) {
-      setDaftarPerangkat(daftarPerangkat.filter((p: any) => p.id !== id));
-    }
+  const handleDeletePerangkat = (id) => {
+    showConfirm('Yakin ingin menghapus perangkat desa ini?', () => {
+      setDaftarPerangkat(daftarPerangkat.filter((p) => p.id !== id));
+    });
   };
-  const openEditorPerangkat = (perangkat: any = null) => {
+  const openEditorPerangkat = (perangkat = null) => {
     if (perangkat) setEditDataPerangkat(perangkat);
     else setEditDataPerangkat({ id: null, nama: '', jabatan: '', foto: '' });
     setShowEditorPerangkat(true);
   };
-  const handleSavePerangkat = (e: any) => {
+  const handleSavePerangkat = (e) => {
     e.preventDefault();
     if (editDataPerangkat.id) {
-      setDaftarPerangkat(daftarPerangkat.map((p: any) => p.id === editDataPerangkat.id ? editDataPerangkat : p));
+      setDaftarPerangkat(daftarPerangkat.map((p) => p.id === editDataPerangkat.id ? editDataPerangkat : p));
     } else {
       setDaftarPerangkat([...daftarPerangkat, { ...editDataPerangkat, id: Date.now() }]);
     }
     setShowEditorPerangkat(false);
   };
-  const handleImageUploadPerangkat = (e: any) => {
+  const handleImageUploadPerangkat = (e) => {
     const file = e.target.files[0];
     if (file) {
       compressImage(file, 600, false, (base64) => {
@@ -1555,29 +1583,28 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
     }
   };
 
-  /* ==== LOGIKA UNTUK LEMBAGA (TABEL) ==== */
-  const filteredLembaga = daftarLembaga.filter((l: any) => l.kategori === activeTab);
+  const filteredLembaga = daftarLembaga.filter((l) => l.kategori === activeTab);
   
-  const handleDeleteLembaga = (id: any) => {
-    if (window.confirm('Yakin ingin menghapus data ini?')) {
-      setDaftarLembaga(daftarLembaga.filter((l: any) => l.id !== id));
-    }
+  const handleDeleteLembaga = (id) => {
+    showConfirm('Yakin ingin menghapus data ini?', () => {
+      setDaftarLembaga(daftarLembaga.filter((l) => l.id !== id));
+    });
   };
-  const openEditorLembaga = (lembaga: any = null) => {
+  const openEditorLembaga = (lembaga = null) => {
     if (lembaga) setEditDataLembaga(lembaga);
     else setEditDataLembaga({ id: null, kategori: activeTab, nama: '', jabatan: '', jenisKelamin: 'Laki-laki', umur: '', foto: '' });
     setShowEditorLembaga(true);
   };
-  const handleSaveLembaga = (e: any) => {
+  const handleSaveLembaga = (e) => {
     e.preventDefault();
     if (editDataLembaga.id) {
-      setDaftarLembaga(daftarLembaga.map((l: any) => l.id === editDataLembaga.id ? editDataLembaga : l));
+      setDaftarLembaga(daftarLembaga.map((l) => l.id === editDataLembaga.id ? editDataLembaga : l));
     } else {
       setDaftarLembaga([...daftarLembaga, { ...editDataLembaga, id: Date.now() }]);
     }
     setShowEditorLembaga(false);
   };
-  const handleImageUploadLembaga = (e: any) => {
+  const handleImageUploadLembaga = (e) => {
     const file = e.target.files[0];
     if (file) {
       compressImage(file, 400, false, (base64) => {
@@ -1591,7 +1618,6 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
     <div className="animate-in fade-in zoom-in-95 duration-500 py-16 bg-gray-50 min-h-[70vh]">
       <div className="container mx-auto px-4 lg:px-8 relative">
         
-        {/* Header Bersama */}
         <div className="text-center mb-16">
           <span className="text-emerald-600 font-bold tracking-widest uppercase text-sm mb-2 block">
             Pemerintahan Desa
@@ -1624,7 +1650,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                  <div className="col-span-full text-center text-gray-500 py-20 bg-white rounded-3xl border border-dashed border-gray-300 font-medium text-lg">Belum ada data perangkat desa.</div>
               )}
 
-              {daftarPerangkat.map((p: any) => (
+              {daftarPerangkat.map((p) => (
                 <div key={p.id} className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden border border-gray-100 group relative">
                   {isAdmin && (
                     <div className="absolute top-4 right-4 z-20 flex gap-2">
@@ -1641,7 +1667,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                       src={p.foto} 
                       alt={p.nama} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      onError={(e: any) => { e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&q=80' }} 
+                      onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&q=80' }} 
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </div>
@@ -1689,7 +1715,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {filteredLembaga.map((item: any, index: number) => (
+                      {filteredLembaga.map((item, index) => (
                         <tr key={item.id} className="hover:bg-gray-50 transition-colors">
                           <td className="px-6 py-4 font-bold text-gray-500">{index + 1}</td>
                           <td className="px-6 py-4">
@@ -1697,7 +1723,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                               src={item.foto || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=150&q=80'} 
                               alt={item.nama} 
                               className="w-14 h-14 rounded-xl object-cover shadow-sm border border-gray-200 bg-white"
-                              onError={(e: any) => { e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=150&q=80' }}
+                              onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=150&q=80' }}
                             />
                           </td>
                           <td className="px-6 py-4 font-extrabold text-gray-900 text-base">{item.nama}</td>
@@ -1728,7 +1754,6 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
 
       </div>
 
-      {/* ================= MODAL EDITOR PERANGKAT DESA ================= */}
       {showEditorPerangkat && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-xl w-full p-8 max-h-[90vh] overflow-y-auto border border-emerald-100 animate-in zoom-in-95">
@@ -1739,7 +1764,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                 </div>
                 {editDataPerangkat.id ? 'Edit Perangkat' : 'Tambah Perangkat Baru'}
               </h3>
-              <button onClick={() => setShowEditorPerangkat(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
+              <button type="button" onClick={() => setShowEditorPerangkat(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -1801,7 +1826,6 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
         </div>
       )}
 
-      {/* ================= MODAL EDITOR LEMBAGA DESA (TABEL) ================= */}
       {showEditorLembaga && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto border border-emerald-100 animate-in zoom-in-95">
@@ -1812,7 +1836,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                 </div>
                 {editDataLembaga.id ? 'Edit Data' : 'Tambah Data Baru'}
               </h3>
-              <button onClick={() => setShowEditorLembaga(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
+              <button type="button" onClick={() => setShowEditorLembaga(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -1902,18 +1926,18 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
   );
 }
 
-function HalamanBerita({ isAdmin, daftarBerita, setDaftarBerita }: any) {
+function HalamanBerita({ isAdmin, daftarBerita, setDaftarBerita, showConfirm }) {
   const [showEditor, setShowEditor] = useState(false);
-  const [editData, setEditData] = useState<any>(null);
-  const [selectedBerita, setSelectedBerita] = useState<any>(null);
+  const [editData, setEditData] = useState(null);
+  const [selectedBerita, setSelectedBerita] = useState(null);
 
-  const handleDelete = (id: any) => {
-    if (window.confirm('Yakin ingin menghapus berita ini?')) {
-      setDaftarBerita(daftarBerita.filter((b: any) => b.id !== id));
-    }
+  const handleDelete = (id) => {
+    showConfirm('Yakin ingin menghapus berita ini?', () => {
+      setDaftarBerita(daftarBerita.filter((b) => b.id !== id));
+    });
   };
 
-  const openEditor = (berita: any = null) => {
+  const openEditor = (berita = null) => {
     if (berita) {
       setEditData(berita);
     } else {
@@ -1922,10 +1946,10 @@ function HalamanBerita({ isAdmin, daftarBerita, setDaftarBerita }: any) {
     setShowEditor(true);
   };
 
-  const handleSave = (e: any) => {
+  const handleSave = (e) => {
     e.preventDefault();
     if (editData.id) {
-      setDaftarBerita(daftarBerita.map((b: any) => b.id === editData.id ? editData : b));
+      setDaftarBerita(daftarBerita.map((b) => b.id === editData.id ? editData : b));
       if (selectedBerita && selectedBerita.id === editData.id) {
         setSelectedBerita(editData);
       }
@@ -1936,7 +1960,7 @@ function HalamanBerita({ isAdmin, daftarBerita, setDaftarBerita }: any) {
     setShowEditor(false);
   };
 
-  const handleImageUpload = (e: any) => {
+  const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
       compressImage(file, 800, false, (base64) => {
@@ -1966,7 +1990,7 @@ function HalamanBerita({ isAdmin, daftarBerita, setDaftarBerita }: any) {
                  src={selectedBerita.gambar} 
                  alt={selectedBerita.judul} 
                  className="w-full h-full object-cover"
-                 onError={(e: any) => { e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=1200&q=80' }}
+                 onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=1200&q=80' }}
                />
             </div>
             
@@ -2014,7 +2038,7 @@ function HalamanBerita({ isAdmin, daftarBerita, setDaftarBerita }: any) {
                  <div className="col-span-full text-center text-gray-500 py-20 bg-white rounded-3xl border border-dashed border-gray-300 font-medium text-lg">Belum ada berita yang diterbitkan.</div>
               )}
 
-              {daftarBerita.map((berita: any) => (
+              {daftarBerita.map((berita) => (
                 <div key={berita.id} className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col relative border border-gray-100 group overflow-hidden">
                   {isAdmin && (
                     <div className="absolute top-4 right-4 z-20 flex gap-2">
@@ -2032,7 +2056,7 @@ function HalamanBerita({ isAdmin, daftarBerita, setDaftarBerita }: any) {
                       src={berita.gambar} 
                       alt={berita.judul} 
                       className="w-full h-full object-cover transition duration-700 group-hover:scale-110"
-                      onError={(e: any) => { e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&q=80' }}
+                      onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&q=80' }}
                     />
                     <div className="absolute top-4 left-4 bg-white/90 backdrop-blur text-emerald-800 text-xs font-extrabold px-4 py-1.5 rounded-full shadow-sm border border-emerald-100">
                       {berita.kategori}
@@ -2073,7 +2097,7 @@ function HalamanBerita({ isAdmin, daftarBerita, setDaftarBerita }: any) {
                 </div>
                 {editData.id ? 'Edit Berita' : 'Tambah Berita Baru'}
               </h3>
-              <button onClick={() => setShowEditor(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
+              <button type="button" onClick={() => setShowEditor(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -2250,7 +2274,7 @@ function HalamanKontak() {
 
 /* ================= Helper Components ================= */
 
-function NavButton({ children, active, onClick, icon }: any) {
+function NavButton({ children, active, onClick, icon }) {
   return (
     <button
       onClick={onClick}
@@ -2266,7 +2290,7 @@ function NavButton({ children, active, onClick, icon }: any) {
   );
 }
 
-function MobileNavButton({ children, active, onClick }: any) {
+function MobileNavButton({ children, active, onClick }) {
   return (
     <button
       onClick={onClick}
