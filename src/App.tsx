@@ -62,7 +62,7 @@ const compressImage = (file: any, maxWidth: any, isLogo: any, callback: any) => 
       if (ctx) {
         ctx.drawImage(img, 0, 0, width, height);
         const format = isLogo ? 'image/png' : 'image/jpeg';
-        const quality = isLogo ? undefined : 0.5;
+        const quality = isLogo ? undefined : 0.4;
         const compressedBase64 = canvas.toDataURL(format, quality);
         callback(compressedBase64);
       } else {
@@ -224,24 +224,39 @@ export default function App() {
   useEffect(() => {
     if (!user || !db) return;
 
-    const unsubBeranda = onSnapshot(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_beranda'), 'main'), (snap) => {
-      if(snap.exists()) setDataBeranda(snap.data().value);
+    const unsubBeranda = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'desa_beranda', 'main'), (snap) => {
+      if(snap.exists()) {
+        const val = snap.data().value;
+        setDataBeranda(typeof val === 'string' ? JSON.parse(val) : val);
+      }
     }, console.error);
 
-    const unsubBerita = onSnapshot(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_berita'), 'main'), (snap) => {
-      if(snap.exists()) setDaftarBerita(snap.data().value);
+    const unsubBerita = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'desa_berita', 'main'), (snap) => {
+      if(snap.exists()) {
+        const val = snap.data().value;
+        setDaftarBerita(typeof val === 'string' ? JSON.parse(val) : val);
+      }
     }, console.error);
 
-    const unsubPerangkat = onSnapshot(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_perangkat'), 'main'), (snap) => {
-      if(snap.exists()) setDaftarPerangkat(snap.data().value);
+    const unsubPerangkat = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'desa_perangkat', 'main'), (snap) => {
+      if(snap.exists()) {
+        const val = snap.data().value;
+        setDaftarPerangkat(typeof val === 'string' ? JSON.parse(val) : val);
+      }
     }, console.error);
 
-    const unsubLembaga = onSnapshot(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_lembaga'), 'main'), (snap) => {
-      if(snap.exists()) setDaftarLembaga(snap.data().value);
+    const unsubLembaga = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'desa_lembaga', 'main'), (snap) => {
+      if(snap.exists()) {
+        const val = snap.data().value;
+        setDaftarLembaga(typeof val === 'string' ? JSON.parse(val) : val);
+      }
     }, console.error);
 
-    const unsubProfil = onSnapshot(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_profil'), 'main'), (snap) => {
-      if(snap.exists()) setDaftarProfil(snap.data().value);
+    const unsubProfil = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'desa_profil', 'main'), (snap) => {
+      if(snap.exists()) {
+        const val = snap.data().value;
+        setDaftarProfil(typeof val === 'string' ? JSON.parse(val) : val);
+      }
     }, console.error);
 
     return () => {
@@ -252,23 +267,33 @@ export default function App() {
 
   const updateBeranda = async (newData: any) => {
     setDataBeranda(newData);
-    if(user && db) await setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_beranda'), 'main'), { value: newData });
+    if(user && db) {
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'desa_beranda', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
+    }
   };
   const updateBerita = async (newData: any) => {
     setDaftarBerita(newData);
-    if(user && db) await setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_berita'), 'main'), { value: newData });
+    if(user && db) {
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'desa_berita', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
+    }
   };
   const updatePerangkat = async (newData: any) => {
     setDaftarPerangkat(newData);
-    if(user && db) await setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_perangkat'), 'main'), { value: newData });
+    if(user && db) {
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'desa_perangkat', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
+    }
   };
   const updateLembaga = async (newData: any) => {
     setDaftarLembaga(newData);
-    if(user && db) await setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_lembaga'), 'main'), { value: newData });
+    if(user && db) {
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'desa_lembaga', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
+    }
   };
   const updateProfil = async (newData: any) => {
     setDaftarProfil(newData);
-    if(user && db) await setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'desa_profil'), 'main'), { value: newData });
+    if(user && db) {
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'desa_profil', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
+    }
   };
 
   useEffect(() => {
@@ -840,7 +865,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, show
   const handleHeroBgChange = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      compressImage(file, 1200, false, (base64: any) => {
+      compressImage(file, 800, false, (base64: any) => {
         setEditForm((prev: any) => ({ ...prev, heroBg: base64 }));
       });
       e.target.value = '';
@@ -850,7 +875,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, show
   const handleLogoHeroChange = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      compressImage(file, 400, true, (base64: any) => {
+      compressImage(file, 300, true, (base64: any) => {
         setEditForm((prev: any) => ({ ...prev, logoHero: base64 }));
       });
       e.target.value = '';
@@ -860,7 +885,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, show
   const handleHeaderLogoChange = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      compressImage(file, 300, true, (base64: any) => {
+      compressImage(file, 200, true, (base64: any) => {
         setEditForm((prev: any) => ({ ...prev, headerLogo: base64 }));
       });
       e.target.value = '';
@@ -870,7 +895,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, show
   const handleFotoKadesUpload = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      compressImage(file, 400, false, (base64: any) => {
+      compressImage(file, 300, false, (base64: any) => {
         setEditForm((prev: any) => ({ ...prev, fotoKades: base64 }));
       });
       e.target.value = '';
@@ -1616,7 +1641,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
   const handleImageUploadPerangkat = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      compressImage(file, 600, false, (base64: any) => {
+      compressImage(file, 300, false, (base64: any) => {
         setEditDataPerangkat({ ...editDataPerangkat, foto: base64 });
       });
       e.target.value = '';
@@ -1647,7 +1672,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
   const handleImageUploadLembaga = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      compressImage(file, 400, false, (base64: any) => {
+      compressImage(file, 200, false, (base64: any) => {
         setEditDataLembaga({ ...editDataLembaga, foto: base64 });
       });
       e.target.value = '';
@@ -2011,7 +2036,7 @@ function HalamanBerita({ isAdmin, daftarBerita, setDaftarBerita, showConfirm }: 
   const handleImageUpload = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      compressImage(file, 800, false, (base64: any) => {
+      compressImage(file, 500, false, (base64: any) => {
         setEditData({ ...editData, gambar: base64 });
       });
       e.target.value = '';
