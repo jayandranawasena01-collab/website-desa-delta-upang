@@ -688,8 +688,21 @@ export default function App() {
 
       {/* Pesan Alert Login Admin Aktif */}
       {isAdmin && (
-        <div className="bg-emerald-100 text-emerald-800 px-4 py-2 text-sm font-medium text-center shadow-inner flex items-center justify-center gap-2 z-30 relative">
-           <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Mode Admin Aktif: Anda dapat mengedit konten, pastikan Anda menekan tombol simpan.
+        <div className="bg-emerald-100 text-emerald-800 px-4 py-3 text-sm font-medium text-center shadow-inner flex flex-col items-center justify-center gap-2 z-30 relative">
+           <div className="flex items-center gap-2">
+             <CheckCircle2 className="w-5 h-5 text-emerald-600" /> 
+             <span>Mode Admin Aktif: Anda dapat mengedit konten website.</span>
+           </div>
+           {!db && (
+             <div className="bg-rose-100 text-rose-700 border border-rose-200 px-3 py-1 rounded-full text-xs font-bold animate-pulse">
+               ⚠️ Status Database: OFFLINE / LOKAL (Pengunjung belum bisa melihat perubahan Anda. Hubungi Developer untuk setting Firebase).
+             </div>
+           )}
+           {db && (
+             <div className="bg-emerald-200 text-emerald-800 border border-emerald-300 px-3 py-1 rounded-full text-xs font-bold">
+               ✅ Status Database: ONLINE (Pengunjung dapat melihat perubahan Anda).
+             </div>
+           )}
         </div>
       )}
 
