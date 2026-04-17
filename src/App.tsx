@@ -9,7 +9,7 @@ import {
 // ================= FIREBASE CLOUD STORAGE SETUP =================
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
-import { initializeFirestore, doc, setDoc, onSnapshot, collection } from 'firebase/firestore';
+import { initializeFirestore, doc, setDoc, onSnapshot } from 'firebase/firestore';
 
 // Deklarasi global agar TypeScript di Vercel tidak error
 declare const __firebase_config: any;
@@ -180,6 +180,7 @@ const initialBeranda = {
 
 export default function App() {
   const [user, setUser] = useState<any>(null);
+  const [isDbConnected, setIsDbConnected] = useState(false); // Indikator Status Akurat
   const [currentPage, setCurrentPage] = useState('beranda');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
@@ -222,9 +223,34 @@ export default function App() {
   const [daftarProfil, setDaftarProfil] = useState(() => getInitialData('desa_profil_v2', initialProfil));
   const [dataBeranda, setDataBeranda] = useState(() => getInitialData('desa_beranda_v2', initialBeranda));
 
-  // ================= INIT FIREBASE =================
+  // ================= MONITORING KONEKSI INTERNET FISIK =================
+  useEffect(() => {
+    const handleOnline = () => {
+      // Hanya persiapan online, status aslinya menunggu konfirmasi dari fetch data server
+      if (typeof window !== 'undefined' && db && user) {
+         // Akan di set true nanti oleh onSnapshot
+      }
+    };
+    const handleOffline = () => setIsDbConnected(false); // Langsung set Offline jika internet putus
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      setIsDbConnected(false);
+    }
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [user]);
+
+  // ================= INIT FIREBASE AUTH (STABILITAS KONEKSI URUTAN) =================
   useEffect(() => {
     if (!auth) return;
+    let isMounted = true;
+
     const initAuth = async () => {
       try {
         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -237,53 +263,68 @@ export default function App() {
       }
     };
     initAuth();
-    const unsubscribe = onAuthStateChanged(auth, setUser);
-    return () => unsubscribe();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (isMounted) {
+        setUser(currentUser);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
   }, []);
 
+  // ================= FETCH DATA (SINKRONISASI SERVER PRIORITAS UTAMA) =================
   useEffect(() => {
     if (!user || !db) return;
 
-    const unsubBeranda = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'desa_beranda', 'main'), (snap) => {
-      if(snap.exists()) {
+    // Fungsi bantu untuk menerima data server, memprioritaskannya, dan sinkronisasi lokal
+    const handleServerData = (snap: any, stateSetter: any, storageKey: string) => {
+      setIsDbConnected(true); // Indikator koneksi berhasil
+      if (snap.exists()) {
         const val = snap.data().value;
-        setDataBeranda(typeof val === 'string' ? JSON.parse(val) : val);
+        const parsedData = typeof val === 'string' ? JSON.parse(val) : val;
+        
+        // 1. Update ke State UI
+        stateSetter(parsedData);
+        
+        // 2. Sinkronisasi (Timpa memori HP dengan data server terbaru)
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(storageKey, JSON.stringify(parsedData));
+        }
       }
-    }, console.error);
+    };
 
-    const unsubBerita = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'desa_berita', 'main'), (snap) => {
-      if(snap.exists()) {
-        const val = snap.data().value;
-        setDaftarBerita(typeof val === 'string' ? JSON.parse(val) : val);
-      }
-    }, console.error);
+    const unsubBeranda = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'desa_beranda', 'main'), 
+      (snap) => handleServerData(snap, setDataBeranda, 'desa_beranda_v2'),
+      (err) => { console.error(err); setIsDbConnected(false); }
+    );
 
-    const unsubPerangkat = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'desa_perangkat', 'main'), (snap) => {
-      if(snap.exists()) {
-        const val = snap.data().value;
-        setDaftarPerangkat(typeof val === 'string' ? JSON.parse(val) : val);
-      }
-    }, console.error);
+    const unsubBerita = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'desa_berita', 'main'), 
+      (snap) => handleServerData(snap, setDaftarBerita, 'desa_berita_v2'),
+      (err) => { console.error(err); setIsDbConnected(false); }
+    );
 
-    const unsubLembaga = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'desa_lembaga', 'main'), (snap) => {
-      if(snap.exists()) {
-        const val = snap.data().value;
-        setDaftarLembaga(typeof val === 'string' ? JSON.parse(val) : val);
-      }
-    }, console.error);
+    const unsubPerangkat = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'desa_perangkat', 'main'), 
+      (snap) => handleServerData(snap, setDaftarPerangkat, 'desa_perangkat_v2'),
+      (err) => { console.error(err); setIsDbConnected(false); }
+    );
 
-    const unsubProfil = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'desa_profil', 'main'), (snap) => {
-      if(snap.exists()) {
-        const val = snap.data().value;
-        setDaftarProfil(typeof val === 'string' ? JSON.parse(val) : val);
-      }
-    }, console.error);
+    const unsubLembaga = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'desa_lembaga', 'main'), 
+      (snap) => handleServerData(snap, setDaftarLembaga, 'desa_lembaga_v2'),
+      (err) => { console.error(err); setIsDbConnected(false); }
+    );
+
+    const unsubProfil = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'desa_profil', 'main'), 
+      (snap) => handleServerData(snap, setDaftarProfil, 'desa_profil_v2'),
+      (err) => { console.error(err); setIsDbConnected(false); }
+    );
 
     return () => {
       unsubBeranda(); unsubBerita(); unsubPerangkat(); unsubLembaga(); unsubProfil();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   // ================= UPDATE FUNCTIONS =================
@@ -694,14 +735,15 @@ export default function App() {
              <CheckCircle2 className="w-5 h-5 text-emerald-600" /> 
              <span>Mode Admin Aktif: Anda dapat mengedit konten website.</span>
            </div>
-           {!db && (
-             <div className="bg-rose-100 text-rose-700 border border-rose-200 px-3 py-1 rounded-full text-xs font-bold animate-pulse">
-               ⚠️ Status Database: OFFLINE / LOKAL (Pengunjung belum bisa melihat perubahan Anda. Hubungi Developer untuk setting Firebase).
+           {/* Indikator Status Akurat yang baru diperbarui */}
+           {!isDbConnected && (
+             <div className="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full text-xs font-bold animate-pulse">
+               ⏳ Menghubungkan ke Server / Mode Offline Sementara...
              </div>
            )}
-           {db && (
-             <div className="bg-emerald-200 text-emerald-800 border border-emerald-300 px-3 py-1 rounded-full text-xs font-bold">
-               ✅ Status Database: ONLINE (Pengunjung dapat melihat perubahan Anda).
+           {isDbConnected && (
+             <div className="bg-emerald-200 text-emerald-800 border border-emerald-400 px-3 py-1 rounded-full text-xs font-bold">
+               ✅ Status Database: ONLINE (Tersinkronisasi dengan Server).
              </div>
            )}
         </div>
