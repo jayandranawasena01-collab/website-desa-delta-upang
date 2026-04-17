@@ -34,13 +34,21 @@ const firebaseConfigManual = {
   measurementId: "G-JLGMKQXVV4"
 };
 
+// Cek apakah config manual sudah diisi dengan benar
+let isManualConfigValid = false;
+if (firebaseConfigManual.apiKey && firebaseConfigManual.apiKey.length > 20) {
+  isManualConfigValid = true;
+}
+
 // Mencegah Firebase berjalan saat proses "Build" di server Vercel (SSR)
 if (typeof window !== 'undefined') {
   try {
     appId = typeof __app_id !== 'undefined' ? __app_id : 'desa-delta-upang';
-    const firebaseConfig = typeof __firebase_config !== 'undefined' 
-      ? JSON.parse(__firebase_config) 
-      : (Object.keys(firebaseConfigManual).length > 0 ? firebaseConfigManual : null);
+    
+    // PERBAIKAN: Memprioritaskan Config Manual agar Komputer & HP membaca Database yang SAMA
+    const firebaseConfig = isManualConfigValid 
+      ? firebaseConfigManual 
+      : (typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null);
     
     if (firebaseConfig && Object.keys(firebaseConfig).length > 0) {
       app = initializeApp(firebaseConfig);
@@ -180,7 +188,8 @@ const initialBeranda = {
 
 export default function App() {
   const [user, setUser] = useState<any>(null);
-  const [isDbConnected, setIsDbConnected] = useState(false); // Indikator Status Akurat
+  const [isDbConnected, setIsDbConnected] = useState(false); 
+  const [dbError, setDbError] = useState(""); // Menyimpan pesan error Firebase
   const [currentPage, setCurrentPage] = useState('beranda');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
@@ -225,12 +234,7 @@ export default function App() {
 
   // ================= MONITORING KONEKSI INTERNET FISIK =================
   useEffect(() => {
-    const handleOnline = () => {
-      // Hanya persiapan online, status aslinya menunggu konfirmasi dari fetch data server
-      if (typeof window !== 'undefined' && db && user) {
-         // Akan di set true nanti oleh onSnapshot
-      }
-    };
+    const handleOnline = () => {};
     const handleOffline = () => setIsDbConnected(false); // Langsung set Offline jika internet putus
 
     window.addEventListener('online', handleOnline);
@@ -244,7 +248,7 @@ export default function App() {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, [user]);
+  }, []);
 
   // ================= INIT FIREBASE AUTH (STABILITAS KONEKSI URUTAN) =================
   useEffect(() => {
@@ -253,13 +257,15 @@ export default function App() {
 
     const initAuth = async () => {
       try {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+        // PERBAIKAN: Jangan gunakan token lokal jika sedang mengakses DB Manual, hindari error tabrakan.
+        if (!isManualConfigValid && typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
           await signInWithCustomToken(auth, __initial_auth_token);
         } else {
           await signInAnonymously(auth);
         }
-      } catch (error) {
-        console.error("Auth error", error);
+      } catch (error: any) {
+        console.error("Auth error:", error.message);
+        // Proses tetap lanjut meskipun gagal login, agar mencoba ambil data publik.
       }
     };
     initAuth();
@@ -278,16 +284,19 @@ export default function App() {
 
   // ================= FETCH DATA (SINKRONISASI SERVER PRIORITAS UTAMA) =================
   useEffect(() => {
-    if (!user || !db) return;
+    // PERBAIKAN: Tidak perlu menunggu `user`, database akan langsung mencoba mengambil data 
+    // jika settingan 'Rules' Firestore Anda sudah diatur menjadi publik.
+    if (!db) return; 
 
     // Fungsi bantu untuk menerima data server, memprioritaskannya, dan sinkronisasi lokal
     const handleServerData = (snap: any, stateSetter: any, storageKey: string) => {
-      setIsDbConnected(true); // Indikator koneksi berhasil
+      setIsDbConnected(true); // Indikator koneksi berhasil Akurat
+      setDbError(""); 
       if (snap.exists()) {
         const val = snap.data().value;
         const parsedData = typeof val === 'string' ? JSON.parse(val) : val;
         
-        // 1. Update ke State UI
+        // 1. Update ke State UI (Data Server Diutamakan)
         stateSetter(parsedData);
         
         // 2. Sinkronisasi (Timpa memori HP dengan data server terbaru)
@@ -297,72 +306,81 @@ export default function App() {
       }
     };
 
+    // Fungsi penanganan jika database menolak karena aturan 'Rules' belum diubah
+    const handleServerError = (err: any) => {
+      console.error("Gagal sinkronisasi data:", err);
+      setIsDbConnected(false);
+      if (err.code === 'permission-denied') {
+        setDbError("Akses Database Ditolak! Anda belum mengubah Rules Firestore menjadi public.");
+      }
+    };
+
     const unsubBeranda = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'desa_beranda', 'main'), 
       (snap) => handleServerData(snap, setDataBeranda, 'desa_beranda_v2'),
-      (err) => { console.error(err); setIsDbConnected(false); }
+      handleServerError
     );
 
     const unsubBerita = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'desa_berita', 'main'), 
       (snap) => handleServerData(snap, setDaftarBerita, 'desa_berita_v2'),
-      (err) => { console.error(err); setIsDbConnected(false); }
+      handleServerError
     );
 
     const unsubPerangkat = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'desa_perangkat', 'main'), 
       (snap) => handleServerData(snap, setDaftarPerangkat, 'desa_perangkat_v2'),
-      (err) => { console.error(err); setIsDbConnected(false); }
+      handleServerError
     );
 
     const unsubLembaga = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'desa_lembaga', 'main'), 
       (snap) => handleServerData(snap, setDaftarLembaga, 'desa_lembaga_v2'),
-      (err) => { console.error(err); setIsDbConnected(false); }
+      handleServerError
     );
 
     const unsubProfil = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'desa_profil', 'main'), 
       (snap) => handleServerData(snap, setDaftarProfil, 'desa_profil_v2'),
-      (err) => { console.error(err); setIsDbConnected(false); }
+      handleServerError
     );
 
     return () => {
       unsubBeranda(); unsubBerita(); unsubPerangkat(); unsubLembaga(); unsubProfil();
     };
-  }, [user]);
+  }, []); // Array dependensi kosong, hanya jalan sekali saat aplikasi dimuat
 
   // ================= UPDATE FUNCTIONS =================
   const updateBeranda = async (newData: any) => {
     setDataBeranda(newData);
     if (typeof window !== 'undefined') localStorage.setItem('desa_beranda_v2', JSON.stringify(newData));
-    if(user && db) {
+    if(db) {
       try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'desa_beranda', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     } else {
-      showAlert("Perubahan Beranda berhasil disimpan secara LOKAL (di perangkat ini). Agar bisa dilihat oleh warga di HP mereka, Anda perlu menambahkan konfigurasi Firebase ke dalam kode (Hubungi Developer).");
+      showAlert("Perubahan disimpan secara LOKAL. Aktifkan koneksi database untuk mensinkronisasi.");
     }
   };
   
   const updateBerita = async (newData: any) => {
     setDaftarBerita(newData);
     if (typeof window !== 'undefined') localStorage.setItem('desa_berita_v2', JSON.stringify(newData));
-    if(user && db) {
+    if(db) {
       try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'desa_berita', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
   const updatePerangkat = async (newData: any) => {
     setDaftarPerangkat(newData);
     if (typeof window !== 'undefined') localStorage.setItem('desa_perangkat_v2', JSON.stringify(newData));
-    if(user && db) {
+    if(db) {
       try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'desa_perangkat', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
   const updateLembaga = async (newData: any) => {
     setDaftarLembaga(newData);
     if (typeof window !== 'undefined') localStorage.setItem('desa_lembaga_v2', JSON.stringify(newData));
-    if(user && db) {
+    if(db) {
       try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'desa_lembaga', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
   const updateProfil = async (newData: any) => {
     setDaftarProfil(newData);
     if (typeof window !== 'undefined') localStorage.setItem('desa_profil_v2', JSON.stringify(newData));
-    if(user && db) {
+    if(db) {
       try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'desa_profil', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
@@ -735,8 +753,9 @@ export default function App() {
              <CheckCircle2 className="w-5 h-5 text-emerald-600" /> 
              <span>Mode Admin Aktif: Anda dapat mengedit konten website.</span>
            </div>
+           
            {/* Indikator Status Akurat yang baru diperbarui */}
-           {!isDbConnected && (
+           {!isDbConnected && !dbError && (
              <div className="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full text-xs font-bold animate-pulse">
                ⏳ Menghubungkan ke Server / Mode Offline Sementara...
              </div>
@@ -744,6 +763,14 @@ export default function App() {
            {isDbConnected && (
              <div className="bg-emerald-200 text-emerald-800 border border-emerald-400 px-3 py-1 rounded-full text-xs font-bold">
                ✅ Status Database: ONLINE (Tersinkronisasi dengan Server).
+             </div>
+           )}
+
+           {/* Menampilkan pesan Error jika Permission Denied pada Firebase (Rules belum public) */}
+           {dbError && (
+             <div className="bg-rose-200 text-rose-800 border border-rose-400 px-4 py-2 rounded-xl text-xs font-bold w-full max-w-2xl mt-1 text-left sm:text-center">
+               ⚠️ {dbError} <br/>
+               <span className="font-normal">Masuk ke <b>Firebase Console</b> Anda, buka menu <b>Firestore Database</b>, klik tab <b>'Rules'</b>, lalu ubah isinya menjadi <br/> <code className="bg-white/50 px-1 rounded">allow read, write: if true;</code> dan klik <b>Publish</b>.</span>
              </div>
            )}
         </div>
