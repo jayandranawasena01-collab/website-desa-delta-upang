@@ -25,12 +25,13 @@ let appId = 'desa-delta-upang';
 // Agar perubahan dari Admin bisa dilihat pengunjung secara real-time di HP mereka, 
 // Anda perlu membuat database Firebase gratis dan memasukkan kodenya di bawah ini:
 const firebaseConfigManual = {
-  // apiKey: "API_KEY_ANDA",
-  // authDomain: "DOMAIN_ANDA.firebaseapp.com",
-  // projectId: "PROJECT_ID_ANDA",
-  // storageBucket: "PROJECT_ID_ANDA.appspot.com",
-  // messagingSenderId: "SENDER_ID",
-  // appId: "APP_ID"
+  apiKey: "AIzaSyBIl0_tSPDJux9rr2FIL_-ZLZFqLPQ4WCY",
+  authDomain: "web-desa-delta-upang.firebaseapp.com",
+  projectId: "web-desa-delta-upang",
+  storageBucket: "web-desa-delta-upang.firebasestorage.app",
+  messagingSenderId: "673276122437",
+  appId: "1:673276122437:web:dc2de24a0209f40e6e5a2c",
+  measurementId: "G-JLGMKQXVV4"
 };
 
 // Mencegah Firebase berjalan saat proses "Build" di server Vercel (SSR)
