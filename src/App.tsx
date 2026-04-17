@@ -21,21 +21,33 @@ let auth: any = null;
 let db: any = null;
 let appId = 'desa-delta-upang';
 
-// Mencegah Firebase berjalan saat proses "Build" di server Vercel (SSR) untuk menghindari Timeout 10 detik
+// ================= KONFIGURASI DATABASE MANUAL =================
+// Agar perubahan dari Admin bisa dilihat pengunjung secara real-time di HP mereka, 
+// Anda perlu membuat database Firebase gratis dan memasukkan kodenya di bawah ini:
+const firebaseConfigManual = {
+  // apiKey: "API_KEY_ANDA",
+  // authDomain: "DOMAIN_ANDA.firebaseapp.com",
+  // projectId: "PROJECT_ID_ANDA",
+  // storageBucket: "PROJECT_ID_ANDA.appspot.com",
+  // messagingSenderId: "SENDER_ID",
+  // appId: "APP_ID"
+};
+
+// Mencegah Firebase berjalan saat proses "Build" di server Vercel (SSR)
 if (typeof window !== 'undefined') {
   try {
     appId = typeof __app_id !== 'undefined' ? __app_id : 'desa-delta-upang';
-    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+    const firebaseConfig = typeof __firebase_config !== 'undefined' 
+      ? JSON.parse(__firebase_config) 
+      : (Object.keys(firebaseConfigManual).length > 0 ? firebaseConfigManual : null);
     
-    // Hanya inisialisasi Firebase jika config tersedia dan berjalan di browser
     if (firebaseConfig && Object.keys(firebaseConfig).length > 0) {
       app = initializeApp(firebaseConfig);
       auth = getAuth(app);
-      // Memaksa Long Polling agar koneksi lolos dari pemblokiran jaringan
       db = initializeFirestore(app, { experimentalForceLongPolling: true });
     }
   } catch (err) {
-    console.warn("Menjalankan aplikasi dalam mode lokal (tanpa Firebase).");
+    console.warn("Menjalankan aplikasi dalam mode lokal.");
   }
 }
 
@@ -149,8 +161,9 @@ const initialProfil = [
 
 const initialBeranda = {
   heroBg: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
-  logoHero: "", 
-  headerLogo: "", 
+  // Logo Default diset ke Banyuasin agar tidak kosong, TAPI tetap bisa diedit di mode Admin.
+  logoHero: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Lambang_Kabupaten_Banyuasin.png/600px-Lambang_Kabupaten_Banyuasin.png", 
+  headerLogo: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Lambang_Kabupaten_Banyuasin.png/600px-Lambang_Kabupaten_Banyuasin.png", 
   namaDesa: "Delta Upang",
   deskripsiDesa: "Kecamatan Makarti Jaya, Kabupaten Banyuasin \nProvinsi Sumatera Selatan",
   fotoKades: "https://lh3.googleusercontent.com/d/1L5Y15w_obbihHFz4rUMrOAci5V7TtAIz",
@@ -194,14 +207,22 @@ export default function App() {
   const showAlert = (message: string) => setDialog({ isOpen: true, type: 'alert', message, onConfirm: null });
   const showConfirm = (message: string, onConfirm: any) => setDialog({ isOpen: true, type: 'confirm', message, onConfirm });
   
-  // States Data
-  const [daftarBerita, setDaftarBerita] = useState(initialBerita);
-  const [daftarPerangkat, setDaftarPerangkat] = useState(initialPerangkat);
-  const [daftarLembaga, setDaftarLembaga] = useState(initialLembaga);
-  const [daftarProfil, setDaftarProfil] = useState(initialProfil);
-  const [dataBeranda, setDataBeranda] = useState(initialBeranda);
+  // ================= INIT STATE (Dengan LocalStorage Fallback) =================
+  const getInitialData = (key: string, fallback: any) => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(key);
+      if (saved) return JSON.parse(saved);
+    }
+    return fallback;
+  };
 
-  // ================= INIT FIREBASE & FETCH DATA CLOUD =================
+  const [daftarBerita, setDaftarBerita] = useState(() => getInitialData('desa_berita_v2', initialBerita));
+  const [daftarPerangkat, setDaftarPerangkat] = useState(() => getInitialData('desa_perangkat_v2', initialPerangkat));
+  const [daftarLembaga, setDaftarLembaga] = useState(() => getInitialData('desa_lembaga_v2', initialLembaga));
+  const [daftarProfil, setDaftarProfil] = useState(() => getInitialData('desa_profil_v2', initialProfil));
+  const [dataBeranda, setDataBeranda] = useState(() => getInitialData('desa_beranda_v2', initialBeranda));
+
+  // ================= INIT FIREBASE =================
   useEffect(() => {
     if (!auth) return;
     const initAuth = async () => {
@@ -265,53 +286,45 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
+  // ================= UPDATE FUNCTIONS =================
   const updateBeranda = async (newData: any) => {
     setDataBeranda(newData);
+    if (typeof window !== 'undefined') localStorage.setItem('desa_beranda_v2', JSON.stringify(newData));
     if(user && db) {
       try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'desa_beranda', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
+    } else {
+      showAlert("Perubahan Beranda berhasil disimpan secara LOKAL (di perangkat ini). Agar bisa dilihat oleh warga di HP mereka, Anda perlu menambahkan konfigurasi Firebase ke dalam kode (Hubungi Developer).");
     }
   };
+  
   const updateBerita = async (newData: any) => {
     setDaftarBerita(newData);
+    if (typeof window !== 'undefined') localStorage.setItem('desa_berita_v2', JSON.stringify(newData));
     if(user && db) {
       try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'desa_berita', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
   const updatePerangkat = async (newData: any) => {
     setDaftarPerangkat(newData);
+    if (typeof window !== 'undefined') localStorage.setItem('desa_perangkat_v2', JSON.stringify(newData));
     if(user && db) {
       try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'desa_perangkat', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
   const updateLembaga = async (newData: any) => {
     setDaftarLembaga(newData);
+    if (typeof window !== 'undefined') localStorage.setItem('desa_lembaga_v2', JSON.stringify(newData));
     if(user && db) {
       try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'desa_lembaga', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
   const updateProfil = async (newData: any) => {
     setDaftarProfil(newData);
+    if (typeof window !== 'undefined') localStorage.setItem('desa_profil_v2', JSON.stringify(newData));
     if(user && db) {
       try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'desa_profil', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const keysToRemove = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key && key.startsWith('desa_') && key !== 'desa_admin_status') {
-            keysToRemove.push(key);
-          }
-        }
-        keysToRemove.forEach(k => localStorage.removeItem(k));
-      } catch (e) {
-        console.error("Cleanup error:", e);
-      }
-    }
-  }, []);
 
   useEffect(() => {
     const handleOutsideClick = () => {
@@ -677,7 +690,7 @@ export default function App() {
       {/* Pesan Alert Login Admin Aktif */}
       {isAdmin && (
         <div className="bg-emerald-100 text-emerald-800 px-4 py-2 text-sm font-medium text-center shadow-inner flex items-center justify-center gap-2 z-30 relative">
-           <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Mode Admin Aktif: Anda dapat mengedit konten halaman ini dan akan terlihat oleh semua orang.
+           <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Mode Admin Aktif: Anda dapat mengedit konten, pastikan Anda menekan tombol simpan.
         </div>
       )}
 
@@ -913,7 +926,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, show
     e.preventDefault();
     setDataBeranda(editForm);
     setShowEditor(false);
-    showAlert("Perubahan Beranda berhasil disimpan ke server.");
+    showAlert("Perubahan selesai. Cek hasilnya!");
   };
 
   return (
