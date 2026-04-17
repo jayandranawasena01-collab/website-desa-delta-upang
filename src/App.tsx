@@ -161,9 +161,8 @@ const initialProfil = [
 
 const initialBeranda = {
   heroBg: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
-  // Logo Default diset ke Banyuasin agar tidak kosong, TAPI tetap bisa diedit di mode Admin.
-  logoHero: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Lambang_Kabupaten_Banyuasin.png/600px-Lambang_Kabupaten_Banyuasin.png", 
-  headerLogo: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Lambang_Kabupaten_Banyuasin.png/600px-Lambang_Kabupaten_Banyuasin.png", 
+  logoHero: "", 
+  headerLogo: "", 
   namaDesa: "Delta Upang",
   deskripsiDesa: "Kecamatan Makarti Jaya, Kabupaten Banyuasin \nProvinsi Sumatera Selatan",
   fotoKades: "https://lh3.googleusercontent.com/d/1L5Y15w_obbihHFz4rUMrOAci5V7TtAIz",
