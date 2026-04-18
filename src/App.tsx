@@ -93,7 +93,8 @@ const initialBerita = [
     tanggal: "12 Okt 2024",
     kategori: "Sosial",
     gambar: "https://images.unsplash.com/photo-1593113565694-c6f130d24c3d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-    excerpt: "Pemerintah Desa Delta Upang kembali menyalurkan Bantuan Langsung Tunai (BLT) yang bersumber dari Dana Desa (DD) kepada keluarga penerima manfaat...\n\n(Teks selengkapnya) Bantuan ini diharapkan dapat meringankan beban ekonomi warga, terutama dalam memenuhi kebutuhan pokok sehari-hari. Kepala Desa menghimbau agar dana tersebut digunakan sebaik-baiknya untuk kebutuhan primer."
+    excerpt: "Pemerintah Desa Delta Upang kembali menyalurkan Bantuan Langsung Tunai (BLT) yang bersumber dari Dana Desa (DD) kepada keluarga penerima manfaat...\n\nBantuan ini diharapkan dapat meringankan beban ekonomi warga, terutama dalam memenuhi kebutuhan pokok sehari-hari. Kepala Desa menghimbau agar dana tersebut digunakan sebaik-baiknya untuk kebutuhan primer.",
+    galeri: []
   },
   {
     id: 2,
@@ -101,7 +102,8 @@ const initialBerita = [
     tanggal: "05 Okt 2024",
     kategori: "Kegiatan",
     gambar: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-    excerpt: "Mengantisipasi datangnya musim penghujan, warga Desa Delta Upang bergotong royong membersihkan saluran air dan fasilitas umum guna mencegah banjir...\n\n(Teks selengkapnya) Kegiatan ini diikuti oleh seluruh elemen masyarakat. Selain membersihkan selokan, warga juga melakukan pemangkasan dahan pohon yang rawan tumbang serta membersihkan area pekarangan fasilitas umum."
+    excerpt: "Mengantisipasi datangnya musim penghujan, warga Desa Delta Upang bergotong royong membersihkan saluran air dan fasilitas umum guna mencegah banjir...\n\nKegiatan ini diikuti oleh seluruh elemen masyarakat. Selain membersihkan selokan, warga juga melakukan pemangkasan dahan pohon yang rawan tumbang serta membersihkan area pekarangan fasilitas umum.",
+    galeri: []
   },
   {
     id: 3,
@@ -109,7 +111,8 @@ const initialBerita = [
     tanggal: "28 Sep 2024",
     kategori: "Pemberdayaan",
     gambar: "https://images.unsplash.com/photo-1592982537447-6f2a6a0a091c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-    excerpt: "BUMDes bekerja sama dengan penyuluh pertanian kecamatan mengadakan pelatihan pembuatan pupuk kompos organik yang diikuti oleh petani lokal Delta Upang...\n\n(Teks selengkapnya) Pelatihan ini bertujuan untuk meningkatkan kemandirian petani dalam penyediaan pupuk, menekan biaya produksi pertanian, sekaligus mengedukasi warga tentang pengelolaan limbah organik."
+    excerpt: "BUMDes bekerja sama dengan penyuluh pertanian kecamatan mengadakan pelatihan pembuatan pupuk kompos organik yang diikuti oleh petani lokal Delta Upang...\n\nPelatihan ini bertujuan untuk meningkatkan kemandirian petani dalam penyediaan pupuk, menekan biaya produksi pertanian, sekaligus mengedukasi warga tentang pengelolaan limbah organik.",
+    galeri: []
   }
 ];
 
@@ -460,7 +463,7 @@ export default function App() {
     const username = e.target.username.value;
     const password = e.target.password.value;
     
-    if (username === 'Andiwidodo' && password === 'admin2311') {
+    if (username === 'Admin' && password === 'admin2311') {
       setIsAdmin(true);
       setShowLoginModal(false);
     } else {
@@ -2624,9 +2627,10 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
 
   const openEditorBerita = (berita: any = null) => {
     if (berita) {
-      setEditDataBerita(berita);
+      // Pastikan ada property galeri walau dari data lama
+      setEditDataBerita({ ...berita, galeri: berita.galeri || [] });
     } else {
-      setEditDataBerita({ id: null, judul: '', tanggal: '', kategori: '', excerpt: '', gambar: '' });
+      setEditDataBerita({ id: null, judul: '', tanggal: '', kategori: '', excerpt: '', gambar: '', galeri: [] });
     }
     setShowEditorBerita(true);
   };
@@ -2665,6 +2669,34 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
     }
   };
 
+  // ----- Logika Upload Foto Tambahan (Galeri) -----
+  const handleImageTambahanUpload = (e: any) => {
+    const files = Array.from(e.target.files);
+    files.forEach((file: any) => {
+      compressImage(file, 800, false, (base64: any) => {
+        setEditDataBerita((prev: any) => ({
+          ...prev,
+          galeri: [...(prev.galeri || []), { id: Math.random().toString(36).substr(2, 9), url: base64, posisi: 'bawah' }]
+        }));
+      });
+    });
+    e.target.value = '';
+  };
+
+  const ubahPosisiGaleri = (id: string, posisiBaru: string) => {
+    setEditDataBerita((prev: any) => ({
+       ...prev,
+       galeri: prev.galeri.map((g: any) => g.id === id ? { ...g, posisi: posisiBaru } : g)
+    }));
+  };
+
+  const hapusImageGaleri = (id: string) => {
+    setEditDataBerita((prev: any) => ({
+       ...prev,
+       galeri: prev.galeri.filter((g: any) => g.id !== id)
+    }));
+  };
+
   const totalPenduduk = (dataGrafik.lakiLaki || 0) + (dataGrafik.perempuan || 0);
   const persentaseLaki = totalPenduduk > 0 ? Math.round((dataGrafik.lakiLaki / totalPenduduk) * 100) : 0;
   const persentasePerempuan = totalPenduduk > 0 ? Math.round((dataGrafik.perempuan / totalPenduduk) * 100) : 0;
@@ -2686,6 +2718,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                    </button>
                 </div>
                 
+                {/* Header Image Utama */}
                 <div className="w-full h-64 md:h-[450px] overflow-hidden bg-gray-200">
                    <img 
                      src={selectedBerita.gambar} 
@@ -2711,8 +2744,69 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                    </h2>
                    <div className="w-20 h-1.5 bg-gradient-to-r from-emerald-500 to-emerald-300 rounded-full mb-10"></div>
                    
-                   <div className="text-gray-700 text-lg md:text-xl leading-relaxed whitespace-pre-wrap font-medium">
-                      {selectedBerita.excerpt}
+                   {/* Render Konten Beserta Posisi Gambar */}
+                   <div className="text-gray-700 text-lg md:text-xl leading-relaxed whitespace-pre-wrap font-medium relative clearfix">
+                      {(() => {
+                        const galeri = selectedBerita.galeri || [];
+                        const imgAtas = galeri.filter((g: any) => g.posisi === 'atas');
+                        const imgBawah = galeri.filter((g: any) => g.posisi === 'bawah');
+                        const imgKiri = galeri.filter((g: any) => g.posisi === 'kiri');
+                        const imgKanan = galeri.filter((g: any) => g.posisi === 'kanan');
+                        const imgTengah = galeri.filter((g: any) => g.posisi === 'tengah');
+
+                        // Pisahkan paragraf agar gambar tengah bisa disisipkan
+                        const paragraphs = selectedBerita.excerpt.split('\n');
+
+                        return (
+                          <React.Fragment>
+                            {/* Gambar Atas */}
+                            {imgAtas.length > 0 && (
+                              <div className="w-full flex flex-col gap-4 mb-8">
+                                {imgAtas.map((g: any) => <img key={g.id} src={g.url} alt="Berita Atas" className="w-full rounded-2xl shadow-md object-cover" />)}
+                              </div>
+                            )}
+
+                            {/* Gambar Kiri (Float) */}
+                            {imgKiri.map((g: any) => (
+                              <img key={g.id} src={g.url} alt="Berita Kiri" className="w-[45%] md:w-1/3 float-left mr-6 mb-4 rounded-xl shadow-sm object-cover" />
+                            ))}
+
+                            {/* Gambar Kanan (Float) */}
+                            {imgKanan.map((g: any) => (
+                              <img key={g.id} src={g.url} alt="Berita Kanan" className="w-[45%] md:w-1/3 float-right ml-6 mb-4 rounded-xl shadow-sm object-cover" />
+                            ))}
+
+                            {/* Text Berita + Sisipan Tengah */}
+                            {paragraphs.map((p: string, idx: number) => {
+                              // Tentukan dimana gambar 'tengah' akan muncul. Jika paragraf sedikit, muncul di awal/akhir
+                              const isMiddle = paragraphs.length > 1 ? idx === Math.floor(paragraphs.length / 2) : idx === 0;
+
+                              return (
+                                <React.Fragment key={idx}>
+                                  {p.trim() ? <p className="mb-3 text-justify">{p}</p> : <div className="h-4 clear-both"></div>}
+                                  
+                                  {isMiddle && imgTengah.length > 0 && (
+                                    <div className="w-full clear-both my-8 flex flex-col gap-4 items-center">
+                                      {imgTengah.map((g: any) => (
+                                        <img key={g.id} src={g.url} alt="Berita Tengah" className="w-[90%] md:w-[75%] rounded-2xl shadow-lg object-cover" />
+                                      ))}
+                                    </div>
+                                  )}
+                                </React.Fragment>
+                              );
+                            })}
+
+                            <div className="clear-both pt-6"></div>
+
+                            {/* Gambar Bawah */}
+                            {imgBawah.length > 0 && (
+                              <div className="w-full flex flex-col gap-4 mt-6">
+                                {imgBawah.map((g: any) => <img key={g.id} src={g.url} alt="Berita Bawah" className="w-full rounded-2xl shadow-md object-cover" />)}
+                              </div>
+                            )}
+                          </React.Fragment>
+                        );
+                      })()}
                    </div>
                 </div>
               </div>
@@ -2909,7 +3003,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
       {showEditorBerita && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto border border-emerald-100 animate-in zoom-in-95">
-            <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-100">
+            <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-100 sticky top-0 bg-white z-10">
               <h3 className="text-2xl font-extrabold text-gray-900 flex items-center">
                 <div className="bg-emerald-100 p-2 rounded-xl mr-3">
                    <Newspaper className="w-6 h-6 text-emerald-600" />
@@ -2959,7 +3053,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                 </div>
 
                 <div className="col-span-full">
-                  <label className="block text-sm font-bold text-gray-700 mb-3">Gambar / Foto Berita</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-3">Foto Sampul Utama</label>
                   <div className="flex items-center gap-5 bg-gray-50 p-4 rounded-2xl border border-gray-200">
                     {editDataBerita.gambar ? (
                       <img src={editDataBerita.gambar} alt="Preview" className="w-32 h-32 object-cover rounded-xl shadow-sm border border-gray-200" />
@@ -2969,24 +3063,66 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                       </div>
                     )}
                     <div className="flex-1">
-                      <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 hover:border-emerald-300 px-5 py-3 rounded-xl font-bold flex items-center justify-center transition-all shadow-sm">
+                      <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 hover:border-emerald-300 px-5 py-3 rounded-xl font-bold flex items-center justify-center transition-all shadow-sm w-max">
                         <Upload className="w-5 h-5 mr-2" /> Upload Foto Baru
                         <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
                       </label>
-                      <p className="text-sm text-gray-500 mt-3 font-medium">Otomatis di-compress agar memori tidak penuh.</p>
+                      <p className="text-sm text-gray-500 mt-3 font-medium">Gambar ini akan tampil di daftar berita utama.</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="col-span-full">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Ringkasan / Isi Berita</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Ringkasan / Isi Berita (Gunakan Enter untuk Baris Baru)</label>
                   <textarea 
-                    required rows={5}
+                    required rows={8}
                     value={editDataBerita.excerpt}
                     onChange={(e) => setEditDataBerita({...editDataBerita, excerpt: e.target.value})}
-                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium leading-relaxed" 
+                    className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium leading-relaxed" 
                   ></textarea>
                 </div>
+
+                {/* GALERI TAMBAHAN */}
+                <div className="col-span-full border-t border-gray-200 pt-6">
+                  <label className="block text-sm font-bold text-gray-700 mb-3">Foto Tambahan (Opsional - Muncul Dalam Isi Berita)</label>
+                  <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200">
+                    <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 px-5 py-3 rounded-xl font-bold flex items-center justify-center transition-all shadow-sm w-full">
+                      <Upload className="w-5 h-5 mr-2" /> Pilih Beberapa Foto Tambahan
+                      <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageTambahanUpload} />
+                    </label>
+                    
+                    {(editDataBerita.galeri && editDataBerita.galeri.length > 0) && (
+                      <div className="space-y-4 mt-5">
+                        {editDataBerita.galeri.map((g: any) => (
+                          <div key={g.id} className="flex items-center gap-4 bg-white p-3 rounded-xl border border-gray-200 shadow-sm animate-in fade-in">
+                            <img src={g.url} alt="Preview Tambahan" className="w-20 h-20 object-cover rounded-lg shadow-sm border border-gray-100" />
+                            <div className="flex-1">
+                              <label className="block text-xs font-bold text-gray-600 mb-1.5">Posisi Foto Terhadap Teks</label>
+                              <div className="relative">
+                                <select 
+                                  value={g.posisi} 
+                                  onChange={(e) => ubahPosisiGaleri(g.id, e.target.value)}
+                                  className="w-full pl-4 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-emerald-500 appearance-none"
+                                >
+                                  <option value="atas">Paling Atas (Di Bawah Judul)</option>
+                                  <option value="kiri">Kiri (Teks Mengalir di Kanan)</option>
+                                  <option value="kanan">Kanan (Teks Mengalir di Kiri)</option>
+                                  <option value="tengah">Tengah (Di Antara Paragraf)</option>
+                                  <option value="bawah">Paling Bawah</option>
+                                </select>
+                                <ChevronDown className="w-4 h-4 text-gray-500 absolute right-3 top-2.5 pointer-events-none" />
+                              </div>
+                            </div>
+                            <button type="button" onClick={() => hapusImageGaleri(g.id)} className="p-3 bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 rounded-lg transition-colors" title="Hapus Foto">
+                              <Trash2 className="w-5 h-5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
               </div>
               
               <div className="flex justify-end gap-4 pt-6 sticky bottom-0 bg-white p-4 -mx-8 -mb-8 rounded-b-3xl">
