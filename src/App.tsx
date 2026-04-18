@@ -2438,7 +2438,7 @@ function HalamanKontak() {
                  <div className="bg-white p-4 rounded-full shadow-2xl mb-4 group-hover:shadow-[0_0_30px_rgba(5,150,105,0.6)] transition-all">
                    <MapPin className="w-10 h-10 text-emerald-600" />
                  </div>
-                 <span className="font-extrabold text-2xl text-white drop-shadow-lg text-center px-4">Lokasi Kantor <br/> Desa Delta Upang</span>
+                 <span className="font-extrabold text-2xl text-white drop-shadow-lg text-center px-4">Titik Lokasi Kantor <br/> Desa Delta Upang</span>
               </div>
             </div>
           </div>
