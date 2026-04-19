@@ -1240,9 +1240,27 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
 
   // ----- Logika Kalender -----
   const today = new Date();
-  const currentMonth = today.getMonth();
-  const currentYear = today.getFullYear();
+  const [currentMonth, setCurrentMonth] = useState(today.getMonth());
+  const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const currentDay = today.getDate();
+
+  const handlePrevMonth = () => {
+    if (currentMonth === 0) {
+      setCurrentMonth(11);
+      setCurrentYear(currentYear - 1);
+    } else {
+      setCurrentMonth(currentMonth - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (currentMonth === 11) {
+      setCurrentMonth(0);
+      setCurrentYear(currentYear + 1);
+    } else {
+      setCurrentMonth(currentMonth + 1);
+    }
+  };
 
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
   const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
@@ -1434,13 +1452,32 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
             {/* Tampilan Kalender (Kiri) */}
             <div className="w-full lg:w-1/2 bg-white rounded-3xl shadow-[0_15px_40px_rgba(0,0,0,0.08)] border border-gray-100 p-6 sm:p-8 overflow-hidden">
               <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100">
-                <h3 className="text-2xl font-extrabold text-gray-900 flex items-center">
+                <div className="flex items-center">
                   <CalendarDays className="w-7 h-7 text-emerald-600 mr-3" />
-                  {monthNames[currentMonth]} {currentYear}
-                </h3>
+                  <div className="flex gap-1 items-center">
+                    <select 
+                      value={currentMonth} 
+                      onChange={(e) => setCurrentMonth(Number(e.target.value))}
+                      className="text-2xl font-extrabold text-gray-900 bg-transparent border-none outline-none cursor-pointer hover:text-emerald-600 appearance-none p-0 focus:ring-0 text-center"
+                    >
+                      {monthNames.map((m, idx) => (
+                        <option key={idx} value={idx} className="text-base font-medium text-gray-800">{m}</option>
+                      ))}
+                    </select>
+                    <select 
+                      value={currentYear} 
+                      onChange={(e) => setCurrentYear(Number(e.target.value))}
+                      className="text-2xl font-extrabold text-gray-900 bg-transparent border-none outline-none cursor-pointer hover:text-emerald-600 appearance-none p-0 focus:ring-0 text-center ml-1"
+                    >
+                      {Array.from({length: 15}, (_, i) => today.getFullYear() - 5 + i).map(y => (
+                        <option key={y} value={y} className="text-base font-medium text-gray-800">{y}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
                 <div className="flex gap-2">
-                  <button className="p-2 rounded-xl border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-emerald-600 transition"><ChevronRight className="w-5 h-5 rotate-180"/></button>
-                  <button className="p-2 rounded-xl border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-emerald-600 transition"><ChevronRight className="w-5 h-5"/></button>
+                  <button onClick={handlePrevMonth} className="p-2 rounded-xl border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-emerald-600 transition"><ChevronRight className="w-5 h-5 rotate-180"/></button>
+                  <button onClick={handleNextMonth} className="p-2 rounded-xl border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-emerald-600 transition"><ChevronRight className="w-5 h-5"/></button>
                 </div>
               </div>
               
@@ -1454,7 +1491,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
               
               <div className="grid grid-cols-7 gap-2 sm:gap-4">
                 {calendarDays.map((day, idx) => {
-                  const isToday = day === currentDay;
+                  const isToday = day === currentDay && currentMonth === today.getMonth() && currentYear === today.getFullYear();
                   // Mengecek apakah hari ini ada dalam data agenda (dinamis)
                   const hasAgenda = daftarAgenda.some((a: any) => {
                     if(!a.tanggal) return false;
