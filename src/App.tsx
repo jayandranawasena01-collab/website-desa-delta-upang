@@ -2241,6 +2241,16 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
   const kaurList = daftarPerangkat.filter((p: any) => p.jabatan.toUpperCase().includes('KAUR'));
   const kasunList = daftarPerangkat.filter((p: any) => p.jabatan.toUpperCase().includes('KASUN') || p.jabatan.toUpperCase().includes('DUSUN'));
 
+  // Logika Tinggi Dinamis Container Berdasarkan Jumlah Kasun
+  const maxKasunPerRow = 5;
+  const kasunRowCount = Math.ceil(kasunList.length / maxKasunPerRow);
+  
+  // Jika 0 Kasun, batang putus di garis Kaur (Y=620)
+  const trunkHeight = kasunRowCount === 0 ? 360 : 680 + ((kasunRowCount - 1) * 340);
+  
+  // Tinggi Container Dinamis
+  const containerHeight = kasunRowCount === 0 ? 950 : 1300 + ((kasunRowCount - 1) * 340);
+
   // Desain Card Perangkat Persis Screenshot
   const PerangkatCard = ({ p }: any) => (
     <div style={{ width: '160px', height: '260px' }} className="bg-white border-[3px] border-black overflow-hidden relative flex flex-col items-center shadow-lg group z-10">
@@ -2306,7 +2316,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
             ) : (
               <div className="w-full overflow-x-auto pb-10 custom-scrollbar">
                 {/* Wadah Absolut untuk struktur berjenjang yang presisi */}
-                <div style={{ width: '1300px', height: '1300px', position: 'relative', margin: '0 auto', marginTop: '40px' }} className="bg-white/50 rounded-3xl">
+                <div style={{ width: '1300px', height: `${containerHeight}px`, position: 'relative', margin: '0 auto', marginTop: '40px' }} className="bg-white/50 rounded-3xl">
 
                   {/* --- GARIS PENGHUBUNG (CONNECTOR LINES) --- */}
                   
@@ -2314,7 +2324,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                   <div style={{ position: 'absolute', left: '330px', top: '120px', width: '240px', borderTop: '4px dashed black', zIndex: 0 }}></div>
                   
                   {/* Batang Utama (Trunk) vertikal dari Kades turun ke Kasun */}
-                  <div style={{ position: 'absolute', left: '648px', top: '260px', width: '4px', height: '680px', backgroundColor: 'black', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '648px', top: '260px', width: '4px', height: `${trunkHeight}px`, backgroundColor: 'black', zIndex: 0 }}></div>
 
                   {/* Cabang Sekdes (Kanan) */}
                   <div style={{ position: 'absolute', left: '648px', top: '300px', width: '304px', height: '4px', backgroundColor: 'black', zIndex: 0 }}></div>
@@ -2336,13 +2346,6 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                   <div style={{ position: 'absolute', left: '148px', top: '420px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
                   <div style={{ position: 'absolute', left: '348px', top: '420px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
                   <div style={{ position: 'absolute', left: '548px', top: '420px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
-
-                  {/* Cabang Kasun (Paling Bawah) */}
-                  <div style={{ position: 'absolute', left: '348px', top: '940px', width: '604px', height: '4px', backgroundColor: 'black', zIndex: 0 }}></div>
-                  {/* Drop Kasun 1, 2, 3 */}
-                  <div style={{ position: 'absolute', left: '348px', top: '940px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
-                  <div style={{ position: 'absolute', left: '648px', top: '940px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
-                  <div style={{ position: 'absolute', left: '948px', top: '940px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
 
 
                   {/* --- KARTU PERANGKAT DESA (NODES) --- */}
@@ -2384,17 +2387,76 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                     {kaurList[2] && <PerangkatCard p={kaurList[2]} />}
                   </div>
 
-                  {/* Level 4: Kasun (Bawah Tengah) */}
-                  <div style={{ position: 'absolute', left: '270px', top: '980px', zIndex: 10 }}>
-                    {kasunList[0] && <PerangkatCard p={kasunList[0]} />}
-                  </div>
-                  <div style={{ position: 'absolute', left: '570px', top: '980px', zIndex: 10 }}>
-                    {kasunList[1] && <PerangkatCard p={kasunList[1]} />}
-                  </div>
-                  <div style={{ position: 'absolute', left: '870px', top: '980px', zIndex: 10 }}>
-                    {kasunList[2] && <PerangkatCard p={kasunList[2]} />}
-                  </div>
 
+                  {/* --- RENDER DINAMIS KEPALA DUSUN --- */}
+                  {(() => {
+                    const kasunGap = 220; // Jarak antar kotak kasun
+                    const baseLineY = 940; // Y-koordinat garis horizontal kasun baris pertama
+                    const baseBoxY = 980; // Y-koordinat kotak kasun baris pertama
+                    const rowHeightSpacing = 340; // Jarak antar baris kasun baru
+                    const centerX = 650; // Titik tengah container
+
+                    const rows = [];
+                    for (let i = 0; i < kasunList.length; i += maxKasunPerRow) {
+                      rows.push(kasunList.slice(i, i + maxKasunPerRow));
+                    }
+
+                    return rows.map((rowItems, rowIndex) => {
+                      const currentLineY = baseLineY + (rowIndex * rowHeightSpacing);
+                      const currentBoxY = baseBoxY + (rowIndex * rowHeightSpacing);
+                      const count = rowItems.length;
+                      
+                      // Menghitung offset untuk meletakkan kotak presisi di tengah
+                      const startOffset = -((count - 1) / 2) * kasunGap;
+
+                      return (
+                        <React.Fragment key={`kasun-row-${rowIndex}`}>
+                          {/* Garis Horizontal Penghubung (Hanya muncul jika lebih dari 1 kasun di baris tersebut) */}
+                          {count > 1 && (
+                            <div style={{
+                              position: 'absolute',
+                              left: `${(centerX + startOffset) - 2}px`,
+                              top: `${currentLineY}px`,
+                              width: `${((count - 1) * kasunGap) + 4}px`,
+                              height: '4px',
+                              backgroundColor: 'black',
+                              zIndex: 0
+                            }}></div>
+                          )}
+
+                          {/* Garis Vertikal Drop & Kotak Kasun */}
+                          {rowItems.map((kasun: any, idx: number) => {
+                            const itemCenterX = centerX + startOffset + (idx * kasunGap);
+                            return (
+                              <React.Fragment key={`kasun-item-${kasun.id}`}>
+                                {/* Drop Vertikal */}
+                                <div style={{
+                                  position: 'absolute',
+                                  left: `${itemCenterX - 2}px`,
+                                  top: `${currentLineY}px`,
+                                  width: '4px',
+                                  height: '40px',
+                                  backgroundColor: 'black',
+                                  zIndex: 0
+                                }}></div>
+                                
+                                {/* Kotak Card Perangkat */}
+                                <div style={{
+                                  position: 'absolute',
+                                  left: `${itemCenterX - 80}px`,
+                                  top: `${currentBoxY}px`,
+                                  zIndex: 10
+                                }}>
+                                  <PerangkatCard p={kasun} />
+                                </div>
+                              </React.Fragment>
+                            );
+                          })}
+                        </React.Fragment>
+                      );
+                    });
+                  })()}
+                  
                 </div>
               </div>
             )}
