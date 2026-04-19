@@ -3,7 +3,8 @@ import {
   Menu, X, Home, Info, Users, Newspaper, Phone, 
   MapPin, Mail, ChevronRight, Landmark, ArrowRight,
   LogIn, LogOut, Edit, Trash2, Plus, Image as ImageIcon, Save, Upload, CheckCircle2,
-  BookOpen, Target, Map, Building2, ChevronDown, CalendarDays, PieChart, TrendingUp, Activity
+  BookOpen, Target, Map, Building2, ChevronDown, CalendarDays, PieChart, TrendingUp, Activity,
+  ChevronLeft, ChevronsLeft, ChevronsRight
 } from 'lucide-react';
 
 // ================= FIREBASE CLOUD STORAGE SETUP =================
@@ -1243,6 +1244,17 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const currentDay = today.getDate();
+  const [infoTanggal, setInfoTanggal] = useState<{tanggal: string, keterangan: string} | null>(null);
+
+  const handlePrevYear = () => {
+    setCurrentYear(currentYear - 1);
+    setInfoTanggal(null);
+  };
+
+  const handleNextYear = () => {
+    setCurrentYear(currentYear + 1);
+    setInfoTanggal(null);
+  };
 
   const handlePrevMonth = () => {
     if (currentMonth === 0) {
@@ -1251,6 +1263,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
     } else {
       setCurrentMonth(currentMonth - 1);
     }
+    setInfoTanggal(null);
   };
 
   const handleNextMonth = () => {
@@ -1260,6 +1273,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
     } else {
       setCurrentMonth(currentMonth + 1);
     }
+    setInfoTanggal(null);
   };
 
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
@@ -1282,6 +1296,57 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
     const d = new Date(a.tanggal);
     return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
   }).sort((a: any, b: any) => new Date(a.tanggal).getTime() - new Date(b.tanggal).getTime());
+
+  // Fungsi Deteksi Hari Libur Nasional & Keagamaan
+  const getHolidays = (d: number, m: number, y: number) => {
+    const holidays = [];
+    
+    // Libur Statis (Tanggal Pasti Setiap Tahun)
+    if (d === 1 && m === 0) holidays.push("Tahun Baru Masehi");
+    if (d === 1 && m === 4) holidays.push("Hari Buruh Internasional");
+    if (d === 1 && m === 5) holidays.push("Hari Lahir Pancasila");
+    if (d === 17 && m === 7) holidays.push("Hari Kemerdekaan RI");
+    if (d === 25 && m === 11) holidays.push("Hari Raya Natal");
+    
+    // Prediksi/Jadwal Libur Dinamis Keagamaan (Contoh hardcode untuk 2024 - 2026)
+    if (y === 2024) {
+      if (d === 8 && m === 1) holidays.push("Isra Mikraj Nabi Muhammad SAW");
+      if (d === 10 && m === 1) holidays.push("Tahun Baru Imlek");
+      if (d === 11 && m === 2) holidays.push("Hari Suci Nyepi");
+      if (d === 29 && m === 2) holidays.push("Wafat Isa Almasih");
+      if ((d === 10 || d === 11) && m === 3) holidays.push("Hari Raya Idul Fitri");
+      if (d === 9 && m === 4) holidays.push("Kenaikan Isa Almasih");
+      if (d === 23 && m === 4) holidays.push("Hari Raya Waisak");
+      if (d === 17 && m === 5) holidays.push("Hari Raya Idul Adha");
+      if (d === 7 && m === 6) holidays.push("Tahun Baru Islam");
+      if (d === 16 && m === 8) holidays.push("Maulid Nabi Muhammad SAW");
+    } else if (y === 2025) {
+      if (d === 27 && m === 0) holidays.push("Isra Mikraj Nabi Muhammad SAW");
+      if (d === 29 && m === 0) holidays.push("Tahun Baru Imlek");
+      if (d === 29 && m === 2) holidays.push("Hari Suci Nyepi");
+      if ((d === 31 && m === 2) || (d === 1 && m === 3)) holidays.push("Hari Raya Idul Fitri");
+      if (d === 18 && m === 3) holidays.push("Wafat Isa Almasih");
+      if (d === 12 && m === 4) holidays.push("Hari Raya Waisak");
+      if (d === 29 && m === 4) holidays.push("Kenaikan Isa Almasih");
+      if (d === 6 && m === 5) holidays.push("Hari Raya Idul Adha");
+      if (d === 26 && m === 5) holidays.push("Tahun Baru Islam");
+      if (d === 5 && m === 8) holidays.push("Maulid Nabi Muhammad SAW");
+    } else if (y === 2026) {
+      if (d === 16 && m === 0) holidays.push("Isra Mikraj Nabi Muhammad SAW");
+      if (d === 17 && m === 0) holidays.push("Tahun Baru Imlek");
+      if (d === 19 && m === 2) holidays.push("Hari Suci Nyepi");
+      if (d === 20 && m === 2) holidays.push("Hari Raya Idul Fitri");
+      if (d === 21 && m === 2) holidays.push("Hari Raya Idul Fitri");
+      if (d === 3 && m === 3) holidays.push("Wafat Isa Almasih");
+      if (d === 14 && m === 4) holidays.push("Kenaikan Isa Almasih");
+      if (d === 31 && m === 4) holidays.push("Hari Raya Waisak");
+      if (d === 27 && m === 4) holidays.push("Hari Raya Idul Adha");
+      if (d === 16 && m === 5) holidays.push("Tahun Baru Islam");
+      if (d === 25 && m === 7) holidays.push("Maulid Nabi Muhammad SAW");
+    }
+
+    return holidays;
+  };
 
   return (
     <div className="animate-in fade-in duration-700">
@@ -1450,34 +1515,19 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
 
           <div className="max-w-5xl mx-auto flex flex-col lg:flex-row gap-10 lg:gap-16">
             {/* Tampilan Kalender (Kiri) */}
-            <div className="w-full lg:w-1/2 bg-white rounded-3xl shadow-[0_15px_40px_rgba(0,0,0,0.08)] border border-gray-100 p-6 sm:p-8 overflow-hidden">
+            <div className="w-full lg:w-1/2 bg-white rounded-3xl shadow-[0_15px_40px_rgba(0,0,0,0.08)] border border-gray-100 p-6 sm:p-8 flex flex-col relative overflow-hidden">
               <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100">
                 <div className="flex items-center">
                   <CalendarDays className="w-7 h-7 text-emerald-600 mr-3" />
-                  <div className="flex gap-1 items-center">
-                    <select 
-                      value={currentMonth} 
-                      onChange={(e) => setCurrentMonth(Number(e.target.value))}
-                      className="text-2xl font-extrabold text-gray-900 bg-transparent border-none outline-none cursor-pointer hover:text-emerald-600 appearance-none p-0 focus:ring-0 text-center"
-                    >
-                      {monthNames.map((m, idx) => (
-                        <option key={idx} value={idx} className="text-base font-medium text-gray-800">{m}</option>
-                      ))}
-                    </select>
-                    <select 
-                      value={currentYear} 
-                      onChange={(e) => setCurrentYear(Number(e.target.value))}
-                      className="text-2xl font-extrabold text-gray-900 bg-transparent border-none outline-none cursor-pointer hover:text-emerald-600 appearance-none p-0 focus:ring-0 text-center ml-1"
-                    >
-                      {Array.from({length: 15}, (_, i) => today.getFullYear() - 5 + i).map(y => (
-                        <option key={y} value={y} className="text-base font-medium text-gray-800">{y}</option>
-                      ))}
-                    </select>
-                  </div>
+                  <span className="text-xl font-extrabold text-gray-900 min-w-[140px]">
+                    {monthNames[currentMonth]} {currentYear}
+                  </span>
                 </div>
-                <div className="flex gap-2">
-                  <button onClick={handlePrevMonth} className="p-2 rounded-xl border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-emerald-600 transition"><ChevronRight className="w-5 h-5 rotate-180"/></button>
-                  <button onClick={handleNextMonth} className="p-2 rounded-xl border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-emerald-600 transition"><ChevronRight className="w-5 h-5"/></button>
+                <div className="flex gap-1.5">
+                  <button onClick={handlePrevYear} className="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-emerald-600 transition" title="Tahun Sebelumnya"><ChevronsLeft className="w-4 h-4"/></button>
+                  <button onClick={handlePrevMonth} className="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-emerald-600 transition" title="Bulan Sebelumnya"><ChevronLeft className="w-4 h-4"/></button>
+                  <button onClick={handleNextMonth} className="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-emerald-600 transition" title="Bulan Berikutnya"><ChevronRight className="w-4 h-4"/></button>
+                  <button onClick={handleNextYear} className="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-emerald-600 transition" title="Tahun Berikutnya"><ChevronsRight className="w-4 h-4"/></button>
                 </div>
               </div>
               
@@ -1489,41 +1539,82 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                 ))}
               </div>
               
-              <div className="grid grid-cols-7 gap-2 sm:gap-4">
+              <div className="grid grid-cols-7 gap-2 sm:gap-4 flex-grow content-start">
                 {calendarDays.map((day, idx) => {
                   const isToday = day === currentDay && currentMonth === today.getMonth() && currentYear === today.getFullYear();
-                  // Mengecek apakah hari ini ada dalam data agenda (dinamis)
-                  const hasAgenda = daftarAgenda.some((a: any) => {
+                  
+                  // Deteksi Agenda
+                  const agendaHariIni = daftarAgenda.filter((a: any) => {
                     if(!a.tanggal) return false;
                     const d = new Date(a.tanggal);
                     return d.getDate() === day && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
                   });
+                  const hasAgenda = agendaHariIni.length > 0;
+                  
+                  // Deteksi Hari Minggu & Libur Nasional
                   const isSunday = (idx % 7) === 0;
+                  const liburan = day ? getHolidays(day, currentMonth, currentYear) : [];
+                  const isHoliday = liburan.length > 0;
+
+                  const isRedDay = isHoliday || isSunday;
 
                   return (
                     <div key={idx} className="aspect-square flex flex-col items-center justify-center relative">
                       {day && (
                         <div 
-                          className={`w-full h-full flex items-center justify-center rounded-xl font-bold text-sm sm:text-base transition-all cursor-pointer ${
+                          onClick={() => {
+                            let ket = [];
+                            if (isHoliday) ket.push(`Hari Libur: ${liburan.join(', ')}`);
+                            if (hasAgenda) {
+                               ket.push(`Agenda Desa: ${agendaHariIni.map((a:any) => a.judul).join(', ')}`);
+                            }
+                            
+                            if (ket.length > 0) {
+                              setInfoTanggal({
+                                tanggal: `${day} ${monthNames[currentMonth]} ${currentYear}`,
+                                keterangan: ket.join(' | ')
+                              });
+                            } else {
+                              setInfoTanggal({
+                                tanggal: `${day} ${monthNames[currentMonth]} ${currentYear}`,
+                                keterangan: "Tidak ada catatan hari libur peringatan nasional atau agenda desa pada tanggal ini."
+                              });
+                            }
+                          }}
+                          className={`w-full h-full flex flex-col items-center justify-center rounded-xl font-bold text-sm sm:text-base transition-all cursor-pointer ${
                             isToday 
                               ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/40 transform scale-110 z-10' 
                               : hasAgenda
                                 ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'
-                                : isSunday 
-                                  ? 'text-rose-500 hover:bg-gray-50' 
+                                : isRedDay 
+                                  ? 'text-rose-500 hover:bg-rose-50' 
                                   : 'text-gray-700 hover:bg-gray-50'
                           }`}
                         >
                           {day}
-                          {hasAgenda && !isToday && (
-                            <span className="absolute bottom-1.5 w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
-                          )}
+                          <div className="flex gap-0.5 absolute bottom-1.5">
+                             {hasAgenda && !isToday && <span className="w-1 h-1 bg-emerald-500 rounded-full"></span>}
+                             {isHoliday && !isToday && !hasAgenda && <span className="w-1 h-1 bg-rose-500 rounded-full"></span>}
+                          </div>
                         </div>
                       )}
                     </div>
                   );
                 })}
               </div>
+
+              {/* Kotak Info Tanggal (Muncul Jika Tanggal Diklik) */}
+              {infoTanggal && (
+                <div className="mt-6 p-4 bg-emerald-50 border border-emerald-100 rounded-xl flex items-start animate-in fade-in slide-in-from-bottom-2">
+                  <Info className="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-bold text-emerald-900 text-sm mb-1">{infoTanggal.tanggal}</h4>
+                    <p className="text-sm text-emerald-700 font-medium leading-relaxed">
+                      {infoTanggal.keterangan}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Agenda List (Kanan) */}
@@ -1540,7 +1631,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                 )}
               </div>
               
-              <div className="space-y-4 flex-grow overflow-y-auto custom-scrollbar pr-2 max-h-[380px]">
+              <div className="space-y-4 flex-grow overflow-y-auto custom-scrollbar pr-2 max-h-[460px]">
                 {agendaBulanIni.length === 0 ? (
                    <div className="text-gray-500 italic py-10 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">Belum ada agenda pada bulan ini.</div>
                 ) : (
