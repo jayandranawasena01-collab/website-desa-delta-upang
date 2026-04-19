@@ -205,13 +205,36 @@ export default function App() {
   const [user, setUser] = useState<any>(null);
   const [isDbConnected, setIsDbConnected] = useState(false); 
   const [dbError, setDbError] = useState(""); 
-  const [currentPage, setCurrentPage] = useState('beranda');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // State Active Tabs
-  const [activeProfilTab, setActiveProfilTab] = useState<any>(null);
-  const [activePemerintahTab, setActivePemerintahTab] = useState('perangkat');
-  const [activeBeritaTab, setActiveBeritaTab] = useState('list-berita');
+  // State Active Pages & Tabs disimpan di localStorage agar tidak kembali ke beranda saat refresh
+  const [currentPage, setCurrentPage] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('delta_upang_currentPage') || 'beranda';
+    }
+    return 'beranda';
+  });
+
+  const [activeProfilTab, setActiveProfilTab] = useState<any>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('delta_upang_activeProfilTab') || null;
+    }
+    return null;
+  });
+
+  const [activePemerintahTab, setActivePemerintahTab] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('delta_upang_activePemerintahTab') || 'perangkat';
+    }
+    return 'perangkat';
+  });
+
+  const [activeBeritaTab, setActiveBeritaTab] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('delta_upang_activeBeritaTab') || 'list-berita';
+    }
+    return 'list-berita';
+  });
   
   // States untuk mengatur dropdown
   const [isDesktopProfilOpen, setIsDesktopProfilOpen] = useState(false);
@@ -445,9 +468,22 @@ export default function App() {
 
   const navigateTo = (page: string, tabId: any = null) => {
     setCurrentPage(page);
-    if (page === 'profil' && tabId !== null) setActiveProfilTab(tabId);
-    if (page === 'pemerintah' && tabId !== null) setActivePemerintahTab(tabId);
-    if (page === 'berita' && tabId !== null) setActiveBeritaTab(tabId);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('delta_upang_currentPage', page);
+    }
+
+    if (page === 'profil' && tabId !== null) {
+      setActiveProfilTab(tabId);
+      if (typeof window !== 'undefined') localStorage.setItem('delta_upang_activeProfilTab', tabId);
+    }
+    if (page === 'pemerintah' && tabId !== null) {
+      setActivePemerintahTab(tabId);
+      if (typeof window !== 'undefined') localStorage.setItem('delta_upang_activePemerintahTab', tabId);
+    }
+    if (page === 'berita' && tabId !== null) {
+      setActiveBeritaTab(tabId);
+      if (typeof window !== 'undefined') localStorage.setItem('delta_upang_activeBeritaTab', tabId);
+    }
 
     setIsMobileMenuOpen(false);
     setIsMobileProfilOpen(false);
@@ -595,7 +631,7 @@ export default function App() {
                     if (currentPage === 'profil') {
                       setIsDesktopProfilOpen(!isDesktopProfilOpen);
                     } else {
-                      navigateTo('profil', daftarProfil[0]?.id);
+                      navigateTo('profil', activeProfilTab || daftarProfil[0]?.id);
                       setIsDesktopProfilOpen(true);
                     }
                   }}
@@ -646,7 +682,7 @@ export default function App() {
                     if (currentPage === 'pemerintah') {
                       setIsDesktopPemerintahOpen(!isDesktopPemerintahOpen);
                     } else {
-                      navigateTo('pemerintah', 'perangkat');
+                      navigateTo('pemerintah', activePemerintahTab || 'perangkat');
                       setIsDesktopPemerintahOpen(true);
                     }
                   }}
@@ -697,7 +733,7 @@ export default function App() {
                     if (currentPage === 'berita') {
                       setIsDesktopBeritaOpen(!isDesktopBeritaOpen);
                     } else {
-                      navigateTo('berita', 'list-berita');
+                      navigateTo('berita', activeBeritaTab || 'list-berita');
                       setIsDesktopBeritaOpen(true);
                     }
                   }}
@@ -3268,8 +3304,14 @@ function HalamanKontak() {
             </div>
           </div>
 
+          {/* Menambahkan tag tautan (a) untuk membuat peta dapat diklik */}
           <div className="bg-white p-3 rounded-3xl shadow-xl h-full min-h-[500px] border border-gray-100">
-            <div className="w-full h-full bg-gray-100 rounded-2xl flex flex-col items-center justify-center text-gray-500 overflow-hidden relative group cursor-pointer">
+            <a 
+              href="https://maps.app.goo.gl/YUxS68MLjqc1JLrR6" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="block w-full h-full bg-gray-100 rounded-2xl flex flex-col items-center justify-center text-gray-500 overflow-hidden relative group cursor-pointer"
+            >
               <img 
                 src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
                 alt="Peta" 
@@ -3282,7 +3324,7 @@ function HalamanKontak() {
                  </div>
                  <span className="font-extrabold text-2xl text-white drop-shadow-lg text-center px-4">Lokasi Kantor <br/> Desa Delta Upang</span>
               </div>
-            </div>
+            </a>
           </div>
         </div>
       </div>
