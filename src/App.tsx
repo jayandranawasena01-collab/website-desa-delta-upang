@@ -499,7 +499,7 @@ export default function App() {
     const username = e.target.username.value;
     const password = e.target.password.value;
     
-    if (username === 'Admin' && password === 'admin2311') {
+    if (username === 'Delta Upang' && password === 'admin2311') {
       setIsAdmin(true);
       setShowLoginModal(false);
     } else {
