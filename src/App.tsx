@@ -217,7 +217,8 @@ export default function App() {
 
   const [activeProfilTab, setActiveProfilTab] = useState<any>(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('delta_upang_activeProfilTab') || null;
+      const saved = localStorage.getItem('delta_upang_activeProfilTab');
+      return saved ? saved : null;
     }
     return null;
   });
@@ -474,7 +475,8 @@ export default function App() {
 
     if (page === 'profil' && tabId !== null) {
       setActiveProfilTab(tabId);
-      if (typeof window !== 'undefined') localStorage.setItem('delta_upang_activeProfilTab', tabId);
+      // Diubah ke string untuk keamanan penyimpanan local storage
+      if (typeof window !== 'undefined') localStorage.setItem('delta_upang_activeProfilTab', String(tabId));
     }
     if (page === 'pemerintah' && tabId !== null) {
       setActivePemerintahTab(tabId);
@@ -499,7 +501,7 @@ export default function App() {
     const username = e.target.username.value;
     const password = e.target.password.value;
     
-    if (username === 'Delta Upang' && password === 'admin2311') {
+    if (username === 'Admin' && password === 'admin2311') {
       setIsAdmin(true);
       setShowLoginModal(false);
     } else {
@@ -658,12 +660,12 @@ export default function App() {
                           navigateTo('profil', profil.id);
                         }}
                         className={`text-left px-5 py-3 text-sm font-bold transition-all duration-200 relative overflow-hidden ${
-                           activeProfilTab === profil.id && currentPage === 'profil'
+                           String(activeProfilTab) === String(profil.id) && currentPage === 'profil'
                              ? 'text-emerald-700 bg-emerald-50/80'
                              : 'text-gray-600 hover:bg-gray-50 hover:text-emerald-600'
                         }`}
                       >
-                         {activeProfilTab === profil.id && currentPage === 'profil' && (
+                         {String(activeProfilTab) === String(profil.id) && currentPage === 'profil' && (
                            <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-400 to-emerald-600"></span>
                          )}
                          {profil.judul}
@@ -849,7 +851,7 @@ export default function App() {
                         key={profil.id}
                         onClick={() => navigateTo('profil', profil.id)}
                         className={`text-left px-6 py-3.5 text-sm font-bold transition-colors border-l-2 ${
-                          activeProfilTab === profil.id && currentPage === 'profil'
+                          String(activeProfilTab) === String(profil.id) && currentPage === 'profil'
                             ? 'border-emerald-400 text-white bg-emerald-800/50'
                             : 'border-transparent text-emerald-200 hover:bg-emerald-800 hover:text-white'
                         }`}
@@ -1843,12 +1845,14 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
   useEffect(() => {
     if (initialTabId) {
       setActiveTabId(initialTabId);
-    } else if (daftarProfil.length > 0 && !daftarProfil.find((p: any) => p.id === activeTabId)) {
+    // Menggunakan perbandingan String() untuk mengatasi konflik tipe data Number vs String dari localStorage
+    } else if (daftarProfil.length > 0 && !daftarProfil.find((p: any) => String(p.id) === String(activeTabId))) {
       setActiveTabId(daftarProfil[0].id);
     }
   }, [initialTabId, daftarProfil, activeTabId]);
 
-  const activeProfil = daftarProfil.find((p: any) => p.id === activeTabId);
+  // Menggunakan perbandingan String() agar selalu cocok
+  const activeProfil = daftarProfil.find((p: any) => String(p.id) === String(activeTabId));
 
   const handleDelete = (id: any) => {
     showConfirm('Yakin ingin menghapus bagian profil ini?', () => {
