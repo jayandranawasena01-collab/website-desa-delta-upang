@@ -1403,15 +1403,15 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                   <div className="text-emerald-200 font-bold text-xs sm:text-lg tracking-wide">{stat.label}</div>
 
                   {stat.id === 1 && (
-                    <div className="flex justify-center gap-2 sm:gap-6 mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-white/10 w-full">
-                      <div className="flex flex-col items-center">
-                        <span className="font-extrabold text-white text-sm sm:text-xl">{displayLaki}</span>
-                        <span className="text-[9px] sm:text-[11px] text-emerald-100/90 font-bold uppercase tracking-wider mt-0.5 text-center break-words">Laki-laki</span>
+                    <div className="flex justify-center items-center gap-1 sm:gap-4 mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-white/10 w-full px-1">
+                      <div className="flex flex-col items-center flex-1 min-w-0">
+                        <span className="font-extrabold text-white text-xs sm:text-xl truncate w-full text-center">{displayLaki}</span>
+                        <span className="text-[8px] sm:text-[10px] text-emerald-100/90 font-bold uppercase tracking-wider mt-0.5 text-center truncate w-full">Laki-laki</span>
                       </div>
-                      <div className="w-px bg-white/20"></div>
-                      <div className="flex flex-col items-center">
-                        <span className="font-extrabold text-white text-sm sm:text-xl">{displayPerempuan}</span>
-                        <span className="text-[9px] sm:text-[11px] text-emerald-100/90 font-bold uppercase tracking-wider mt-0.5 text-center break-words">Perempuan</span>
+                      <div className="w-px bg-white/20 h-6 sm:h-8 mx-1"></div>
+                      <div className="flex flex-col items-center flex-1 min-w-0">
+                        <span className="font-extrabold text-white text-xs sm:text-xl truncate w-full text-center">{displayPerempuan}</span>
+                        <span className="text-[8px] sm:text-[10px] text-emerald-100/90 font-bold uppercase tracking-wider mt-0.5 text-center truncate w-full">Perempuan</span>
                       </div>
                     </div>
                   )}
@@ -2021,8 +2021,15 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                       </div>
                     </div>
                   ) : (
-                    <div className="text-gray-700 text-lg md:text-xl leading-relaxed whitespace-pre-wrap font-medium">
-                      {activeProfil.konten}
+                    <div className="text-gray-700 text-lg md:text-xl leading-relaxed font-medium">
+                      {activeProfil.konten.split('\n').map((paragraph: string, index: number) => {
+                        if (!paragraph.trim()) return <div key={`space-${index}`} className="h-4"></div>;
+                        return (
+                          <p key={index} className="text-justify mb-4" style={{ textIndent: '2cm' }}>
+                            {paragraph}
+                          </p>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -2242,7 +2249,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
   const kasunList = daftarPerangkat.filter((p: any) => p.jabatan.toUpperCase().includes('KASUN') || p.jabatan.toUpperCase().includes('DUSUN'));
 
   // Logika Tinggi Dinamis Container Berdasarkan Jumlah Kasun
-  const maxKasunPerRow = 5;
+  const maxKasunPerRow = 6; // Maksimal 6 Kasun per baris sesuai instruksi
   const kasunRowCount = Math.ceil(kasunList.length / maxKasunPerRow);
   
   // Jika 0 Kasun, batang putus di garis Kaur (Y=620)
@@ -2390,7 +2397,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
 
                   {/* --- RENDER DINAMIS KEPALA DUSUN --- */}
                   {(() => {
-                    const kasunGap = 220; // Jarak antar kotak kasun
+                    const kasunGap = 200; // Jarak antar kotak kasun (dimodifikasi agar muat 6 kotak)
                     const baseLineY = 940; // Y-koordinat garis horizontal kasun baris pertama
                     const baseBoxY = 980; // Y-koordinat kotak kasun baris pertama
                     const rowHeightSpacing = 340; // Jarak antar baris kasun baru
