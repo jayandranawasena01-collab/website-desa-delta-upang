@@ -1403,15 +1403,14 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                   <div className="text-emerald-200 font-bold text-xs sm:text-lg tracking-wide">{stat.label}</div>
 
                   {stat.id === 1 && (
-                    <div className="flex justify-center items-center gap-1 sm:gap-4 mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-white/10 w-full px-1">
-                      <div className="flex flex-col items-center flex-1 min-w-0">
-                        <span className="font-extrabold text-white text-xs sm:text-xl truncate w-full text-center">{displayLaki}</span>
-                        <span className="text-[8px] sm:text-[10px] text-emerald-100/90 font-bold uppercase tracking-wider mt-0.5 text-center truncate w-full">Laki-laki</span>
+                    <div className="flex justify-between items-stretch gap-2 mt-4 pt-4 border-t border-white/20 w-full">
+                      <div className="flex flex-col items-center justify-center w-1/2 bg-white/10 rounded-xl py-2 px-1 shadow-inner border border-white/5">
+                        <span className="font-black text-white text-sm sm:text-xl leading-none drop-shadow-md">{displayLaki}</span>
+                        <span className="text-[9px] sm:text-[11px] text-emerald-100 font-bold uppercase tracking-wider mt-1.5 text-center break-words whitespace-normal leading-tight w-full">Laki-laki</span>
                       </div>
-                      <div className="w-px bg-white/20 h-6 sm:h-8 mx-1"></div>
-                      <div className="flex flex-col items-center flex-1 min-w-0">
-                        <span className="font-extrabold text-white text-xs sm:text-xl truncate w-full text-center">{displayPerempuan}</span>
-                        <span className="text-[8px] sm:text-[10px] text-emerald-100/90 font-bold uppercase tracking-wider mt-0.5 text-center truncate w-full">Perempuan</span>
+                      <div className="flex flex-col items-center justify-center w-1/2 bg-white/10 rounded-xl py-2 px-1 shadow-inner border border-white/5">
+                        <span className="font-black text-white text-sm sm:text-xl leading-none drop-shadow-md">{displayPerempuan}</span>
+                        <span className="text-[9px] sm:text-[11px] text-emerald-100 font-bold uppercase tracking-wider mt-1.5 text-center break-words whitespace-normal leading-tight w-full">Perempuan</span>
                       </div>
                     </div>
                   )}
