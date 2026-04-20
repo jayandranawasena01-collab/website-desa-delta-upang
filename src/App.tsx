@@ -1102,6 +1102,59 @@ export default function App() {
         </div>
       </footer>
 
+      {/* Modal Login Elegan */}
+      {showLoginModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 animate-in zoom-in-95 duration-300 border border-emerald-100">
+            <div className="flex justify-between items-center mb-8">
+              <h3 className="text-2xl font-extrabold text-gray-800 flex items-center tracking-tight">
+                <div className="bg-emerald-100 p-2 rounded-xl mr-3">
+                  <LogIn className="w-6 h-6 text-emerald-600" />
+                </div>
+                Login Admin
+              </h3>
+              <button onClick={() => setShowLoginModal(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <form onSubmit={handleLogin} className="space-y-5">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Username</label>
+                <label className="block text-sm text-gray-500 mb-2">Hubungi admin untuk mendapatkan username dan password</label>
+                <input 
+                  type="text" 
+                  name="username" 
+                  required
+                  className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" 
+                  placeholder="Masukkan username"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Password</label>
+                <input 
+                  type="password" 
+                  name="password" 
+                  required
+                  className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" 
+                  placeholder="Masukkan password"
+                />
+              </div>
+              <button 
+                type="submit" 
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-[0_8px_20px_rgba(5,150,105,0.3)] hover:shadow-[0_8px_25px_rgba(5,150,105,0.4)] hover:-translate-y-0.5 mt-4"
+              >
+                Masuk ke Dasbor
+              </button>
+              <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100 mt-4">
+                <p className="text-xs text-emerald-800 text-center font-medium">
+                  Peringatan! :<br/>Jangan berikan informasi apapun mengenai username dan password kepada pihak yang tidak bertanggung jawab
+                </p>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Floating Music Button (Pojok Kiri Bawah) */}
       <div className="fixed bottom-6 left-6 md:bottom-8 md:left-8 z-50 animate-in fade-in slide-in-from-bottom-10 group">
         <button
