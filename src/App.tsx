@@ -1066,7 +1066,7 @@ export default function App() {
                   <div className="bg-white/5 p-2 rounded-lg group-hover:bg-emerald-900/50 transition mr-4">
                     <Mail className="w-5 h-5 text-emerald-400" />
                   </div>
-                  <--!<span>deltaupang12@gmail.com</span>-->
+                  <span>deltaupang12@gmail.com</span>
                 </li>
               </ul>
             </div>
