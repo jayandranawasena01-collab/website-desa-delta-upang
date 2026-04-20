@@ -260,6 +260,30 @@ export default function App() {
   const showAlert = (message: string) => setDialog({ isOpen: true, type: 'alert', message, onConfirm: null });
   const showConfirm = (message: string, onConfirm: any) => setDialog({ isOpen: true, type: 'confirm', message, onConfirm });
   
+  // Background Music State
+  const [isPlayingMusic, setIsPlayingMusic] = useState(false);
+
+  // ================= MUSIK LATAR (AUTOPLAY PADA INTERAKSI PERTAMA) =================
+  useEffect(() => {
+    const startMusic = () => {
+      if (!isPlayingMusic) {
+        setIsPlayingMusic(true);
+      }
+    };
+
+    // Browser modern memblokir autoplay suara tanpa interaksi user.
+    // Jadi kita mulai memutar musik tersembunyi tepat saat user pertama kali klik/sentuh layar.
+    document.addEventListener('click', startMusic, { once: true });
+    document.addEventListener('touchstart', startMusic, { once: true });
+    document.addEventListener('keydown', startMusic, { once: true });
+
+    return () => {
+      document.removeEventListener('click', startMusic);
+      document.removeEventListener('touchstart', startMusic);
+      document.removeEventListener('keydown', startMusic);
+    };
+  }, [isPlayingMusic]);
+
   // ================= INIT STATE =================
   const getInitialData = (key: string, fallback: any) => {
     if (typeof window !== 'undefined') {
@@ -1144,6 +1168,20 @@ export default function App() {
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {/* Hidden Background Music (Youtube iframe) - Starts on first user interaction */}
+      {isPlayingMusic && (
+        <div className="fixed bottom-0 left-0 w-0 h-0 opacity-0 pointer-events-none overflow-hidden z-[-1]">
+          <iframe
+            width="1"
+            height="1"
+            src="https://www.youtube.com/embed/gSpL-6AQy5I?autoplay=1&loop=1&playlist=gSpL-6AQy5I&controls=0&showinfo=0&autohide=1"
+            title="Background Music"
+            allow="autoplay"
+            frameBorder="0"
+          ></iframe>
         </div>
       )}
     </div>
