@@ -627,8 +627,7 @@ export default function App() {
                 </div>
                 <div className="hidden sm:block">
                   <h1 className="text-2xl font-extrabold tracking-tight leading-none drop-shadow-md">Desa Delta Upang</h1>
-                  <p className="text-xs text-emerald-200 font-medium mt-1 tracking-wide">Kecamatan Makarti Jaya</p>
-                  <p className="text-xs text-emerald-200 font-medium mt-1 tracking-wide">Kabupaten Banyuasin</p>
+                  <p className="text-xs text-emerald-200 font-medium mt-1 tracking-wide">Kec. Makarti Jaya, Kab Banyuasin</p>
                   <p className="text-xs text-emerald-200 font-medium mt-1 tracking-wide">Provinsi Sumatera Selatan</p>
                 </div>
               </div>
