@@ -261,6 +261,7 @@ export default function App() {
     return false;
   });
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false); // State untuk Sticky Header
 
   // Custom Modal Alert/Confirm
   const [dialog, setDialog] = useState<any>({ isOpen: false, type: 'alert', message: '', onConfirm: null });
@@ -284,13 +285,17 @@ export default function App() {
   const [daftarProfil, setDaftarProfil] = useState(() => getInitialData('delta_upang_profil', initialProfil));
   const [dataBeranda, setDataBeranda] = useState(() => getInitialData('delta_upang_beranda', initialBeranda));
 
-  // ================= MONITORING KONEKSI =================
+  // ================= MONITORING KONEKSI & SCROLL =================
   useEffect(() => {
     const handleOnline = () => {};
     const handleOffline = () => setIsDbConnected(false); 
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
+    window.addEventListener('scroll', handleScroll);
 
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
       setIsDbConnected(false);
@@ -299,6 +304,7 @@ export default function App() {
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
@@ -531,7 +537,7 @@ export default function App() {
     { id: 'grafik-penduduk', label: 'Grafik Penduduk' }
   ];
 
-  // Logic untuk mempersiapkan array galeri berjalan agar mulus (didobel)
+  // Array digandakan agar efek marquee bisa berjalan seamless tanpa putus
   const galeriMarquee = dataBeranda.galeriHeader && dataBeranda.galeriHeader.length > 0 
       ? [...dataBeranda.galeriHeader, ...dataBeranda.galeriHeader] 
       : [];
@@ -592,17 +598,17 @@ export default function App() {
               animation: roll-left 15s linear infinite;
             }
             
-            /* CSS Marquee Galeri Header (Tanpa Putus) */
-            @keyframes marquee-infinite {
-              0% { transform: translateX(0%); }
-              100% { transform: translateX(-50%); }
+            /* CSS Marquee Galeri Header Kiri Ke Kanan (Seamless) */
+            @keyframes marquee-ltr {
+              0% { transform: translateX(-50%); }
+              100% { transform: translateX(0%); }
             }
-            .animate-marquee {
+            .animate-marquee-ltr {
               display: flex;
               width: max-content;
-              animation: marquee-infinite 25s linear infinite;
+              animation: marquee-ltr 25s linear infinite;
             }
-            .animate-marquee:hover {
+            .animate-marquee-ltr:hover {
               animation-play-state: paused;
             }
 
@@ -629,41 +635,39 @@ export default function App() {
           `}
         </style>
 
-        {/* Header & Navbar (Sticky z-50 agar tidak tertutup saat scroll) */}
-        <header className="bg-gradient-to-r from-[#21215b] to-[#181842] text-white sticky top-0 z-50 shadow-xl border-b border-white/10">
+        {/* Header & Navbar (Sticky/Fixed) */}
+        <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-[#181842]/95 backdrop-blur-xl shadow-lg border-b border-white/10 py-2' : 'bg-transparent border-b border-white/10 py-4'}`}>
           <div className="container mx-auto px-4 lg:px-8">
-            <div className="flex justify-between items-center py-3">
+            <div className="flex justify-between items-center">
               
-              {/* Logo (Diperbesar sesuai permintaan) */}
+              {/* Logo Diperbesar */}
               <div 
                 className="flex items-center gap-4 cursor-pointer group flex-shrink-0"
                 onClick={() => navigateTo('beranda')}
               >
-                <div className="bg-white/10 backdrop-blur-sm p-1.5 rounded-xl border border-white/20 group-hover:bg-white transition duration-300 w-16 h-16 md:w-20 md:h-20 flex items-center justify-center overflow-hidden shadow-lg">
+                <div className="bg-white/10 backdrop-blur-sm p-1.5 rounded-2xl border border-white/20 group-hover:bg-white transition duration-300 w-16 h-16 md:w-20 md:h-20 flex items-center justify-center overflow-hidden shadow-lg">
                   {dataBeranda.headerLogo ? (
                     <img src={dataBeranda.headerLogo} alt="Logo" className="w-full h-full object-contain" />
                   ) : (
-                    <Landmark className="h-10 w-10 md:h-12 md:w-12 text-white group-hover:text-[#21215b] transition duration-300" />
+                    <Landmark className="w-10 h-10 md:w-14 md:h-14 text-white group-hover:text-emerald-900 transition duration-300" />
                   )}
                 </div>
                 <div className="hidden sm:block">
-                  <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight leading-none drop-shadow-md">Desa {dataBeranda.namaDesa}</h1>
-                  <p className="text-xs md:text-sm text-emerald-100 font-medium mt-1.5 tracking-wide">Kecamatan Makarti Jaya, Kab. Banyuasin</p>
-                  <p className="text-xs md:text-sm text-emerald-100 font-medium mt-0.5 tracking-wide">Provinsi Sumatera Selatan</p>
+                  <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight leading-none drop-shadow-md text-white">Desa {dataBeranda.namaDesa}</h1>
+                  <p className="text-xs md:text-sm text-emerald-100 font-medium mt-1 tracking-wide">Kecamatan Makarti Jaya, Kab. Banyuasin</p>
                 </div>
               </div>
 
-              {/* Bagian Kanan (Galeri Berjalan & Menu Desktop) */}
-              <div className="hidden lg:flex flex-col items-end justify-center gap-3 w-full max-w-[600px]">
+              {/* Desktop Menu & Gallery */}
+              <div className="hidden lg:flex flex-col items-end gap-3 w-full max-w-[700px]">
                 
-                {/* Galeri Header Berjalan (Marquee) */}
+                {/* Marquee Galeri Header Kiri ke Kanan */}
                 {galeriMarquee.length > 0 && (
-                  <div className="w-full overflow-hidden rounded-xl border border-white/10 bg-black/20 p-1.5 shadow-inner">
-                    <div className="animate-marquee gap-2">
+                  <div className="w-[432px] overflow-hidden rounded-xl border border-white/20 bg-black/20 p-1 shadow-inner">
+                    <div className="animate-marquee-ltr gap-2">
                       {galeriMarquee.map((img: any, idx: number) => (
-                        <div key={idx} className="w-[140px] h-[65px] flex-shrink-0 rounded-lg overflow-hidden border border-white/10 shadow-sm relative group cursor-pointer">
+                        <div key={idx} className="w-[100px] h-[60px] flex-shrink-0 rounded-lg overflow-hidden border border-white/10 shadow-sm relative group cursor-pointer">
                           <img src={img.url} alt={`Galeri ${idx}`} className="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition duration-300"></div>
                         </div>
                       ))}
                     </div>
@@ -671,7 +675,7 @@ export default function App() {
                 )}
 
                 {/* Desktop Navigation */}
-                <nav className="flex space-x-1 items-center bg-black/20 p-1.5 rounded-2xl backdrop-blur-md border border-white/10 w-full justify-end">
+                <nav className="flex space-x-1 items-center bg-white/10 p-1.5 rounded-2xl backdrop-blur-sm border border-white/10 justify-end w-full">
                   <NavButton active={currentPage === 'beranda'} onClick={() => navigateTo('beranda')} icon={<Home className="w-4 h-4 mr-2" />}>Beranda</NavButton>
                   
                   {/* Dropdown Profil Desa */}
@@ -687,9 +691,9 @@ export default function App() {
                           setIsDesktopProfilOpen(true);
                         }
                       }}
-                      className={`px-4 py-2 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
+                      className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
                         currentPage === 'profil'
-                          ? 'bg-amber-500 text-white shadow-md'
+                          ? 'bg-white text-emerald-900 shadow-md'
                           : 'text-white hover:bg-white/10 hover:text-white'
                       }`}
                     >
@@ -711,12 +715,12 @@ export default function App() {
                             }}
                             className={`text-left px-5 py-3 text-sm font-bold transition-all duration-200 relative overflow-hidden ${
                               String(activeProfilTab) === String(profil.id) && currentPage === 'profil'
-                                ? 'text-amber-700 bg-amber-50'
-                                : 'text-gray-600 hover:bg-gray-50 hover:text-amber-600'
+                                ? 'text-emerald-700 bg-emerald-50'
+                                : 'text-gray-600 hover:bg-gray-50 hover:text-emerald-600'
                             }`}
                           >
                             {String(activeProfilTab) === String(profil.id) && currentPage === 'profil' && (
-                              <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-400 to-amber-600"></span>
+                              <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-400 to-emerald-600"></span>
                             )}
                             {profil.judul}
                           </button>
@@ -738,9 +742,9 @@ export default function App() {
                           setIsDesktopPemerintahOpen(true);
                         }
                       }}
-                      className={`px-4 py-2 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
+                      className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
                         currentPage === 'pemerintah'
-                          ? 'bg-amber-500 text-white shadow-md'
+                          ? 'bg-white text-emerald-900 shadow-md'
                           : 'text-white hover:bg-white/10 hover:text-white'
                       }`}
                     >
@@ -762,12 +766,12 @@ export default function App() {
                             }}
                             className={`text-left px-5 py-3 text-sm font-bold transition-all duration-200 relative overflow-hidden ${
                               activePemerintahTab === menu.id && currentPage === 'pemerintah'
-                                ? 'text-amber-700 bg-amber-50'
-                                : 'text-gray-600 hover:bg-gray-50 hover:text-amber-600'
+                                ? 'text-emerald-700 bg-emerald-50'
+                                : 'text-gray-600 hover:bg-gray-50 hover:text-emerald-600'
                             }`}
                           >
                             {activePemerintahTab === menu.id && currentPage === 'pemerintah' && (
-                              <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-400 to-amber-600"></span>
+                              <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-400 to-emerald-600"></span>
                             )}
                             {menu.label}
                           </button>
@@ -789,9 +793,9 @@ export default function App() {
                           setIsDesktopBeritaOpen(true);
                         }
                       }}
-                      className={`px-4 py-2 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
+                      className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
                         currentPage === 'berita'
-                          ? 'bg-amber-500 text-white shadow-md'
+                          ? 'bg-white text-emerald-900 shadow-md'
                           : 'text-white hover:bg-white/10 hover:text-white'
                       }`}
                     >
@@ -813,12 +817,12 @@ export default function App() {
                             }}
                             className={`text-left px-5 py-3 text-sm font-bold transition-all duration-200 relative overflow-hidden ${
                               activeBeritaTab === menu.id && currentPage === 'berita'
-                                ? 'text-amber-700 bg-amber-50'
-                                : 'text-gray-600 hover:bg-gray-50 hover:text-amber-600'
+                                ? 'text-emerald-700 bg-emerald-50'
+                                : 'text-gray-600 hover:bg-gray-50 hover:text-emerald-600'
                             }`}
                           >
                             {activeBeritaTab === menu.id && currentPage === 'berita' && (
-                              <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-400 to-amber-600"></span>
+                              <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-400 to-emerald-600"></span>
                             )}
                             <div className="flex items-center">
                               {menu.id === 'list-berita' ? <Newspaper className="w-4 h-4 mr-2 opacity-70" /> : <PieChart className="w-4 h-4 mr-2 opacity-70" />}
@@ -836,12 +840,12 @@ export default function App() {
                   <div className="pl-2 ml-1 border-l border-white/20 flex items-center gap-2">
                     {isAdmin ? (
                       <>
-                        <button onClick={handleLogout} className="flex items-center text-sm font-bold bg-[#ff2d55] hover:bg-rose-600 text-white px-5 py-2 rounded-xl transition shadow-[0_0_15px_rgba(255,45,85,0.4)]">
+                        <button onClick={handleLogout} className="flex items-center text-sm font-bold bg-[#ff2d55] hover:bg-rose-600 text-white px-5 py-2.5 rounded-xl transition shadow-[0_0_15px_rgba(255,45,85,0.4)]">
                           <LogOut className="w-4 h-4 mr-2" /> Keluar
                         </button>
                       </>
                     ) : (
-                      <button onClick={() => setShowLoginModal(true)} className="flex items-center text-sm font-bold bg-[#ff2d55]/80 hover:bg-[#ff2d55] text-white px-5 py-2 rounded-xl transition border border-white/10 shadow-lg">
+                      <button onClick={() => setShowLoginModal(true)} className="flex items-center text-sm font-bold bg-[#ff2d55]/80 hover:bg-[#ff2d55] text-white px-5 py-2.5 rounded-xl transition border border-white/10 shadow-lg">
                         <LogIn className="w-4 h-4 mr-2" /> Admin
                       </button>
                     )}
@@ -874,13 +878,15 @@ export default function App() {
 
           {/* Mobile Navigation */}
           {isMobileMenuOpen && (
-            <div className="lg:hidden bg-[#181842]/95 backdrop-blur-xl border-t border-white/10">
+            <div className="lg:hidden bg-[#181842]/95 backdrop-blur-xl border-t border-white/10 max-h-[85vh] overflow-y-auto">
+              
+              {/* Galeri Mobile */}
               {galeriMarquee.length > 0 && (
                  <div className="px-4 py-3 border-b border-white/10 bg-black/20">
                     <p className="text-xs font-bold text-emerald-200 mb-2">Galeri Desa</p>
                     <div className="w-full overflow-hidden rounded-lg flex gap-2 overflow-x-auto custom-scrollbar pb-2">
                       {dataBeranda.galeriHeader.map((img: any, idx: number) => (
-                        <img key={idx} src={img.url} className="w-[120px] h-[60px] object-cover rounded-md border border-white/20 flex-shrink-0" alt="Galeri" />
+                        <img key={idx} src={img.url} className="w-[100px] h-[60px] object-cover rounded-md border border-white/20 flex-shrink-0" alt="Galeri" />
                       ))}
                     </div>
                  </div>
@@ -899,23 +905,23 @@ export default function App() {
                     }}
                     className={`flex items-center justify-between w-full text-left px-5 py-4 rounded-xl text-lg font-bold transition-all ${
                       currentPage === 'profil' || isMobileProfilOpen
-                        ? 'bg-emerald-800 text-white border-l-4 border-amber-400 shadow-inner'
-                        : 'text-emerald-100 hover:bg-emerald-800/80 hover:text-white'
+                        ? 'bg-white text-emerald-900 shadow-inner'
+                        : 'text-emerald-100 hover:bg-white/10 hover:text-white'
                     }`}
                   >
                     <span>Profil Desa</span>
                     <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isMobileProfilOpen ? 'rotate-180' : ''}`} />
                   </button>
                   {isMobileProfilOpen && (
-                    <div className="flex flex-col bg-emerald-900/50 rounded-xl mt-2 mx-2 overflow-hidden border border-white/5 animate-in slide-in-from-top-2 duration-200">
+                    <div className="flex flex-col bg-black/20 rounded-xl mt-2 mx-2 overflow-hidden border border-white/5 animate-in slide-in-from-top-2 duration-200">
                       {daftarProfil.map((profil: any) => (
                         <button
                           key={profil.id}
                           onClick={() => navigateTo('profil', profil.id)}
                           className={`text-left px-6 py-3.5 text-sm font-bold transition-colors border-l-2 ${
                             String(activeProfilTab) === String(profil.id) && currentPage === 'profil'
-                              ? 'border-amber-400 text-white bg-emerald-800/50'
-                              : 'border-transparent text-emerald-200 hover:bg-emerald-800 hover:text-white'
+                              ? 'border-emerald-400 text-white bg-white/10'
+                              : 'border-transparent text-emerald-200 hover:bg-white/5 hover:text-white'
                           }`}
                         >
                           {profil.judul}
@@ -935,23 +941,23 @@ export default function App() {
                     }}
                     className={`flex items-center justify-between w-full text-left px-5 py-4 rounded-xl text-lg font-bold transition-all ${
                       currentPage === 'pemerintah' || isMobilePemerintahOpen
-                        ? 'bg-emerald-800 text-white border-l-4 border-amber-400 shadow-inner'
-                        : 'text-emerald-100 hover:bg-emerald-800/80 hover:text-white'
+                        ? 'bg-white text-emerald-900 shadow-inner'
+                        : 'text-emerald-100 hover:bg-white/10 hover:text-white'
                     }`}
                   >
                     <span>Pemerintah Desa</span>
                     <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isMobilePemerintahOpen ? 'rotate-180' : ''}`} />
                   </button>
                   {isMobilePemerintahOpen && (
-                    <div className="flex flex-col bg-emerald-900/50 rounded-xl mt-2 mx-2 overflow-hidden border border-white/5 animate-in slide-in-from-top-2 duration-200">
+                    <div className="flex flex-col bg-black/20 rounded-xl mt-2 mx-2 overflow-hidden border border-white/5 animate-in slide-in-from-top-2 duration-200">
                       {menuPemerintah.map((menu) => (
                         <button
                           key={menu.id}
                           onClick={() => navigateTo('pemerintah', menu.id)}
                           className={`text-left px-6 py-3.5 text-sm font-bold transition-colors border-l-2 ${
                             activePemerintahTab === menu.id && currentPage === 'pemerintah'
-                              ? 'border-amber-400 text-white bg-emerald-800/50'
-                              : 'border-transparent text-emerald-200 hover:bg-emerald-800 hover:text-white'
+                              ? 'border-emerald-400 text-white bg-white/10'
+                              : 'border-transparent text-emerald-200 hover:bg-white/5 hover:text-white'
                           }`}
                         >
                           {menu.label}
@@ -971,23 +977,23 @@ export default function App() {
                     }}
                     className={`flex items-center justify-between w-full text-left px-5 py-4 rounded-xl text-lg font-bold transition-all ${
                       currentPage === 'berita' || isMobileBeritaOpen
-                        ? 'bg-emerald-800 text-white border-l-4 border-amber-400 shadow-inner'
-                        : 'text-emerald-100 hover:bg-emerald-800/80 hover:text-white'
+                        ? 'bg-white text-emerald-900 shadow-inner'
+                        : 'text-emerald-100 hover:bg-white/10 hover:text-white'
                     }`}
                   >
                     <span>Berita & Informasi</span>
                     <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isMobileBeritaOpen ? 'rotate-180' : ''}`} />
                   </button>
                   {isMobileBeritaOpen && (
-                    <div className="flex flex-col bg-emerald-900/50 rounded-xl mt-2 mx-2 overflow-hidden border border-white/5 animate-in slide-in-from-top-2 duration-200">
+                    <div className="flex flex-col bg-black/20 rounded-xl mt-2 mx-2 overflow-hidden border border-white/5 animate-in slide-in-from-top-2 duration-200">
                       {menuBerita.map((menu) => (
                         <button
                           key={menu.id}
                           onClick={() => navigateTo('berita', menu.id)}
                           className={`text-left px-6 py-3.5 text-sm font-bold transition-colors border-l-2 ${
                             activeBeritaTab === menu.id && currentPage === 'berita'
-                              ? 'border-amber-400 text-white bg-emerald-800/50'
-                              : 'border-transparent text-emerald-200 hover:bg-emerald-800 hover:text-white'
+                              ? 'border-emerald-400 text-white bg-white/10'
+                              : 'border-transparent text-emerald-200 hover:bg-white/5 hover:text-white'
                           }`}
                         >
                           {menu.label}
@@ -1005,7 +1011,7 @@ export default function App() {
 
         {/* Pesan Alert Login Admin Aktif */}
         {isAdmin && (
-          <div className="bg-emerald-100 text-emerald-800 px-4 py-3 text-sm font-medium text-center shadow-inner flex flex-col items-center justify-center gap-2 z-30 relative">
+          <div className="bg-emerald-100 text-emerald-800 px-4 py-3 text-sm font-medium text-center shadow-inner flex flex-col items-center justify-center gap-2 z-30 relative pt-24 md:pt-24">
              <div className="flex items-center gap-2">
                <CheckCircle2 className="w-5 h-5 text-emerald-600" /> 
                <span>Mode Admin Aktif: Anda dapat mengedit konten website.</span>
@@ -1750,7 +1756,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                 </div>
               </div>
 
-              {/* PENGATURAN GALERI HEADER (BARU) */}
+              {/* PENGATURAN GALERI HEADER */}
               <div className="bg-gray-50 p-6 rounded-2xl border border-amber-200 shadow-inner">
                 <h4 className="font-extrabold text-lg text-amber-800 mb-4 flex items-center">
                    <span className="w-6 h-1 bg-amber-500 rounded-full mr-3"></span> Pengaturan Galeri Header (Foto Berjalan)
@@ -1784,7 +1790,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                           ))
                        )}
                     </div>
-                    <p className="text-xs text-gray-500 mt-2 font-medium">Fitur galeri ini akan tampil berjalan dari kanan ke kiri tepat di atas menu navigasi desktop.</p>
+                    <p className="text-xs text-gray-500 mt-2 font-medium">Fitur galeri ini akan tampil berjalan dari kiri ke kanan tepat di atas menu navigasi desktop.</p>
                   </div>
                 </div>
               </div>
@@ -3500,9 +3506,9 @@ function NavButton({ children, active, onClick, icon }: any) {
   return (
     <button
       onClick={onClick}
-      className={`px-4 py-2 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
+      className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
         active 
-          ? 'bg-amber-500 text-white shadow-md' 
+          ? 'bg-white text-emerald-900 shadow-md' 
           : 'text-white hover:bg-white/10 hover:text-white'
       }`}
     >
@@ -3518,8 +3524,8 @@ function MobileNavButton({ children, active, onClick }: any) {
       onClick={onClick}
       className={`block w-full text-left px-5 py-4 rounded-xl text-lg font-bold transition-all ${
         active 
-          ? 'bg-emerald-800 text-white border-l-4 border-amber-400 shadow-inner' 
-          : 'text-emerald-100 hover:bg-emerald-800/80 hover:text-white'
+          ? 'bg-white text-emerald-900 shadow-inner' 
+          : 'text-emerald-100 hover:bg-white/10 hover:text-white'
       }`}
     >
       {children}
