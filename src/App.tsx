@@ -537,8 +537,8 @@ export default function App() {
       {/* Overlay Transparan Gelap (Opsional, agar background tidak terlalu mengganggu warna situs) */}
       <div className="fixed inset-0 bg-black/30 pointer-events-none"></div>
 
-      {/* CONTAINER BOXED: Situs web dengan max-width di tengah layar */}
-      <div className="max-w-[1440px] mx-auto min-h-screen flex flex-col font-sans bg-gray-50 text-gray-800 relative shadow-[0_0_50px_rgba(0,0,0,0.4)] selection:bg-emerald-200 selection:text-emerald-900 overflow-x-hidden">
+      {/* CONTAINER BOXED: Situs web dengan max-width di tengah layar. Hapus overflow-x-hidden agar sticky bekerja sempurna */}
+      <div className="max-w-[1440px] mx-auto min-h-screen flex flex-col font-sans bg-gray-50 text-gray-800 relative shadow-[0_0_50px_rgba(0,0,0,0.4)] selection:bg-emerald-200 selection:text-emerald-900">
 
         {/* Dialog Kustom (Pengganti Alert & Confirm) */}
         {dialog.isOpen && (
