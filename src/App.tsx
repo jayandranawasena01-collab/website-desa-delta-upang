@@ -38,7 +38,6 @@ if (typeof window !== 'undefined') {
   try {
     appId = typeof __app_id !== 'undefined' ? __app_id : 'desa-delta-upang';
     
-    // Prioritaskan config dari environment (Canvas) jika ada, jika tidak gunakan config manual
     const firebaseConfig = (typeof __firebase_config !== 'undefined' && __firebase_config) 
       ? JSON.parse(__firebase_config) 
       : firebaseConfigManual;
@@ -186,7 +185,7 @@ const initialProfil = [
 
 const initialBeranda = {
   heroBg: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
-  outerBg: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80", // Latar belakang luar (Boxed)
+  outerBg: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
   logoHero: "", 
   headerLogo: "", 
   namaDesa: "Delta Upang",
@@ -203,43 +202,40 @@ const initialBeranda = {
   ]
 };
 
+// Data Awal Galeri Header
+const initialGaleriHeader = [
+  { id: 1, url: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=800&q=80" },
+  { id: 2, url: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&q=80" },
+  { id: 3, url: "https://images.unsplash.com/photo-1592982537447-6f2a6a0a091c?w=800&q=80" },
+  { id: 4, url: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&q=80" }
+];
+
 export default function App() {
   const [user, setUser] = useState<any>(null);
   const [isDbConnected, setIsDbConnected] = useState(false); 
   const [dbError, setDbError] = useState(""); 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // State Active Pages & Tabs disimpan di localStorage agar tidak kembali ke beranda saat refresh
   const [currentPage, setCurrentPage] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('delta_upang_currentPage') || 'beranda';
-    }
+    if (typeof window !== 'undefined') return localStorage.getItem('delta_upang_currentPage') || 'beranda';
     return 'beranda';
   });
 
   const [activeProfilTab, setActiveProfilTab] = useState<any>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('delta_upang_activeProfilTab');
-      return saved ? saved : null;
-    }
+    if (typeof window !== 'undefined') return localStorage.getItem('delta_upang_activeProfilTab') || null;
     return null;
   });
 
   const [activePemerintahTab, setActivePemerintahTab] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('delta_upang_activePemerintahTab') || 'perangkat';
-    }
+    if (typeof window !== 'undefined') return localStorage.getItem('delta_upang_activePemerintahTab') || 'perangkat';
     return 'perangkat';
   });
 
   const [activeBeritaTab, setActiveBeritaTab] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('delta_upang_activeBeritaTab') || 'list-berita';
-    }
+    if (typeof window !== 'undefined') return localStorage.getItem('delta_upang_activeBeritaTab') || 'list-berita';
     return 'list-berita';
   });
   
-  // States untuk mengatur dropdown
   const [isDesktopProfilOpen, setIsDesktopProfilOpen] = useState(false);
   const [isMobileProfilOpen, setIsMobileProfilOpen] = useState(false);
   const [isDesktopPemerintahOpen, setIsDesktopPemerintahOpen] = useState(false);
@@ -247,16 +243,12 @@ export default function App() {
   const [isDesktopBeritaOpen, setIsDesktopBeritaOpen] = useState(false);
   const [isMobileBeritaOpen, setIsMobileBeritaOpen] = useState(false);
   
-  // State Admin
   const [isAdmin, setIsAdmin] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('delta_upang_admin') === 'true';
-    }
+    if (typeof window !== 'undefined') return localStorage.getItem('delta_upang_admin') === 'true';
     return false;
   });
   const [showLoginModal, setShowLoginModal] = useState(false);
 
-  // Custom Modal Alert/Confirm
   const [dialog, setDialog] = useState<any>({ isOpen: false, type: 'alert', message: '', onConfirm: null });
   const showAlert = (message: string) => setDialog({ isOpen: true, type: 'alert', message, onConfirm: null });
   const showConfirm = (message: string, onConfirm: any) => setDialog({ isOpen: true, type: 'confirm', message, onConfirm });
@@ -277,6 +269,7 @@ export default function App() {
   const [daftarLembaga, setDaftarLembaga] = useState(() => getInitialData('delta_upang_lembaga', initialLembaga));
   const [daftarProfil, setDaftarProfil] = useState(() => getInitialData('delta_upang_profil', initialProfil));
   const [dataBeranda, setDataBeranda] = useState(() => getInitialData('delta_upang_beranda', initialBeranda));
+  const [daftarGaleriHeader, setDaftarGaleriHeader] = useState(() => getInitialData('delta_upang_galeri_header', initialGaleriHeader));
 
   // ================= MONITORING KONEKSI =================
   useEffect(() => {
@@ -331,8 +324,6 @@ export default function App() {
 
   // ================= FETCH DATA =================
   useEffect(() => {
-    // PENTING: Tunggu hingga Firebase database DAN user auth token (anonymous/custom) tersedia.
-    // Jika tidak, permintaan baca data ini akan diblokir oleh aturan izin (permission denied).
     if (!db || !user) return; 
 
     const handleServerData = (snap: any, stateSetter: any, storageKey: string) => {
@@ -360,35 +351,32 @@ export default function App() {
     const unsubBeranda = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_beranda', 'main'), 
       (snap) => handleServerData(snap, setDataBeranda, 'delta_upang_beranda'), handleServerError
     );
-
     const unsubBerita = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_berita', 'main'), 
       (snap) => handleServerData(snap, setDaftarBerita, 'delta_upang_berita'), handleServerError
     );
-    
     const unsubGrafik = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_grafik', 'main'), 
       (snap) => handleServerData(snap, setDataGrafik, 'delta_upang_grafik'), handleServerError
     );
-
     const unsubAgenda = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_agenda', 'main'), 
       (snap) => handleServerData(snap, setDaftarAgenda, 'delta_upang_agenda'), handleServerError
     );
-
     const unsubPerangkat = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_perangkat', 'main'), 
       (snap) => handleServerData(snap, setDaftarPerangkat, 'delta_upang_perangkat'), handleServerError
     );
-
     const unsubLembaga = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_lembaga', 'main'), 
       (snap) => handleServerData(snap, setDaftarLembaga, 'delta_upang_lembaga'), handleServerError
     );
-
     const unsubProfil = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_profil', 'main'), 
       (snap) => handleServerData(snap, setDaftarProfil, 'delta_upang_profil'), handleServerError
     );
+    const unsubGaleriHeader = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_galeri_header', 'main'), 
+      (snap) => handleServerData(snap, setDaftarGaleriHeader, 'delta_upang_galeri_header'), handleServerError
+    );
 
     return () => {
-      unsubBeranda(); unsubBerita(); unsubGrafik(); unsubAgenda(); unsubPerangkat(); unsubLembaga(); unsubProfil();
+      unsubBeranda(); unsubBerita(); unsubGrafik(); unsubAgenda(); unsubPerangkat(); unsubLembaga(); unsubProfil(); unsubGaleriHeader();
     };
-  }, [user]); // Dependensi user ditambahkan agar fungsi berjalan HANYA jika terautentikasi
+  }, [user]);
 
   // ================= UPDATE FUNCTIONS =================
   const updateBeranda = async (newData: any) => {
@@ -400,7 +388,6 @@ export default function App() {
       showAlert("Perubahan disimpan secara LOKAL. Aktifkan koneksi database untuk mensinkronisasi.");
     }
   };
-  
   const updateBerita = async (newData: any) => {
     setDaftarBerita(newData);
     if (typeof window !== 'undefined') localStorage.setItem('delta_upang_berita', JSON.stringify(newData));
@@ -408,7 +395,6 @@ export default function App() {
       try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_berita', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
-  
   const updateGrafik = async (newData: any) => {
     setDataGrafik(newData);
     if (typeof window !== 'undefined') localStorage.setItem('delta_upang_grafik', JSON.stringify(newData));
@@ -416,7 +402,6 @@ export default function App() {
       try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_grafik', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
-
   const updateAgenda = async (newData: any) => {
     setDaftarAgenda(newData);
     if (typeof window !== 'undefined') localStorage.setItem('delta_upang_agenda', JSON.stringify(newData));
@@ -424,7 +409,6 @@ export default function App() {
       try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_agenda', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
-
   const updatePerangkat = async (newData: any) => {
     setDaftarPerangkat(newData);
     if (typeof window !== 'undefined') localStorage.setItem('delta_upang_perangkat', JSON.stringify(newData));
@@ -444,6 +428,13 @@ export default function App() {
     if (typeof window !== 'undefined') localStorage.setItem('delta_upang_profil', JSON.stringify(newData));
     if(db && user) {
       try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_profil', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
+    }
+  };
+  const updateGaleriHeader = async (newData: any) => {
+    setDaftarGaleriHeader(newData);
+    if (typeof window !== 'undefined') localStorage.setItem('delta_upang_galeri_header', JSON.stringify(newData));
+    if(db && user) {
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_galeri_header', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
 
@@ -471,13 +462,10 @@ export default function App() {
 
   const navigateTo = (page: string, tabId: any = null) => {
     setCurrentPage(page);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('delta_upang_currentPage', page);
-    }
+    if (typeof window !== 'undefined') localStorage.setItem('delta_upang_currentPage', page);
 
     if (page === 'profil' && tabId !== null) {
       setActiveProfilTab(tabId);
-      // Diubah ke string untuk keamanan penyimpanan local storage
       if (typeof window !== 'undefined') localStorage.setItem('delta_upang_activeProfilTab', String(tabId));
     }
     if (page === 'pemerintah' && tabId !== null) {
@@ -528,19 +516,68 @@ export default function App() {
     { id: 'grafik-penduduk', label: 'Grafik Penduduk' }
   ];
 
+  // Logic Modal Editor Galeri Header
+  const [showEditorGaleriHeader, setShowEditorGaleriHeader] = useState(false);
+  const [editDataGaleriHeader, setEditDataGaleriHeader] = useState<any[]>([]);
+
+  const openEditorGaleriHeader = () => {
+    setEditDataGaleriHeader([...daftarGaleriHeader]);
+    setShowEditorGaleriHeader(true);
+  };
+
+  const handleUploadGaleriHeader = (e: any) => {
+    const files = Array.from(e.target.files);
+    let oversized = false;
+    const validFiles = files.filter((file: any) => {
+      // Validasi Ukuran Maksimal 500KB (500 * 1024 bytes)
+      if (file.size > 500 * 1024) {
+        oversized = true;
+        return false;
+      }
+      return true;
+    });
+
+    if (oversized) {
+      showAlert("Beberapa foto diabaikan karena ukurannya melebihi batas 500KB.");
+    }
+
+    validFiles.forEach((file: any) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event: any) => {
+        setEditDataGaleriHeader((prev: any) => [...prev, { id: Date.now() + Math.random(), url: event.target.result }]);
+      };
+    });
+    e.target.value = '';
+  };
+
+  const hapusItemGaleriHeader = (id: any) => {
+    setEditDataGaleriHeader(editDataGaleriHeader.filter((item: any) => item.id !== id));
+  };
+
+  const simpanGaleriHeader = () => {
+    updateGaleriHeader(editDataGaleriHeader);
+    setShowEditorGaleriHeader(false);
+    showAlert("Galeri header berhasil diperbarui.");
+  };
+
+  // Helper untuk melipatgandakan data gambar jika jumlahnya sedikit agar marquee mulus
+  let filledGaleriHeader = [...daftarGaleriHeader];
+  if (filledGaleriHeader.length > 0) {
+    while (filledGaleriHeader.length < 4) {
+      filledGaleriHeader = [...filledGaleriHeader, ...daftarGaleriHeader];
+    }
+  }
+
   return (
-    // WRAPPER UTAMA: Lebar penuh layar, gambar latar belakang di set fixed
     <div 
       className="min-h-screen w-full bg-fixed bg-cover bg-center bg-no-repeat bg-gray-100"
       style={{ backgroundImage: `url(${dataBeranda.outerBg || 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'})` }}
     >
-      {/* Overlay Transparan Gelap (Opsional, agar background tidak terlalu mengganggu warna situs) */}
       <div className="fixed inset-0 bg-black/30 pointer-events-none"></div>
 
-      {/* CONTAINER BOXED: Situs web dengan max-width di tengah layar. Hapus overflow-x-hidden agar sticky bekerja sempurna */}
       <div className="max-w-[1440px] mx-auto min-h-screen flex flex-col font-sans bg-gray-50 text-gray-800 relative shadow-[0_0_50px_rgba(0,0,0,0.4)] selection:bg-emerald-200 selection:text-emerald-900">
 
-        {/* Dialog Kustom (Pengganti Alert & Confirm) */}
         {dialog.isOpen && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
             <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 animate-in zoom-in-95 border border-emerald-100">
@@ -567,7 +604,6 @@ export default function App() {
           </div>
         )}
 
-        {/* Styles for Animations */}
         <style>
           {`
             @keyframes float-animation {
@@ -606,14 +642,56 @@ export default function App() {
             .animate-grow {
               animation: growBar 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
             }
+            @keyframes scroll-ltr {
+              0% { transform: translateX(-50%); }
+              100% { transform: translateX(0%); }
+            }
+            .animate-scroll-ltr {
+              animation: scroll-ltr 30s linear infinite;
+            }
           `}
         </style>
 
         {/* Header & Navbar */}
         <header className="bg-gradient-to-r from-emerald-900 to-emerald-800 text-white sticky top-0 z-50 shadow-xl border-b border-emerald-700">
+          
+          {/* GALERI FOTO HEADER (ATAS MENU NAVIGASI BERANDA SAMPAI ADMIN) */}
+          {filledGaleriHeader.length > 0 ? (
+             <div className="w-full bg-black/40 border-b border-white/10 h-24 overflow-hidden relative flex items-center group">
+               <div className="flex w-max animate-scroll-ltr h-full hover:[animation-play-state:paused]">
+                 {/* Dirender dua kali agar looping animasi tidak terputus */}
+                 {[...filledGaleriHeader, ...filledGaleriHeader].map((img: any, i: number) => (
+                   <div key={i} className="h-full p-1.5 flex-shrink-0" style={{ width: 'calc(min(1440px, 100vw) / 4)' }}>
+                      <img src={img.url} className="w-full h-full object-cover rounded-xl border border-white/20 shadow-md" alt="Galeri Header" />
+                   </div>
+                 ))}
+               </div>
+
+               {isAdmin && (
+                 <button 
+                   onClick={openEditorGaleriHeader}
+                   className="absolute right-4 top-1/2 -translate-y-1/2 bg-amber-500 hover:bg-amber-600 text-white p-2.5 rounded-xl shadow-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center font-bold text-sm gap-2"
+                 >
+                   <Edit className="w-4 h-4" /> Edit Galeri
+                 </button>
+               )}
+             </div>
+          ) : (
+            isAdmin && (
+               <div className="w-full bg-emerald-950 p-2 flex justify-center border-b border-white/10">
+                 <button 
+                   onClick={openEditorGaleriHeader}
+                   className="bg-emerald-700 hover:bg-emerald-600 px-4 py-1.5 rounded-lg text-sm font-bold flex items-center shadow"
+                 >
+                   <Plus className="w-4 h-4 mr-2"/> Tambah Foto Galeri Header
+                 </button>
+               </div>
+            )
+          )}
+
           <div className="container mx-auto px-4 lg:px-8">
             <div className="flex justify-between items-center py-3">
-              {/* Logo - Kontainer dan fallback icon diperbesar ukurannya */}
+              {/* Logo */}
               <div 
                 className="flex items-center gap-4 cursor-pointer group"
                 onClick={() => navigateTo('beranda')}
@@ -954,6 +1032,67 @@ export default function App() {
           )}
         </header>
 
+        {/* Modal Pengelola Galeri Header Khusus Admin */}
+        {showEditorGaleriHeader && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[110] p-4">
+            <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full p-8 max-h-[90vh] overflow-y-auto border border-emerald-100 animate-in zoom-in-95">
+              <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100 sticky top-0 bg-white z-10">
+                <h3 className="text-2xl font-extrabold text-gray-900 flex items-center tracking-tight">
+                  <div className="bg-emerald-100 p-2 rounded-xl mr-3">
+                     <ImageIcon className="w-6 h-6 text-emerald-600" />
+                  </div>
+                  Kelola Galeri Foto Header
+                </h3>
+                <button type="button" onClick={() => setShowEditorGaleriHeader(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="mb-6">
+                <div className="bg-emerald-50 p-6 rounded-2xl border border-emerald-100">
+                  <h4 className="font-extrabold text-emerald-800 mb-2">Upload Foto Baru (Maksimal 500KB)</h4>
+                  <p className="text-sm text-emerald-700 mb-4 font-medium">Bisa memilih lebih dari satu foto sekaligus. Semakin banyak foto, animasi akan semakin kaya.</p>
+                  
+                  <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-100 px-6 py-4 rounded-xl font-bold flex flex-col items-center justify-center transition-all shadow-sm w-full text-center">
+                    <Upload className="w-8 h-8 mb-2" /> 
+                    <span>Klik disini untuk Upload File</span>
+                    <input type="file" accept="image/*" multiple className="hidden" onChange={handleUploadGaleriHeader} />
+                  </label>
+                </div>
+              </div>
+
+              <h4 className="font-extrabold text-gray-800 mb-4 border-b pb-2">Daftar Foto Saat Ini ({editDataGaleriHeader.length} Foto)</h4>
+              {editDataGaleriHeader.length === 0 ? (
+                <div className="text-center text-gray-500 py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200 font-medium">
+                  Belum ada foto yang ditambahkan. Silakan upload terlebih dahulu.
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {editDataGaleriHeader.map((item: any) => (
+                    <div key={item.id} className="relative group bg-gray-100 rounded-xl border border-gray-200 overflow-hidden h-32">
+                      <img src={item.url} alt="Galeri" className="w-full h-full object-cover" />
+                      <button 
+                        onClick={() => hapusItemGaleriHeader(item.id)}
+                        className="absolute inset-0 m-auto w-10 h-10 bg-rose-500 hover:bg-rose-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 shadow-lg"
+                        title="Hapus Foto"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-4 pt-8 mt-4">
+                <button onClick={() => setShowEditorGaleriHeader(false)} className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">Batal</button>
+                <button onClick={simpanGaleriHeader} className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold flex items-center transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5">
+                  <Save className="w-5 h-5 mr-2" /> Simpan & Terapkan Galeri
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Pesan Alert Login Admin Aktif */}
         {isAdmin && (
           <div className="bg-emerald-100 text-emerald-800 px-4 py-3 text-sm font-medium text-center shadow-inner flex flex-col items-center justify-center gap-2 z-30 relative">
@@ -1107,7 +1246,7 @@ export default function App() {
         )}
       </div>
 
-      {/* Modal Login Elegan (Berada di luar Box Container tapi tetap Fixed di Layar) */}
+      {/* Modal Login Elegan */}
       {showLoginModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 animate-in zoom-in-95 duration-300 border border-emerald-100">
@@ -2915,7 +3054,6 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
 
   const openEditorBerita = (berita: any = null) => {
     if (berita) {
-      // Pastikan ada property galeri walau dari data lama
       setEditDataBerita({ ...berita, galeri: berita.galeri || [] });
     } else {
       setEditDataBerita({ id: null, judul: '', tanggal: '', kategori: '', excerpt: '', gambar: '', galeri: [] });
@@ -2957,7 +3095,6 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
     }
   };
 
-  // ----- Logika Upload Foto Tambahan (Galeri) -----
   const handleImageTambahanUpload = (e: any) => {
     const files = Array.from(e.target.files);
     files.forEach((file: any) => {
@@ -3006,7 +3143,6 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                    </button>
                 </div>
                 
-                {/* Header Image Utama */}
                 <div className="w-full h-64 md:h-[450px] overflow-hidden bg-gray-200">
                    <img 
                      src={selectedBerita.gambar} 
@@ -3032,7 +3168,6 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                    </h2>
                    <div className="w-20 h-1.5 bg-gradient-to-r from-emerald-500 to-emerald-300 rounded-full mb-10"></div>
                    
-                   {/* Render Konten Beserta Posisi Gambar */}
                    <div className="text-gray-700 text-lg md:text-xl leading-relaxed whitespace-pre-wrap font-medium relative clearfix">
                       {(() => {
                         const galeri = selectedBerita.galeri || [];
@@ -3042,31 +3177,25 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                         const imgKanan = galeri.filter((g: any) => g.posisi === 'kanan');
                         const imgTengah = galeri.filter((g: any) => g.posisi === 'tengah');
 
-                        // Pisahkan paragraf agar gambar tengah bisa disisipkan
                         const paragraphs = selectedBerita.excerpt.split('\n');
 
                         return (
                           <React.Fragment>
-                            {/* Gambar Atas */}
                             {imgAtas.length > 0 && (
                               <div className="w-full flex flex-col gap-4 mb-8">
                                 {imgAtas.map((g: any) => <img key={g.id} src={g.url} alt="Berita Atas" className="w-full rounded-2xl shadow-md object-cover" />)}
                               </div>
                             )}
 
-                            {/* Gambar Kiri (Float) */}
                             {imgKiri.map((g: any) => (
                               <img key={g.id} src={g.url} alt="Berita Kiri" className="w-[45%] md:w-1/3 float-left mr-6 mb-4 rounded-xl shadow-sm object-cover" />
                             ))}
 
-                            {/* Gambar Kanan (Float) */}
                             {imgKanan.map((g: any) => (
                               <img key={g.id} src={g.url} alt="Berita Kanan" className="w-[45%] md:w-1/3 float-right ml-6 mb-4 rounded-xl shadow-sm object-cover" />
                             ))}
 
-                            {/* Text Berita + Sisipan Tengah */}
                             {paragraphs.map((p: string, idx: number) => {
-                              // Tentukan dimana gambar 'tengah' akan muncul. Jika paragraf sedikit, muncul di awal/akhir
                               const isMiddle = paragraphs.length > 1 ? idx === Math.floor(paragraphs.length / 2) : idx === 0;
 
                               return (
@@ -3086,7 +3215,6 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
 
                             <div className="clear-both pt-6"></div>
 
-                            {/* Gambar Bawah */}
                             {imgBawah.length > 0 && (
                               <div className="w-full flex flex-col gap-4 mt-6">
                                 {imgBawah.map((g: any) => <img key={g.id} src={g.url} alt="Berita Bawah" className="w-full rounded-2xl shadow-md object-cover" />)}
@@ -3178,7 +3306,6 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
             )}
           </>
         ) : (
-          /* TAMPILAN GRAFIK PENDUDUK */
           <div className="animate-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto">
             <div className="text-center mb-14">
               <span className="text-emerald-600 font-bold tracking-widest uppercase text-sm mb-2 block">Visualisasi Data</span>
@@ -3204,7 +3331,6 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
               <div className="absolute top-0 left-0 w-32 h-32 bg-emerald-50 rounded-br-full -z-10 opacity-70"></div>
               <div className="absolute bottom-0 right-0 w-40 h-40 bg-amber-50 rounded-tl-full -z-10 opacity-70"></div>
 
-              {/* Left Side: Summary Big Number */}
               <div className="w-full md:w-1/3 text-center md:text-left z-10">
                 <h3 className="text-xl font-bold text-gray-500 mb-2 uppercase tracking-widest flex justify-center md:justify-start items-center">
                   <TrendingUp className="w-5 h-5 mr-2" /> Total Populasi
@@ -3218,10 +3344,8 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                 <p className="text-sm text-gray-400 mt-6 font-medium">Diperbarui: {dataGrafik.updateTerakhir}</p>
               </div>
 
-              {/* Right Side: Awesome Custom CSS Bar Chart */}
               <div className="w-full md:w-2/3 z-10">
                 
-                {/* Laki-Laki Bar */}
                 <div className="mb-8">
                   <div className="flex justify-between items-end mb-3">
                     <div className="flex items-center">
@@ -3248,7 +3372,6 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                   </div>
                 </div>
 
-                {/* Perempuan Bar */}
                 <div>
                   <div className="flex justify-between items-end mb-3">
                     <div className="flex items-center">
@@ -3556,7 +3679,6 @@ function HalamanKontak() {
             </div>
           </div>
 
-          {/* Menambahkan tag tautan (a) untuk membuat peta dapat diklik */}
           <div className="bg-white p-3 rounded-3xl shadow-xl h-full min-h-[500px] border border-gray-100">
             <a 
               href="https://maps.app.goo.gl/YUxS68MLjqc1JLrR6" 
