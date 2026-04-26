@@ -609,8 +609,8 @@ export default function App() {
           `}
         </style>
 
-        {/* Header & Navbar - Menghapus class sticky top-0 */}
-        <header className="bg-gradient-to-r from-emerald-900 to-emerald-800 text-white relative z-40 shadow-xl border-b border-emerald-700">
+        {/* Header & Navbar */}
+        <header className="bg-gradient-to-r from-emerald-900 to-emerald-800 text-white sticky top-0 z-50 shadow-xl border-b border-emerald-700">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="flex justify-between items-center py-3">
               {/* Logo - Kontainer dan fallback icon diperbesar ukurannya */}
