@@ -357,6 +357,7 @@ export default function App() {
     const handleServerError = (err: any) => {
       console.warn("Koneksi data latar belakang terputus atau timeout. Aplikasi menggunakan data lokal.");
       setIsDbConnected(false);
+      // Hindari update pesan error ke UI kecuali kalau persmission-denied, agar tampilan tidak terganggu jika sekadar timeout
       if (err.code === 'permission-denied') {
         setDbError("Akses Database Ditolak! Masuk ke Firebase Console Anda, buka menu Firestore Database, klik tab 'Rules', lalu ubah isinya menjadi 'allow read, write: if true;' dan klik Publish.");
       }
@@ -645,27 +646,28 @@ export default function App() {
                 </div>
               </div>
 
-              {/* KANAN: Galeri (Atas) & Navigasi+Admin (Bawah) */}
-              <div className="flex flex-col items-end gap-2 flex-grow justify-end overflow-hidden pl-2 md:pl-4">
+              {/* KANAN: Galeri + Navigasi + Admin (Semua Sejajar dalam 1 Baris) */}
+              <div className="flex items-center justify-end gap-2 md:gap-3 flex-grow overflow-hidden pl-2">
                 
-                {/* GALERI BARIS ATAS (Responsif di HP, Tablet, Web) */}
+                {/* GALERI HEADER (Sejajar dengan menu navigasi) */}
                 {(dataBeranda.galeriHeader && dataBeranda.galeriHeader.length > 0) && (
-                  <div className="flex w-[144px] sm:w-[192px] h-[40px] sm:h-[52px] bg-black/20 backdrop-blur-md border border-white/10 rounded-xl sm:rounded-2xl overflow-hidden relative items-center shadow-inner flex-shrink-0 justify-start">
-                    <div className="animate-scroll-gallery flex items-center h-full cursor-pointer hover:[animation-play-state:paused]">
+                  <div className="hidden lg:flex w-[160px] xl:w-[200px] h-[44px] bg-black/20 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden relative items-center shadow-inner flex-shrink-0 mr-2">
+                    <div className="animate-scroll-gallery flex items-center h-full gap-2 cursor-pointer hover:[animation-play-state:paused] pl-2">
                       {(() => {
                         const base = dataBeranda.galeriHeader;
                         if (!base || base.length === 0) return null;
-                        const displayBase = base.slice(0, 4); // Selalu tampilkan 4 foto
+                        const displayBase = base.slice(0, 4); // Selalu tampilkan tepat 4 foto visualnya
                         let repeated = [...displayBase];
-                        // Perbanyak array agar animasi scroll -50% tidak terputus/kosong
-                        while (repeated.length < 8) repeated = [...repeated, ...displayBase];
+                        // Perbanyak array agar seamless
+                        while (repeated.length < 10) repeated = [...repeated, ...displayBase];
                         const finalArray = [...repeated, ...repeated];
+                        
                         return finalArray.map((img: any, idx: number) => (
-                          <div key={idx} className="w-[36px] sm:w-[48px] h-[40px] sm:h-[52px] flex justify-center items-center flex-shrink-0">
+                          <div key={idx} className="w-[36px] h-[36px] flex justify-center items-center flex-shrink-0 bg-black/40 rounded-md overflow-hidden border border-white/20 shadow-sm">
                             <img 
                               src={img.url} 
-                              alt="Galeri Desa" 
-                              className="w-[30px] h-[30px] sm:w-[40px] sm:h-[40px] rounded-md sm:rounded-lg object-cover border border-white/20 shadow-sm" 
+                              alt="Galeri" 
+                              className="w-full h-full object-cover" 
                             />
                           </div>
                         ));
@@ -674,196 +676,190 @@ export default function App() {
                   </div>
                 )}
 
-                {/* NAVIGASI & ADMIN BARIS BAWAH */}
-                <div className="flex items-center gap-3 w-full justify-end">
+                {/* NAVIGASI DESKTOP */}
+                <nav className="hidden xl:flex space-x-1 items-center bg-black/20 p-1.5 rounded-2xl backdrop-blur-md border border-white/10 flex-shrink-0">
+                  <NavButton active={currentPage === 'beranda'} onClick={() => navigateTo('beranda')} icon={<Home className="w-4 h-4 mr-2" />}>Beranda</NavButton>
                   
-                  {/* TENGAH: Desktop Navigation */}
-                  <nav className="hidden xl:flex space-x-1 items-center bg-black/20 p-1.5 rounded-2xl backdrop-blur-md border border-white/10 flex-shrink-0">
-                    <NavButton active={currentPage === 'beranda'} onClick={() => navigateTo('beranda')} icon={<Home className="w-4 h-4 mr-2" />}>Beranda</NavButton>
-                    
-                    {/* Dropdown Profil Desa */}
-                    <div className="relative" onClick={(e: any) => e.stopPropagation()}>
-                      <button
-                        onClick={() => {
-                          setIsDesktopPemerintahOpen(false);
-                          setIsDesktopBeritaOpen(false);
-                          if (currentPage === 'profil') {
-                            setIsDesktopProfilOpen(!isDesktopProfilOpen);
-                          } else {
-                            navigateTo('profil', activeProfilTab || daftarProfil[0]?.id);
-                            setIsDesktopProfilOpen(true);
-                          }
-                        }}
-                        className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
-                          currentPage === 'profil'
-                            ? 'bg-white text-emerald-900 shadow-md'
-                            : 'text-white hover:bg-white/10 hover:text-white'
-                        }`}
-                      >
-                        <Info className="w-4 h-4 mr-2" />
-                        Profil Desa
-                        <ChevronDown className={`w-4 h-4 ml-1 opacity-70 transition-transform duration-300 ${isDesktopProfilOpen ? 'rotate-180' : ''}`} />
-                      </button>
-
-                      <div className={`absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.15)] border border-gray-100 transition-all duration-300 transform origin-top z-50 overflow-hidden ${
-                        isDesktopProfilOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'
-                      }`}>
-                        <div className="flex flex-col py-1.5">
-                          {daftarProfil.map((profil: any) => (
-                            <button
-                              key={profil.id}
-                              onClick={(e: any) => {
-                                e.stopPropagation();
-                                navigateTo('profil', profil.id);
-                              }}
-                              className={`text-left px-5 py-3 text-sm font-bold transition-all duration-200 relative overflow-hidden ${
-                                 String(activeProfilTab) === String(profil.id) && currentPage === 'profil'
-                                   ? 'text-emerald-700 bg-emerald-50/80'
-                                   : 'text-gray-600 hover:bg-gray-50 hover:text-emerald-600'
-                              }`}
-                            >
-                               {String(activeProfilTab) === String(profil.id) && currentPage === 'profil' && (
-                                 <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-400 to-emerald-600"></span>
-                               )}
-                               {profil.judul}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Dropdown Pemerintah Desa */}
-                    <div className="relative" onClick={(e: any) => e.stopPropagation()}>
-                      <button
-                        onClick={() => {
-                          setIsDesktopProfilOpen(false);
-                          setIsDesktopBeritaOpen(false);
-                          if (currentPage === 'pemerintah') {
-                            setIsDesktopPemerintahOpen(!isDesktopPemerintahOpen);
-                          } else {
-                            navigateTo('pemerintah', activePemerintahTab || 'perangkat');
-                            setIsDesktopPemerintahOpen(true);
-                          }
-                        }}
-                        className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
-                          currentPage === 'pemerintah'
-                            ? 'bg-white text-emerald-900 shadow-md'
-                            : 'text-white hover:bg-white/10 hover:text-white'
-                        }`}
-                      >
-                        <Users className="w-4 h-4 mr-2" />
-                        Pemerintah Desa
-                        <ChevronDown className={`w-4 h-4 ml-1 opacity-70 transition-transform duration-300 ${isDesktopPemerintahOpen ? 'rotate-180' : ''}`} />
-                      </button>
-
-                      <div className={`absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.15)] border border-gray-100 transition-all duration-300 transform origin-top z-50 overflow-hidden ${
-                        isDesktopPemerintahOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'
-                      }`}>
-                        <div className="flex flex-col py-1.5">
-                          {menuPemerintah.map((menu) => (
-                            <button
-                              key={menu.id}
-                              onClick={(e: any) => {
-                                e.stopPropagation();
-                                navigateTo('pemerintah', menu.id);
-                              }}
-                              className={`text-left px-5 py-3 text-sm font-bold transition-all duration-200 relative overflow-hidden ${
-                                 activePemerintahTab === menu.id && currentPage === 'pemerintah'
-                                   ? 'text-emerald-700 bg-emerald-50/80'
-                                   : 'text-gray-600 hover:bg-gray-50 hover:text-emerald-600'
-                              }`}
-                            >
-                               {activePemerintahTab === menu.id && currentPage === 'pemerintah' && (
-                                 <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-400 to-emerald-600"></span>
-                               )}
-                               {menu.label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Dropdown Berita & Grafik */}
-                    <div className="relative" onClick={(e: any) => e.stopPropagation()}>
-                      <button
-                        onClick={() => {
-                          setIsDesktopProfilOpen(false);
-                          setIsDesktopPemerintahOpen(false);
-                          if (currentPage === 'berita') {
-                            setIsDesktopBeritaOpen(!isDesktopBeritaOpen);
-                          } else {
-                            navigateTo('berita', activeBeritaTab || 'list-berita');
-                            setIsDesktopBeritaOpen(true);
-                          }
-                        }}
-                        className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
-                          currentPage === 'berita'
-                            ? 'bg-white text-emerald-900 shadow-md'
-                            : 'text-white hover:bg-white/10 hover:text-white'
-                        }`}
-                      >
-                        <Newspaper className="w-4 h-4 mr-2" />
-                        Berita
-                        <ChevronDown className={`w-4 h-4 ml-1 opacity-70 transition-transform duration-300 ${isDesktopBeritaOpen ? 'rotate-180' : ''}`} />
-                      </button>
-
-                      <div className={`absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.15)] border border-gray-100 transition-all duration-300 transform origin-top z-50 overflow-hidden ${
-                        isDesktopBeritaOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'
-                      }`}>
-                        <div className="flex flex-col py-1.5">
-                          {menuBerita.map((menu) => (
-                            <button
-                              key={menu.id}
-                              onClick={(e: any) => {
-                                e.stopPropagation();
-                                navigateTo('berita', menu.id);
-                              }}
-                              className={`text-left px-5 py-3 text-sm font-bold transition-all duration-200 relative overflow-hidden ${
-                                 activeBeritaTab === menu.id && currentPage === 'berita'
-                                   ? 'text-emerald-700 bg-emerald-50/80'
-                                   : 'text-gray-600 hover:bg-gray-50 hover:text-emerald-600'
-                              }`}
-                            >
-                               {activeBeritaTab === menu.id && currentPage === 'berita' && (
-                                 <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-400 to-emerald-600"></span>
-                               )}
-                               <div className="flex items-center">
-                                 {menu.id === 'list-berita' ? <Newspaper className="w-4 h-4 mr-2 opacity-70" /> : <PieChart className="w-4 h-4 mr-2 opacity-70" />}
-                                 {menu.label}
-                               </div>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    <NavButton active={currentPage === 'kontak'} onClick={() => navigateTo('kontak')} icon={<Phone className="w-4 h-4 mr-2" />}>Kontak</NavButton>
-                  </nav>
-
-                  {/* Tombol Login Admin Desktop & Mobile */}
-                  <div className="flex items-center gap-3 flex-shrink-0">
-                    {isAdmin ? (
-                      <button onClick={handleLogout} className="flex items-center p-2.5 xl:px-5 xl:py-2.5 text-sm font-bold bg-rose-500 hover:bg-rose-600 text-white rounded-xl transition shadow-[0_0_15px_rgba(244,63,94,0.4)]" title="Keluar">
-                        <LogOut className="w-5 h-5 xl:mr-2 xl:w-4 xl:h-4" /> <span className="hidden xl:block">Keluar</span>
-                      </button>
-                    ) : (
-                      <button onClick={() => setShowLoginModal(true)} className="flex items-center p-2.5 xl:px-5 xl:py-2.5 text-sm font-bold bg-white/10 hover:bg-white/20 text-white rounded-xl transition border border-white/10" title="Admin">
-                        <LogIn className="w-5 h-5 xl:mr-2 xl:w-4 xl:h-4" /> <span className="hidden xl:block">Admin</span>
-                      </button>
-                    )}
-                    
-                    {/* Mobile Menu Hamburger */}
-                    <button 
-                      className="xl:hidden p-2.5 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition"
-                      onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  {/* Dropdown Profil Desa */}
+                  <div className="relative" onClick={(e: any) => e.stopPropagation()}>
+                    <button
+                      onClick={() => {
+                        setIsDesktopPemerintahOpen(false);
+                        setIsDesktopBeritaOpen(false);
+                        if (currentPage === 'profil') {
+                          setIsDesktopProfilOpen(!isDesktopProfilOpen);
+                        } else {
+                          navigateTo('profil', activeProfilTab || daftarProfil[0]?.id);
+                          setIsDesktopProfilOpen(true);
+                        }
+                      }}
+                      className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
+                        currentPage === 'profil'
+                          ? 'bg-white text-emerald-900 shadow-md'
+                          : 'text-white hover:bg-white/10 hover:text-white'
+                      }`}
                     >
-                      {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                      <Info className="w-4 h-4 mr-2" />
+                      Profil Desa
+                      <ChevronDown className={`w-4 h-4 ml-1 opacity-70 transition-transform duration-300 ${isDesktopProfilOpen ? 'rotate-180' : ''}`} />
                     </button>
+
+                    <div className={`absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.15)] border border-gray-100 transition-all duration-300 transform origin-top z-50 overflow-hidden ${
+                      isDesktopProfilOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'
+                    }`}>
+                      <div className="flex flex-col py-1.5">
+                        {daftarProfil.map((profil: any) => (
+                          <button
+                            key={profil.id}
+                            onClick={(e: any) => {
+                              e.stopPropagation();
+                              navigateTo('profil', profil.id);
+                            }}
+                            className={`text-left px-5 py-3 text-sm font-bold transition-all duration-200 relative overflow-hidden ${
+                               String(activeProfilTab) === String(profil.id) && currentPage === 'profil'
+                                 ? 'text-emerald-700 bg-emerald-50/80'
+                                 : 'text-gray-600 hover:bg-gray-50 hover:text-emerald-600'
+                            }`}
+                          >
+                             {String(activeProfilTab) === String(profil.id) && currentPage === 'profil' && (
+                               <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-400 to-emerald-600"></span>
+                             )}
+                             {profil.judul}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
+
+                  {/* Dropdown Pemerintah Desa */}
+                  <div className="relative" onClick={(e: any) => e.stopPropagation()}>
+                    <button
+                      onClick={() => {
+                        setIsDesktopProfilOpen(false);
+                        setIsDesktopBeritaOpen(false);
+                        if (currentPage === 'pemerintah') {
+                          setIsDesktopPemerintahOpen(!isDesktopPemerintahOpen);
+                        } else {
+                          navigateTo('pemerintah', activePemerintahTab || 'perangkat');
+                          setIsDesktopPemerintahOpen(true);
+                        }
+                      }}
+                      className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
+                        currentPage === 'pemerintah'
+                          ? 'bg-white text-emerald-900 shadow-md'
+                          : 'text-white hover:bg-white/10 hover:text-white'
+                      }`}
+                    >
+                      <Users className="w-4 h-4 mr-2" />
+                      Pemerintah Desa
+                      <ChevronDown className={`w-4 h-4 ml-1 opacity-70 transition-transform duration-300 ${isDesktopPemerintahOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    <div className={`absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.15)] border border-gray-100 transition-all duration-300 transform origin-top z-50 overflow-hidden ${
+                      isDesktopPemerintahOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'
+                    }`}>
+                      <div className="flex flex-col py-1.5">
+                        {menuPemerintah.map((menu) => (
+                          <button
+                            key={menu.id}
+                            onClick={(e: any) => {
+                              e.stopPropagation();
+                              navigateTo('pemerintah', menu.id);
+                            }}
+                            className={`text-left px-5 py-3 text-sm font-bold transition-all duration-200 relative overflow-hidden ${
+                               activePemerintahTab === menu.id && currentPage === 'pemerintah'
+                                 ? 'text-emerald-700 bg-emerald-50/80'
+                                 : 'text-gray-600 hover:bg-gray-50 hover:text-emerald-600'
+                            }`}
+                          >
+                             {activePemerintahTab === menu.id && currentPage === 'pemerintah' && (
+                               <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-400 to-emerald-600"></span>
+                             )}
+                             {menu.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Dropdown Berita & Grafik */}
+                  <div className="relative" onClick={(e: any) => e.stopPropagation()}>
+                    <button
+                      onClick={() => {
+                        setIsDesktopProfilOpen(false);
+                        setIsDesktopPemerintahOpen(false);
+                        if (currentPage === 'berita') {
+                          setIsDesktopBeritaOpen(!isDesktopBeritaOpen);
+                        } else {
+                          navigateTo('berita', activeBeritaTab || 'list-berita');
+                          setIsDesktopBeritaOpen(true);
+                        }
+                      }}
+                      className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
+                        currentPage === 'berita'
+                          ? 'bg-white text-emerald-900 shadow-md'
+                          : 'text-white hover:bg-white/10 hover:text-white'
+                      }`}
+                    >
+                      <Newspaper className="w-4 h-4 mr-2" />
+                      Berita
+                      <ChevronDown className={`w-4 h-4 ml-1 opacity-70 transition-transform duration-300 ${isDesktopBeritaOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    <div className={`absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.15)] border border-gray-100 transition-all duration-300 transform origin-top z-50 overflow-hidden ${
+                      isDesktopBeritaOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'
+                    }`}>
+                      <div className="flex flex-col py-1.5">
+                        {menuBerita.map((menu) => (
+                          <button
+                            key={menu.id}
+                            onClick={(e: any) => {
+                              e.stopPropagation();
+                              navigateTo('berita', menu.id);
+                            }}
+                            className={`text-left px-5 py-3 text-sm font-bold transition-all duration-200 relative overflow-hidden ${
+                               activeBeritaTab === menu.id && currentPage === 'berita'
+                                 ? 'text-emerald-700 bg-emerald-50/80'
+                                 : 'text-gray-600 hover:bg-gray-50 hover:text-emerald-600'
+                            }`}
+                          >
+                             {activeBeritaTab === menu.id && currentPage === 'berita' && (
+                               <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-400 to-emerald-600"></span>
+                             )}
+                             <div className="flex items-center">
+                               {menu.id === 'list-berita' ? <Newspaper className="w-4 h-4 mr-2 opacity-70" /> : <PieChart className="w-4 h-4 mr-2 opacity-70" />}
+                               {menu.label}
+                             </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <NavButton active={currentPage === 'kontak'} onClick={() => navigateTo('kontak')} icon={<Phone className="w-4 h-4 mr-2" />}>Kontak</NavButton>
+                </nav>
+
+                {/* Tombol Admin & Hamburger */}
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  {isAdmin ? (
+                    <button onClick={handleLogout} className="flex items-center p-2.5 xl:px-5 xl:py-2.5 text-sm font-bold bg-rose-500 hover:bg-rose-600 text-white rounded-xl transition shadow-[0_0_15px_rgba(244,63,94,0.4)]" title="Keluar">
+                      <LogOut className="w-5 h-5 xl:mr-2 xl:w-4 xl:h-4" /> <span className="hidden xl:block">Keluar</span>
+                    </button>
+                  ) : (
+                    <button onClick={() => setShowLoginModal(true)} className="flex items-center p-2.5 xl:px-5 xl:py-2.5 text-sm font-bold bg-white/10 hover:bg-white/20 text-white rounded-xl transition border border-white/10" title="Admin">
+                      <LogIn className="w-5 h-5 xl:mr-2 xl:w-4 xl:h-4" /> <span className="hidden xl:block">Admin</span>
+                    </button>
+                  )}
+                  
+                  <button 
+                    className="xl:hidden p-2.5 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition"
+                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  >
+                    {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                  </button>
                 </div>
 
               </div>
-
             </div>
           </div>
 
@@ -995,6 +991,7 @@ export default function App() {
                <span>Mode Admin Aktif: Anda dapat mengedit konten website.</span>
              </div>
              
+             {/* Jika koneksi terputus dan belum ada pesan dbError, tampilkan peringatan Offline */}
              {!isDbConnected && !dbError && (
                <div className="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full text-xs font-bold animate-pulse">
                  ⏳ Menghubungkan ke Server / Mode Offline Sementara...
@@ -1006,6 +1003,7 @@ export default function App() {
                </div>
              )}
 
+             {/* Jika ada error Permission Denied (bukan karena timeout), maka tampilkan error */}
              {dbError && (
                <div className="bg-rose-200 text-rose-800 border border-rose-400 px-4 py-2 rounded-xl text-xs font-bold w-full max-w-2xl mt-1 text-left sm:text-center shadow-sm">
                  ⚠️ {dbError}
@@ -1938,6 +1936,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                   {editForm.stats.map((stat: any, index: number) => {
                     const isPopulasi = stat.id === 1;
                     
+                    // Logic Sinkronisasi Display Input Editor
                     let displayNum = stat.num;
                     let displayLaki = stat.subLaki || '';
                     let displayPerempuan = stat.subPerempuan || '';
@@ -1959,7 +1958,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                            value={displayNum}
                            onChange={(e) => handleStatChange(stat.id, 'num', e.target.value)}
                            disabled={isPopulasi}
-                           className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-50 ${isPopulasi ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`} 
+                           className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 ${isPopulasi ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`} 
                          />
                       </div>
                       <div>
@@ -2014,6 +2013,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
         </div>
       )}
 
+      {/* Modal Editor Khusus Data Agenda */}
       {showEditorAgenda && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-in zoom-in-95 border border-emerald-100">
@@ -2383,7 +2383,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
   );
 }
 
-// ============== HALAMAN PEMERINTAHAN ==============
+// ============== HALAMAN PEMERINTAHAN (STRUKTUR SOTK PERSIS GAMBAR) ==============
 function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPerangkat, daftarLembaga, setDaftarLembaga, showConfirm }: any) {
   const isPerangkat = activeTab === 'perangkat' || !activeTab;
   
@@ -2473,17 +2473,24 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
     }
   };
 
+  // ----- PEMISAHAN KATEGORI UNTUK BAGAN STRUKTUR -----
   const kadesList = daftarPerangkat.filter((p: any) => p.jabatan.toUpperCase().includes('KEPALA DESA') || p.jabatan.toUpperCase() === 'KADES');
   const sekdesList = daftarPerangkat.filter((p: any) => p.jabatan.toUpperCase().includes('SEKRETARIS'));
   const kasiList = daftarPerangkat.filter((p: any) => p.jabatan.toUpperCase().includes('KASI'));
   const kaurList = daftarPerangkat.filter((p: any) => p.jabatan.toUpperCase().includes('KAUR'));
   const kasunList = daftarPerangkat.filter((p: any) => p.jabatan.toUpperCase().includes('KASUN') || p.jabatan.toUpperCase().includes('DUSUN'));
 
-  const maxKasunPerRow = 6; 
+  // Logika Tinggi Dinamis Container Berdasarkan Jumlah Kasun
+  const maxKasunPerRow = 6; // Maksimal 6 Kasun per baris sesuai instruksi
   const kasunRowCount = Math.ceil(kasunList.length / maxKasunPerRow);
+  
+  // Jika 0 Kasun, batang putus di garis Kaur (Y=620)
   const trunkHeight = kasunRowCount === 0 ? 360 : 680 + ((kasunRowCount - 1) * 340);
+  
+  // Tinggi Container Dinamis
   const containerHeight = kasunRowCount === 0 ? 950 : 1300 + ((kasunRowCount - 1) * 340);
 
+  // Desain Card Perangkat Persis Screenshot
   const PerangkatCard = ({ p }: any) => (
     <div style={{ width: '160px', height: '260px' }} className="bg-white border-[3px] border-black overflow-hidden relative flex flex-col items-center shadow-lg group z-10">
        {isAdmin && (
@@ -2529,7 +2536,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
           </p>
         </div>
 
-        {/* =========== TAMPILAN PERANGKAT DESA =========== */}
+        {/* =========== TAMPILAN PERANGKAT DESA (HIERARKI BAGAN ABSOLUTE) =========== */}
         {isPerangkat && (
           <div className="animate-in fade-in duration-500 max-w-full">
             {isAdmin && (
@@ -2547,38 +2554,57 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                <div className="col-span-full text-center text-gray-500 py-20 bg-white rounded-3xl border border-dashed border-gray-300 font-medium text-lg max-w-6xl mx-auto">Belum ada data perangkat desa.</div>
             ) : (
               <div className="w-full overflow-x-auto pb-10 custom-scrollbar">
+                {/* Wadah Absolut untuk struktur berjenjang yang presisi */}
                 <div style={{ width: '1300px', height: `${containerHeight}px`, position: 'relative', margin: '0 auto', marginTop: '40px' }} className="bg-white/50 rounded-3xl">
 
+                  {/* --- GARIS PENGHUBUNG (CONNECTOR LINES) --- */}
+                  
+                  {/* Garis BPD ke Kades */}
                   <div style={{ position: 'absolute', left: '330px', top: '120px', width: '240px', borderTop: '4px dashed black', zIndex: 0 }}></div>
+                  
+                  {/* Batang Utama (Trunk) vertikal dari Kades turun ke Kasun */}
                   <div style={{ position: 'absolute', left: '648px', top: '260px', width: '4px', height: `${trunkHeight}px`, backgroundColor: 'black', zIndex: 0 }}></div>
 
+                  {/* Cabang Sekdes (Kanan) */}
                   <div style={{ position: 'absolute', left: '648px', top: '300px', width: '304px', height: '4px', backgroundColor: 'black', zIndex: 0 }}></div>
                   <div style={{ position: 'absolute', left: '948px', top: '300px', width: '4px', height: '20px', backgroundColor: 'black', zIndex: 0 }}></div>
                   
+                  {/* Sambungan bawah Sekdes menuju Kaur */}
                   <div style={{ position: 'absolute', left: '948px', top: '580px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
 
+                  {/* Garis Horizontal Kaur */}
                   <div style={{ position: 'absolute', left: '748px', top: '620px', width: '404px', height: '4px', backgroundColor: 'black', zIndex: 0 }}></div>
+                  {/* Drop Kaur 1, 2, 3 */}
                   <div style={{ position: 'absolute', left: '748px', top: '620px', width: '4px', height: '20px', backgroundColor: 'black', zIndex: 0 }}></div>
                   <div style={{ position: 'absolute', left: '948px', top: '620px', width: '4px', height: '20px', backgroundColor: 'black', zIndex: 0 }}></div>
                   <div style={{ position: 'absolute', left: '1148px', top: '620px', width: '4px', height: '20px', backgroundColor: 'black', zIndex: 0 }}></div>
 
+                  {/* Cabang Kasi (Kiri) */}
                   <div style={{ position: 'absolute', left: '148px', top: '420px', width: '504px', height: '4px', backgroundColor: 'black', zIndex: 0 }}></div>
+                  {/* Drop Kasi 1, 2, 3 */}
                   <div style={{ position: 'absolute', left: '148px', top: '420px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
                   <div style={{ position: 'absolute', left: '348px', top: '420px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
                   <div style={{ position: 'absolute', left: '548px', top: '420px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
 
+
+                  {/* --- KARTU PERANGKAT DESA (NODES) --- */}
+                  
+                  {/* Kotak BPD (Statis) */}
                   <div style={{ position: 'absolute', left: '170px', top: '80px', width: '160px', height: '80px', zIndex: 10 }} className="bg-white border-[3px] border-black flex items-center justify-center font-black text-2xl shadow-lg tracking-widest">
                     BPD
                   </div>
 
+                  {/* Level 1: Kepala Desa */}
                   <div style={{ position: 'absolute', left: '570px', top: '0px', zIndex: 10 }}>
                     {kadesList[0] && <PerangkatCard p={kadesList[0]} />}
                   </div>
 
+                  {/* Level 2: Sekretaris Desa */}
                   <div style={{ position: 'absolute', left: '870px', top: '320px', zIndex: 10 }}>
                     {sekdesList[0] && <PerangkatCard p={sekdesList[0]} />}
                   </div>
 
+                  {/* Level 3: Kasi (Kiri) */}
                   <div style={{ position: 'absolute', left: '70px', top: '460px', zIndex: 10 }}>
                     {kasiList[0] && <PerangkatCard p={kasiList[0]} />}
                   </div>
@@ -2589,6 +2615,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                     {kasiList[2] && <PerangkatCard p={kasiList[2]} />}
                   </div>
 
+                  {/* Level 3: Kaur (Kanan) */}
                   <div style={{ position: 'absolute', left: '670px', top: '640px', zIndex: 10 }}>
                     {kaurList[0] && <PerangkatCard p={kaurList[0]} />}
                   </div>
@@ -2599,12 +2626,14 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                     {kaurList[2] && <PerangkatCard p={kaurList[2]} />}
                   </div>
 
+
+                  {/* --- RENDER DINAMIS KEPALA DUSUN --- */}
                   {(() => {
-                    const kasunGap = 200; 
-                    const baseLineY = 940; 
-                    const baseBoxY = 980; 
-                    const rowHeightSpacing = 340; 
-                    const centerX = 650; 
+                    const kasunGap = 200; // Jarak antar kotak kasun (dimodifikasi agar muat 6 kotak)
+                    const baseLineY = 940; // Y-koordinat garis horizontal kasun baris pertama
+                    const baseBoxY = 980; // Y-koordinat kotak kasun baris pertama
+                    const rowHeightSpacing = 340; // Jarak antar baris kasun baru
+                    const centerX = 650; // Titik tengah container
 
                     const rows = [];
                     for (let i = 0; i < kasunList.length; i += maxKasunPerRow) {
@@ -2615,10 +2644,13 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                       const currentLineY = baseLineY + (rowIndex * rowHeightSpacing);
                       const currentBoxY = baseBoxY + (rowIndex * rowHeightSpacing);
                       const count = rowItems.length;
+                      
+                      // Menghitung offset untuk meletakkan kotak presisi di tengah
                       const startOffset = -((count - 1) / 2) * kasunGap;
 
                       return (
                         <React.Fragment key={`kasun-row-${rowIndex}`}>
+                          {/* Garis Horizontal Penghubung (Hanya muncul jika lebih dari 1 kasun di baris tersebut) */}
                           {count > 1 && (
                             <div style={{
                               position: 'absolute',
@@ -2631,10 +2663,12 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                             }}></div>
                           )}
 
+                          {/* Garis Vertikal Drop & Kotak Kasun */}
                           {rowItems.map((kasun: any, idx: number) => {
                             const itemCenterX = centerX + startOffset + (idx * kasunGap);
                             return (
                               <React.Fragment key={`kasun-item-${kasun.id}`}>
+                                {/* Drop Vertikal */}
                                 <div style={{
                                   position: 'absolute',
                                   left: `${itemCenterX - 2}px`,
@@ -2644,6 +2678,8 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                                   backgroundColor: 'black',
                                   zIndex: 0
                                 }}></div>
+                                
+                                {/* Kotak Card Perangkat */}
                                 <div style={{
                                   position: 'absolute',
                                   left: `${itemCenterX - 80}px`,
@@ -2666,7 +2702,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
           </div>
         )}
 
-        {/* =========== TAMPILAN LEMBAGA =========== */}
+        {/* =========== TAMPILAN LEMBAGA/LAINNYA (TABEL) =========== */}
         {!isPerangkat && (
           <div className="animate-in slide-in-from-bottom-4 duration-500 max-w-6xl mx-auto">
             {isAdmin && (
@@ -2930,6 +2966,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
 
   const openEditorBerita = (berita: any = null) => {
     if (berita) {
+      // Pastikan ada property galeri walau dari data lama
       setEditDataBerita({ ...berita, galeri: berita.galeri || [] });
     } else {
       setEditDataBerita({ id: null, judul: '', tanggal: '', kategori: '', excerpt: '', gambar: '', galeri: [] });
@@ -2971,6 +3008,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
     }
   };
 
+  // ----- Logika Upload Foto Tambahan (Galeri) -----
   const handleImageTambahanUpload = (e: any) => {
     const files = Array.from(e.target.files);
     files.forEach((file: any) => {
@@ -3019,6 +3057,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                    </button>
                 </div>
                 
+                {/* Header Image Utama */}
                 <div className="w-full h-64 md:h-[450px] overflow-hidden bg-gray-200">
                    <img 
                      src={selectedBerita.gambar} 
@@ -3044,6 +3083,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                    </h2>
                    <div className="w-20 h-1.5 bg-gradient-to-r from-emerald-500 to-emerald-300 rounded-full mb-10"></div>
                    
+                   {/* Render Konten Beserta Posisi Gambar */}
                    <div className="text-gray-700 text-lg md:text-xl leading-relaxed whitespace-pre-wrap font-medium relative clearfix">
                       {(() => {
                         const galeri = selectedBerita.galeri || [];
@@ -3053,25 +3093,31 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                         const imgKanan = galeri.filter((g: any) => g.posisi === 'kanan');
                         const imgTengah = galeri.filter((g: any) => g.posisi === 'tengah');
 
+                        // Pisahkan paragraf agar gambar tengah bisa disisipkan
                         const paragraphs = selectedBerita.excerpt.split('\n');
 
                         return (
                           <React.Fragment>
+                            {/* Gambar Atas */}
                             {imgAtas.length > 0 && (
                               <div className="w-full flex flex-col gap-4 mb-8">
                                 {imgAtas.map((g: any) => <img key={g.id} src={g.url} alt="Berita Atas" className="w-full rounded-2xl shadow-md object-cover" />)}
                               </div>
                             )}
 
+                            {/* Gambar Kiri (Float) */}
                             {imgKiri.map((g: any) => (
                               <img key={g.id} src={g.url} alt="Berita Kiri" className="w-[45%] md:w-1/3 float-left mr-6 mb-4 rounded-xl shadow-sm object-cover" />
                             ))}
 
+                            {/* Gambar Kanan (Float) */}
                             {imgKanan.map((g: any) => (
                               <img key={g.id} src={g.url} alt="Berita Kanan" className="w-[45%] md:w-1/3 float-right ml-6 mb-4 rounded-xl shadow-sm object-cover" />
                             ))}
 
+                            {/* Text Berita + Sisipan Tengah */}
                             {paragraphs.map((p: string, idx: number) => {
+                              // Tentukan dimana gambar 'tengah' akan muncul. Jika paragraf sedikit, muncul di awal/akhir
                               const isMiddle = paragraphs.length > 1 ? idx === Math.floor(paragraphs.length / 2) : idx === 0;
 
                               return (
@@ -3091,6 +3137,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
 
                             <div className="clear-both pt-6"></div>
 
+                            {/* Gambar Bawah */}
                             {imgBawah.length > 0 && (
                               <div className="w-full flex flex-col gap-4 mt-6">
                                 {imgBawah.map((g: any) => <img key={g.id} src={g.url} alt="Berita Bawah" className="w-full rounded-2xl shadow-md object-cover" />)}
@@ -3182,6 +3229,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
             )}
           </>
         ) : (
+          /* TAMPILAN GRAFIK PENDUDUK */
           <div className="animate-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto">
             <div className="text-center mb-14">
               <span className="text-emerald-600 font-bold tracking-widest uppercase text-sm mb-2 block">Visualisasi Data</span>
@@ -3207,6 +3255,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
               <div className="absolute top-0 left-0 w-32 h-32 bg-emerald-50 rounded-br-full -z-10 opacity-70"></div>
               <div className="absolute bottom-0 right-0 w-40 h-40 bg-amber-50 rounded-tl-full -z-10 opacity-70"></div>
 
+              {/* Left Side: Summary Big Number */}
               <div className="w-full md:w-1/3 text-center md:text-left z-10">
                 <h3 className="text-xl font-bold text-gray-500 mb-2 uppercase tracking-widest flex justify-center md:justify-start items-center">
                   <TrendingUp className="w-5 h-5 mr-2" /> Total Populasi
@@ -3220,8 +3269,10 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                 <p className="text-sm text-gray-400 mt-6 font-medium">Diperbarui: {dataGrafik.updateTerakhir}</p>
               </div>
 
+              {/* Right Side: Awesome Custom CSS Bar Chart */}
               <div className="w-full md:w-2/3 z-10">
                 
+                {/* Laki-Laki Bar */}
                 <div className="mb-8">
                   <div className="flex justify-between items-end mb-3">
                     <div className="flex items-center">
@@ -3248,6 +3299,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                   </div>
                 </div>
 
+                {/* Perempuan Bar */}
                 <div>
                   <div className="flex justify-between items-end mb-3">
                     <div className="flex items-center">
@@ -3287,6 +3339,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
 
       </div>
 
+      {/* Modal Editor Khusus Data Berita */}
       {showEditorBerita && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto border border-emerald-100 animate-in zoom-in-95">
@@ -3424,6 +3477,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
         </div>
       )}
 
+      {/* Modal Editor Khusus Data Grafik */}
       {showEditorGrafik && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 animate-in zoom-in-95 border border-emerald-100">
