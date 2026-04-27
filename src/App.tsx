@@ -542,7 +542,7 @@ export default function App() {
       {/* Overlay Transparan Gelap (Opsional, agar background tidak terlalu mengganggu warna situs) */}
       <div className="fixed inset-0 bg-black/30 pointer-events-none"></div>
 
-      {/* CONTAINER BOXED: Situs web dengan max-width di tengah layar. Hapus overflow-x-hidden agar sticky bekerja sempurna */}
+      {/* CONTAINER BOXED: Situs web dengan max-width di tengah layar. */}
       <div className="max-w-[1440px] mx-auto min-h-screen flex flex-col font-sans bg-gray-50 text-gray-800 relative shadow-[0_0_50px_rgba(0,0,0,0.4)] selection:bg-emerald-200 selection:text-emerald-900">
 
         {/* Dialog Kustom (Pengganti Alert & Confirm) */}
@@ -656,7 +656,8 @@ export default function App() {
               </div>
 
               {/* Right Desktop: Gallery (Top) & Nav (Bottom) */}
-              <div className="hidden lg:flex flex-col items-end gap-2 xl:gap-3 flex-grow overflow-hidden ml-4 xl:ml-8">
+              {/* PERBAIKAN: Menghapus overflow-hidden agar dropdown navigasi profil tidak tertutup (terpotong) layar */}
+              <div className="hidden lg:flex flex-col items-end gap-2 xl:gap-3 flex-grow ml-4 xl:ml-8 z-50">
                 
                 {/* NEW FEATURE: Galeri Header Marquee Persis Seperti Referensi */}
                 {dataBeranda.galeriHeader && dataBeranda.galeriHeader.length > 0 && (
@@ -1385,12 +1386,14 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
   const getHolidays = (d: number, m: number, y: number) => {
     const holidays = [];
     
+    // Libur Statis (Tanggal Pasti Setiap Tahun)
     if (d === 1 && m === 0) holidays.push("Tahun Baru Masehi");
     if (d === 1 && m === 4) holidays.push("Hari Buruh Internasional");
     if (d === 1 && m === 5) holidays.push("Hari Lahir Pancasila");
     if (d === 17 && m === 7) holidays.push("Hari Kemerdekaan RI");
     if (d === 25 && m === 11) holidays.push("Hari Raya Natal");
     
+    // Prediksi/Jadwal Libur Dinamis Keagamaan (Contoh hardcode untuk 2024 - 2026)
     if (y === 2024) {
       if (d === 8 && m === 1) holidays.push("Isra Mikraj Nabi Muhammad SAW");
       if (d === 10 && m === 1) holidays.push("Tahun Baru Imlek");
