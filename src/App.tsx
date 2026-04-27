@@ -626,11 +626,6 @@ export default function App() {
         {/* Header & Navbar */}
         <header className="bg-gradient-to-r from-emerald-900 to-emerald-800 text-white sticky top-0 z-50 shadow-xl border-b border-emerald-700">
           <div className="container mx-auto px-4 lg:px-8">
-            {/* Perubahan Tata Letak Header:
-               - Logo di kiri.
-               - Galeri foto di atas memanjang dari menu navigasi hingga ke tombol admin.
-               - Menu navigasi & Tombol admin di bawah galeri.
-            */}
             <div className="flex justify-between items-center py-3 w-full gap-4">
               
               {/* KIRI: Logo */}
@@ -655,12 +650,13 @@ export default function App() {
               {/* KANAN: Galeri (Atas) & Navigasi+Admin (Bawah) */}
               <div className="flex flex-col items-end gap-2 flex-grow justify-end overflow-hidden pl-4">
                 
-                {/* GALERI BARIS ATAS */}
+                {/* GALERI BARIS ATAS (Memanjang di atas Nav & Admin, Dibatasi W-200px) */}
+                {/* Terlihat di SEMUA perangkat berkat 'flex', mengubah w-[200px] secara mutlak agar muat 4 foto */}
                 {(dataBeranda.galeriHeader && dataBeranda.galeriHeader.length > 0) && (
-                  <div className="hidden xl:flex w-full max-w-[850px] h-[52px] bg-black/20 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden relative items-center shadow-inner group flex-shrink-0 justify-end">
+                  <div className="flex w-[200px] h-[52px] bg-black/20 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden relative items-center shadow-inner group flex-shrink-0 justify-end">
                     <div className="animate-scroll-gallery gap-2 px-2 items-center h-full flex cursor-pointer">
-                      {/* Menggunakan sintaks array flat manual agar tidak membingungkan parser JSX. Dibatasi 4 foto. */}
-                      {[...dataBeranda.galeriHeader.slice(0,4), ...dataBeranda.galeriHeader.slice(0,4), ...dataBeranda.galeriHeader.slice(0,4), ...dataBeranda.galeriHeader.slice(0,4), ...dataBeranda.galeriHeader.slice(0,4)].map((img: any, idx: number) => (
+                      {/* Duplicate data 10x agar scrolling terlihat berkelanjutan tanpa henti */}
+                      {Array(10).fill(dataBeranda.galeriHeader).reduce((acc: any, val: any) => acc.concat(val), []).map((img: any, idx: number) => (
                         <img 
                           key={idx} 
                           src={img.url} 
@@ -1206,15 +1202,11 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
   // Fungsi khusus Galeri Header (Memaksimalkan kompresi untuk menjamin file < 500kb)
   const handleGaleriHeaderUpload = (e: any) => {
     const files = Array.from(e.target.files);
-    let currentCount = editForm.galeriHeader?.length || 0;
-    const allowedFiles = files.slice(0, 4 - currentCount); // Membatasi maksimal 4 foto
-
-    allowedFiles.forEach((file: any) => {
+    files.forEach((file: any) => {
       // Menggunakan lebar maksimal 600px untuk memastikan ukuran sangat kecil (< 500kb)
       compressImage(file, 600, false, (base64: any) => {
          setEditForm((prev: any) => {
            const current = prev.galeriHeader || [];
-           if (current.length >= 4) return prev; // Keamanan ekstra agar tidak lebih dari 4
            return {
              ...prev,
              galeriHeader: [...current, { id: Date.now() + Math.random(), url: base64 }]
@@ -1758,18 +1750,18 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                    <span className="w-6 h-1 bg-emerald-500 rounded-full mr-3"></span> Galeri Header (Pojok Kanan Atas)
                 </h4>
                 <div className="mb-4 text-sm text-gray-500 font-medium">
-                  Atur foto galeri yang berjalan memutar di header. Dibatasi maksimal 4 foto. Ukuran otomatis dikompres hingga aman (di bawah 500KB). Anda dapat menambah, mengganti, atau menghapus foto.
+                  Upload foto tanpa batas. Maksimal otomatis dikompres hingga aman (di bawah 500KB) untuk performa web. Di layar akan selalu tampil 4 foto bergantian memutar tanpa henti. Anda dapat menambah, mengganti, atau menghapus foto.
                 </div>
                 
-                {(editForm.galeriHeader?.length || 0) < 4 && (
-                  <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 px-5 py-3 rounded-xl font-bold flex items-center justify-center transition-all shadow-sm w-full mb-5">
-                    <Upload className="w-5 h-5 mr-2" /> Tambah Foto Galeri (Tersisa {4 - (editForm.galeriHeader?.length || 0)} Slot)
-                    <input type="file" accept="image/*" multiple className="hidden" onChange={handleGaleriHeaderUpload} />
-                  </label>
-                )}
+                <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 px-5 py-3 rounded-xl font-bold flex items-center justify-center transition-all shadow-sm w-full mb-5">
+                  <Upload className="w-5 h-5 mr-2" /> Tambah Foto Galeri
+                  {/* Atribut multiple agar admin dapat mengunggah banyak foto sekaligus tanpa batas */}
+                  <input type="file" accept="image/*" multiple className="hidden" onChange={handleGaleriHeaderUpload} />
+                </label>
                 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  {(editForm.galeriHeader || []).slice(0, 4).map((img: any, idx: number) => (
+                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
+                  {/* Menampilkan SEMUA foto yang diunggah tanpa batasan slice */}
+                  {(editForm.galeriHeader || []).map((img: any, idx: number) => (
                     <div key={img.id} className="relative group animate-in fade-in zoom-in flex flex-col gap-2">
                       <div className="relative rounded-xl overflow-hidden border border-gray-200 shadow-sm aspect-square">
                         <img src={img.url} className="w-full h-full object-cover" alt={`Galeri ${idx + 1}`} />
@@ -1961,7 +1953,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                            value={displayNum}
                            onChange={(e) => handleStatChange(stat.id, 'num', e.target.value)}
                            disabled={isPopulasi}
-                           className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 ${isPopulasi ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`} 
+                           className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-50 ${isPopulasi ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`} 
                          />
                       </div>
                       <div>
