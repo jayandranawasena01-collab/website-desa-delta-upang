@@ -10,7 +10,7 @@ import {
 // ================= FIREBASE CLOUD STORAGE SETUP =================
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
-import { initializeFirestore, doc, setDoc, onSnapshot } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, onSnapshot } from 'firebase/firestore';
 
 // Deklarasi global agar TypeScript di Vercel tidak error
 declare const __firebase_config: any;
@@ -46,7 +46,8 @@ if (typeof window !== 'undefined') {
     if (firebaseConfig && firebaseConfig.apiKey) {
       app = initializeApp(firebaseConfig);
       auth = getAuth(app);
-      db = initializeFirestore(app, { experimentalForceLongPolling: true });
+      // Menggunakan getFirestore standar untuk menghindari timeout dari experimentalForceLongPolling di jaringan lambat
+      db = getFirestore(app);
     }
   } catch (err) {
     console.warn("Menjalankan aplikasi dalam mode lokal.");
@@ -354,7 +355,7 @@ export default function App() {
     };
 
     const handleServerError = (err: any) => {
-      console.error("Gagal sinkronisasi data:", err);
+      console.warn("Koneksi data latar belakang terputus atau timeout. Aplikasi menggunakan data lokal.");
       setIsDbConnected(false);
       if (err.code === 'permission-denied') {
         setDbError("Akses Database Ditolak! Masuk ke Firebase Console Anda, buka menu Firestore Database, klik tab 'Rules', lalu ubah isinya menjadi 'allow read, write: if true;' dan klik Publish.");
@@ -588,16 +589,13 @@ export default function App() {
             
             /* KEYFRAMES UNTUK GALERI HEADER (SCROLLING MEMUTAR) */
             @keyframes scroll-gallery-header {
-              0% { transform: translateX(0); }
-              100% { transform: translateX(-50%); }
+              from { transform: translateX(0); }
+              to { transform: translateX(-50%); }
             }
             .animate-scroll-gallery {
               display: flex;
               width: max-content;
-              animation: scroll-gallery-header 30s linear infinite;
-            }
-            .animate-scroll-gallery:hover {
-              animation-play-state: paused;
+              animation: scroll-gallery-header 25s linear infinite;
             }
 
             .custom-scrollbar::-webkit-scrollbar {
@@ -648,22 +646,30 @@ export default function App() {
               </div>
 
               {/* KANAN: Galeri (Atas) & Navigasi+Admin (Bawah) */}
-              <div className="flex flex-col items-end gap-2 flex-grow justify-end overflow-hidden pl-4">
+              <div className="flex flex-col items-end gap-2 flex-grow justify-end overflow-hidden pl-2 md:pl-4">
                 
-                {/* GALERI BARIS ATAS (Memanjang di atas Nav & Admin, Dibatasi W-200px) */}
-                {/* Terlihat di SEMUA perangkat berkat 'flex', mengubah w-[200px] secara mutlak agar muat 4 foto */}
+                {/* GALERI BARIS ATAS (Responsif di HP, Tablet, Web) */}
                 {(dataBeranda.galeriHeader && dataBeranda.galeriHeader.length > 0) && (
-                  <div className="flex w-[200px] h-[52px] bg-black/20 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden relative items-center shadow-inner group flex-shrink-0 justify-end">
-                    <div className="animate-scroll-gallery gap-2 px-2 items-center h-full flex cursor-pointer">
-                      {/* Duplicate data 10x agar scrolling terlihat berkelanjutan tanpa henti */}
-                      {Array(10).fill(dataBeranda.galeriHeader).reduce((acc: any, val: any) => acc.concat(val), []).map((img: any, idx: number) => (
-                        <img 
-                          key={idx} 
-                          src={img.url} 
-                          alt="Galeri Desa" 
-                          className="w-[40px] h-[40px] rounded-lg object-cover flex-shrink-0 border border-white/20 shadow-sm" 
-                        />
-                      ))}
+                  <div className="flex w-[144px] sm:w-[192px] h-[40px] sm:h-[52px] bg-black/20 backdrop-blur-md border border-white/10 rounded-xl sm:rounded-2xl overflow-hidden relative items-center shadow-inner flex-shrink-0 justify-start">
+                    <div className="animate-scroll-gallery flex items-center h-full cursor-pointer hover:[animation-play-state:paused]">
+                      {(() => {
+                        const base = dataBeranda.galeriHeader;
+                        if (!base || base.length === 0) return null;
+                        const displayBase = base.slice(0, 4); // Selalu tampilkan 4 foto
+                        let repeated = [...displayBase];
+                        // Perbanyak array agar animasi scroll -50% tidak terputus/kosong
+                        while (repeated.length < 8) repeated = [...repeated, ...displayBase];
+                        const finalArray = [...repeated, ...repeated];
+                        return finalArray.map((img: any, idx: number) => (
+                          <div key={idx} className="w-[36px] sm:w-[48px] h-[40px] sm:h-[52px] flex justify-center items-center flex-shrink-0">
+                            <img 
+                              src={img.url} 
+                              alt="Galeri Desa" 
+                              className="w-[30px] h-[30px] sm:w-[40px] sm:h-[40px] rounded-md sm:rounded-lg object-cover border border-white/20 shadow-sm" 
+                            />
+                          </div>
+                        ));
+                      })()}
                     </div>
                   </div>
                 )}
