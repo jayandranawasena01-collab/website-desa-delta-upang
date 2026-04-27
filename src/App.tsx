@@ -659,8 +659,8 @@ export default function App() {
                 {(dataBeranda.galeriHeader && dataBeranda.galeriHeader.length > 0) && (
                   <div className="hidden xl:flex w-full max-w-[850px] h-[52px] bg-black/20 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden relative items-center shadow-inner group flex-shrink-0 justify-end">
                     <div className="animate-scroll-gallery gap-2 px-2 items-center h-full flex cursor-pointer">
-                      {/* Menggunakan sintaks array flat manual agar tidak membingungkan parser JSX */}
-                      {[...dataBeranda.galeriHeader, ...dataBeranda.galeriHeader, ...dataBeranda.galeriHeader, ...dataBeranda.galeriHeader, ...dataBeranda.galeriHeader].map((img: any, idx: number) => (
+                      {/* Menggunakan sintaks array flat manual agar tidak membingungkan parser JSX. Dibatasi 4 foto. */}
+                      {[...dataBeranda.galeriHeader.slice(0,4), ...dataBeranda.galeriHeader.slice(0,4), ...dataBeranda.galeriHeader.slice(0,4), ...dataBeranda.galeriHeader.slice(0,4), ...dataBeranda.galeriHeader.slice(0,4)].map((img: any, idx: number) => (
                         <img 
                           key={idx} 
                           src={img.url} 
@@ -1206,15 +1206,35 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
   // Fungsi khusus Galeri Header (Memaksimalkan kompresi untuk menjamin file < 500kb)
   const handleGaleriHeaderUpload = (e: any) => {
     const files = Array.from(e.target.files);
-    files.forEach((file: any) => {
+    let currentCount = editForm.galeriHeader?.length || 0;
+    const allowedFiles = files.slice(0, 4 - currentCount); // Membatasi maksimal 4 foto
+
+    allowedFiles.forEach((file: any) => {
       // Menggunakan lebar maksimal 600px untuk memastikan ukuran sangat kecil (< 500kb)
+      compressImage(file, 600, false, (base64: any) => {
+         setEditForm((prev: any) => {
+           const current = prev.galeriHeader || [];
+           if (current.length >= 4) return prev; // Keamanan ekstra agar tidak lebih dari 4
+           return {
+             ...prev,
+             galeriHeader: [...current, { id: Date.now() + Math.random(), url: base64 }]
+           };
+         });
+      });
+    });
+    e.target.value = '';
+  };
+
+  const handleReplaceGaleriHeader = (id: any, e: any) => {
+    const file = e.target.files[0];
+    if (file) {
       compressImage(file, 600, false, (base64: any) => {
          setEditForm((prev: any) => ({
            ...prev,
-           galeriHeader: [...(prev.galeriHeader || []), { id: Date.now() + Math.random(), url: base64 }]
+           galeriHeader: prev.galeriHeader.map((g: any) => g.id === id ? { ...g, url: base64 } : g)
          }));
       });
-    });
+    }
     e.target.value = '';
   };
 
@@ -1738,26 +1758,37 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                    <span className="w-6 h-1 bg-emerald-500 rounded-full mr-3"></span> Galeri Header (Pojok Kanan Atas)
                 </h4>
                 <div className="mb-4 text-sm text-gray-500 font-medium">
-                  Upload foto tanpa batas. Maksimal otomatis dikompres hingga aman (di bawah 500KB) untuk performa web. Gambar akan tampil berjalan memutar tanpa henti (disarankan minimal 4 foto).
+                  Atur foto galeri yang berjalan memutar di header. Dibatasi maksimal 4 foto. Ukuran otomatis dikompres hingga aman (di bawah 500KB). Anda dapat menambah, mengganti, atau menghapus foto.
                 </div>
-                <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 px-5 py-3 rounded-xl font-bold flex items-center justify-center transition-all shadow-sm w-full mb-5">
-                  <Upload className="w-5 h-5 mr-2" /> Tambah Foto Galeri Header
-                  {/* Atribut multiple agar admin dapat mengunggah banyak foto sekaligus */}
-                  <input type="file" accept="image/*" multiple className="hidden" onChange={handleGaleriHeaderUpload} />
-                </label>
                 
-                <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 gap-3">
-                  {(editForm.galeriHeader || []).map((img: any) => (
-                    <div key={img.id} className="relative group animate-in fade-in zoom-in">
-                      <img src={img.url} className="w-full aspect-square object-cover rounded-xl border border-gray-200 shadow-sm" alt="Galeri" />
-                      <button 
-                        type="button" 
-                        onClick={() => hapusGaleriHeader(img.id)}
-                        className="absolute top-1 right-1 bg-rose-500 hover:bg-rose-600 text-white p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition shadow"
-                        title="Hapus"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                {(editForm.galeriHeader?.length || 0) < 4 && (
+                  <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 px-5 py-3 rounded-xl font-bold flex items-center justify-center transition-all shadow-sm w-full mb-5">
+                    <Upload className="w-5 h-5 mr-2" /> Tambah Foto Galeri (Tersisa {4 - (editForm.galeriHeader?.length || 0)} Slot)
+                    <input type="file" accept="image/*" multiple className="hidden" onChange={handleGaleriHeaderUpload} />
+                  </label>
+                )}
+                
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  {(editForm.galeriHeader || []).slice(0, 4).map((img: any, idx: number) => (
+                    <div key={img.id} className="relative group animate-in fade-in zoom-in flex flex-col gap-2">
+                      <div className="relative rounded-xl overflow-hidden border border-gray-200 shadow-sm aspect-square">
+                        <img src={img.url} className="w-full h-full object-cover" alt={`Galeri ${idx + 1}`} />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-sm">
+                          <label className="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white p-2.5 rounded-lg shadow-lg transition transform hover:scale-110" title="Ganti Foto">
+                            <Edit className="w-4 h-4" />
+                            <input type="file" accept="image/*" className="hidden" onChange={(e) => handleReplaceGaleriHeader(img.id, e)} />
+                          </label>
+                          <button 
+                            type="button" 
+                            onClick={() => hapusGaleriHeader(img.id)}
+                            className="bg-rose-500 hover:bg-rose-600 text-white p-2.5 rounded-lg shadow-lg transition transform hover:scale-110"
+                            title="Hapus Foto"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                      <span className="text-center text-xs font-bold text-gray-500 bg-white border border-gray-200 py-1 rounded-md shadow-sm">Foto {idx + 1}</span>
                     </div>
                   ))}
                   {(editForm.galeriHeader || []).length === 0 && (
