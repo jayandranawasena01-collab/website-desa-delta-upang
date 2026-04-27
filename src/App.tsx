@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Menu, X, Home, Info, Users, Newspaper, Phone, 
   MapPin, Mail, ChevronRight, Landmark, ArrowRight,
@@ -84,6 +84,52 @@ const compressImage = (file: any, maxWidth: any, isLogo: any, callback: any) => 
       }
     };
   };
+};
+
+// ================= KOMPONEN ANIMASI ANGKA (COUNTUP) =================
+const AnimatedNumber = ({ value, duration = 2000 }: { value: number, duration?: number }) => {
+  const [count, setCount] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) return;
+    let startTimestamp: number | null = null;
+    const end = value;
+    if (end === 0) {
+      setCount(0);
+      return;
+    }
+    
+    const step = (timestamp: number) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      // Kurva Ease-Out Quart
+      const easeOut = 1 - Math.pow(1 - progress, 4);
+      setCount(Math.floor(easeOut * end));
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      } else {
+        setCount(end);
+      }
+    };
+    window.requestAnimationFrame(step);
+  }, [value, isVisible, duration]);
+
+  return <span ref={ref}>{count.toLocaleString('id-ID')}</span>;
 };
 
 // ================= DATA AWAL DEFAULT =================
@@ -337,8 +383,6 @@ export default function App() {
 
   // ================= FETCH DATA =================
   useEffect(() => {
-    // PENTING: Tunggu hingga Firebase database DAN user auth token (anonymous/custom) tersedia.
-    // Jika tidak, permintaan baca data ini akan diblokir oleh aturan izin (permission denied).
     if (!db || !user) return; 
 
     const handleServerData = (snap: any, stateSetter: any, storageKey: string) => {
@@ -533,31 +577,24 @@ export default function App() {
     { id: 'grafik-penduduk', label: 'Grafik Penduduk' }
   ];
 
-  // --- PERBAIKAN LOGIKA GALERI SEAMLESS ---
   const galeriLen = dataBeranda.galeriHeader?.length || 0;
-  // Memastikan setiap track memiliki minimal 8 gambar agar lebarnya selalu melampaui lebar container (620px).
-  // Jika admin hanya upload 1 foto, foto akan otomatis digandakan 8x agar animasi berjalan tanpa cacat.
   const multiplier = Math.max(1, Math.ceil(8 / Math.max(1, galeriLen)));
   const expandedGaleri = Array(multiplier).fill(dataBeranda.galeriHeader || []).flat();
 
   return (
-    // WRAPPER UTAMA: Lebar penuh layar, gambar latar belakang di set fixed
     <div 
       className="min-h-screen w-full bg-fixed bg-cover bg-center bg-no-repeat bg-gray-100"
       style={{ backgroundImage: `url(${dataBeranda.outerBg || 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'})` }}
     >
-      {/* Overlay Transparan Gelap (Opsional, agar background tidak terlalu mengganggu warna situs) */}
-      <div className="fixed inset-0 bg-black/30 pointer-events-none"></div>
+      <div className="fixed inset-0 bg-black/40 pointer-events-none"></div>
 
-      {/* CONTAINER BOXED: Situs web dengan max-width di tengah layar. */}
-      <div className="max-w-[1440px] mx-auto min-h-screen flex flex-col font-sans bg-gray-50 text-gray-800 relative shadow-[0_0_50px_rgba(0,0,0,0.4)] selection:bg-emerald-200 selection:text-emerald-900">
+      <div className="max-w-[1440px] mx-auto min-h-screen flex flex-col font-sans bg-gray-50 text-gray-800 relative shadow-[0_0_60px_rgba(0,0,0,0.6)] selection:bg-teal-200 selection:text-teal-900">
 
-        {/* Dialog Kustom (Pengganti Alert & Confirm) */}
         {dialog.isOpen && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[100] p-4">
             <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 animate-in zoom-in-95 border border-emerald-100">
               <h3 className="text-xl font-extrabold text-gray-900 mb-4 flex items-center">
-                <Info className="w-6 h-6 mr-2 text-emerald-600"/>
+                <Info className="w-6 h-6 mr-2 text-teal-600"/>
                 {dialog.type === 'confirm' ? 'Konfirmasi' : 'Pemberitahuan'}
               </h3>
               <p className="text-gray-600 mb-8 font-medium">{dialog.message}</p>
@@ -570,7 +607,7 @@ export default function App() {
                     if (dialog.onConfirm) dialog.onConfirm();
                     setDialog({ isOpen: false, type: 'alert', message: '', onConfirm: null });
                   }}
-                  className={`px-5 py-2.5 text-white rounded-xl font-bold shadow-lg transition ${dialog.type === 'confirm' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-emerald-600 hover:bg-emerald-700'}`}
+                  className={`px-5 py-2.5 text-white rounded-xl font-bold shadow-[0_8px_20px_rgba(13,148,136,0.3)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_25px_rgba(13,148,136,0.4)] ${dialog.type === 'confirm' ? 'bg-gradient-to-r from-emerald-600 to-teal-600' : 'bg-gradient-to-r from-emerald-600 to-teal-600'}`}
                 >
                   {dialog.type === 'confirm' ? 'Ya, Lanjutkan' : 'Tutup'}
                 </button>
@@ -579,7 +616,6 @@ export default function App() {
           </div>
         )}
 
-        {/* Styles for Animations & Layout Elements */}
         <style>
           {`
             @keyframes float-animation {
@@ -598,8 +634,6 @@ export default function App() {
               white-space: nowrap;
               animation: roll-left 15s linear infinite;
             }
-            
-            /* Animasi Marquee Galeri Header (Continuous / Seamless Loop) */
             @keyframes scroll-header-gallery {
               0% { transform: translateX(0); }
               100% { transform: translateX(-50%); } 
@@ -614,7 +648,6 @@ export default function App() {
               mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
               -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
             }
-
             .custom-scrollbar::-webkit-scrollbar {
               height: 12px;
             }
@@ -623,90 +656,77 @@ export default function App() {
               border-radius: 8px;
             }
             .custom-scrollbar::-webkit-scrollbar-thumb {
-              background: #d1d5db; 
+              background: #cbd5e1; 
               border-radius: 8px;
             }
             .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-              background: #9ca3af; 
+              background: #94a3b8; 
             }
             @keyframes growBar {
               from { width: 0; }
             }
             .animate-grow {
-              animation: growBar 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+              animation: growBar 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             }
           `}
         </style>
 
-        {/* Header & Navbar */}
-        <header className="bg-gradient-to-r from-emerald-900 to-emerald-800 text-white sticky top-0 z-50 shadow-xl border-b border-emerald-700">
+        {/* Header & Navbar dengan Efek Glassmorphism yang Elegan */}
+        <header className="bg-emerald-950/90 backdrop-blur-xl text-white sticky top-0 z-50 shadow-[0_4px_30px_rgba(0,0,0,0.15)] border-b border-white/10">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="flex justify-between items-center py-2 lg:py-3 gap-6">
               
-              {/* Left: Logo & Title (shrink-0 agar tidak tertekan galeri) */}
               <div 
                 className="flex items-center gap-4 cursor-pointer group shrink-0"
                 onClick={() => navigateTo('beranda')}
               >
-                <div className="bg-white/10 backdrop-blur-sm p-1.5 rounded-xl border border-white/20 group-hover:bg-white transition duration-300 w-16 h-16 md:w-20 md:h-20 flex items-center justify-center overflow-hidden flex-shrink-0">
+                <div className="bg-white/10 backdrop-blur-md p-1.5 rounded-xl border border-white/20 group-hover:bg-white transition duration-300 w-16 h-16 md:w-20 md:h-20 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg">
                   {dataBeranda.headerLogo ? (
                     <img src={dataBeranda.headerLogo} alt="Logo" className="w-full h-full object-contain" />
                   ) : (
-                    <Landmark className="h-10 w-10 md:h-12 md:w-12 text-white group-hover:text-emerald-800 transition duration-300" />
+                    <Landmark className="h-10 w-10 md:h-12 md:w-12 text-white group-hover:text-teal-800 transition duration-300" />
                   )}
                 </div>
                 <div className="hidden sm:block">
-                  <h1 className="text-xl md:text-2xl font-extrabold tracking-tight leading-none drop-shadow-md">Desa {dataBeranda.namaDesa}</h1>
-                  <p className="text-[10px] md:text-xs text-emerald-200 font-medium mt-1 tracking-wide">Kec. Makarti Jaya, Kab Banyuasin</p>
-                  <p className="text-[10px] md:text-xs text-emerald-200 font-medium mt-1 tracking-wide">Provinsi Sumatera Selatan</p>
+                  <h1 className="text-xl md:text-2xl font-extrabold tracking-tight leading-none drop-shadow-md text-transparent bg-clip-text bg-gradient-to-r from-emerald-100 to-white">Desa {dataBeranda.namaDesa}</h1>
+                  <p className="text-[10px] md:text-xs text-teal-200 font-medium mt-1 tracking-wide">Kec. Makarti Jaya, Kab Banyuasin</p>
+                  <p className="text-[10px] md:text-xs text-teal-200 font-medium mt-1 tracking-wide">Provinsi Sumatera Selatan</p>
                 </div>
               </div>
 
-              {/* Right Desktop: Gallery (Top) & Nav (Bottom) */}
               <div className="hidden lg:flex flex-col items-end flex-grow ml-4 xl:ml-8 z-50">
                 <div className="flex flex-col items-stretch gap-2 xl:gap-3 w-max">
                   
-                  {/* NEW FEATURE: Galeri Header Marquee (Seamless / Continuous Loop) */}
                   {dataBeranda.galeriHeader && dataBeranda.galeriHeader.length > 0 && (
-                     // Container "relative w-full" mengunci ukuran agar 100% sama persis dengan lebar Navbar.
                      <div className="relative w-full h-[55px] xl:h-[65px] overflow-hidden fade-x-edges rounded-xl group">
-                        
-                        {/* Wrapper "absolute" memastikan animasi foto yang panjang tidak akan mendesak / merusak lebar layout utama */}
                         <div className="absolute top-0 left-0 h-full flex w-max animate-scroll-gallery hover-pause">
-                          
-                          {/* Track 1 */}
                           <div className="flex gap-2 pr-2 h-full">
                             {expandedGaleri.map((img: any, idx: number) => (
                               <img 
                                 key={`img-a-${idx}`} 
                                 src={img} 
                                 alt="Galeri" 
-                                className="h-full w-[110px] xl:w-[135px] object-cover rounded-lg border-[1.5px] border-white/20 shadow-sm cursor-pointer hover:border-emerald-400 transition-colors duration-300" 
+                                className="h-full w-[110px] xl:w-[135px] object-cover rounded-lg border border-white/10 shadow-sm cursor-pointer hover:border-teal-400 transition-colors duration-300" 
                               />
                             ))}
                           </div>
-
-                          {/* Track 2 (Clone untuk Seamless Loop) */}
                           <div className="flex gap-2 pr-2 h-full" aria-hidden="true">
                             {expandedGaleri.map((img: any, idx: number) => (
                               <img 
                                 key={`img-b-${idx}`} 
                                 src={img} 
                                 alt="Galeri" 
-                                className="h-full w-[110px] xl:w-[135px] object-cover rounded-lg border-[1.5px] border-white/20 shadow-sm cursor-pointer hover:border-emerald-400 transition-colors duration-300" 
+                                className="h-full w-[110px] xl:w-[135px] object-cover rounded-lg border border-white/10 shadow-sm cursor-pointer hover:border-teal-400 transition-colors duration-300" 
                               />
                             ))}
                           </div>
-
                         </div>
                      </div>
                   )}
 
-                  {/* Desktop Navigation */}
-                  <nav className="flex space-x-1 items-center bg-black/20 p-1.5 rounded-2xl backdrop-blur-md border border-white/10 shrink-0">
+                  <nav className="flex space-x-1 items-center bg-black/20 p-1.5 rounded-2xl backdrop-blur-md border border-white/10 shrink-0 shadow-inner">
                   <NavButton active={currentPage === 'beranda'} onClick={() => navigateTo('beranda')} icon={<Home className="w-4 h-4 mr-2" />}>Beranda</NavButton>
                   
-                  {/* Dropdown Profil Desa */}
                   <div className="relative" onClick={(e: any) => e.stopPropagation()}>
                     <button
                       onClick={() => {
@@ -721,8 +741,8 @@ export default function App() {
                       }}
                       className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
                         currentPage === 'profil'
-                          ? 'bg-white text-emerald-900 shadow-md'
-                          : 'text-white hover:bg-white/10 hover:text-white'
+                          ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg'
+                          : 'text-gray-200 hover:bg-white/10 hover:text-white'
                       }`}
                     >
                       <Info className="w-4 h-4 mr-2" />
@@ -730,7 +750,7 @@ export default function App() {
                       <ChevronDown className={`w-4 h-4 ml-1 opacity-70 transition-transform duration-300 ${isDesktopProfilOpen ? 'rotate-180' : ''}`} />
                     </button>
 
-                    <div className={`absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.15)] border border-gray-100 transition-all duration-300 transform origin-top z-50 overflow-hidden ${
+                    <div className={`absolute top-full left-0 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.2)] border border-gray-200 transition-all duration-300 transform origin-top z-50 overflow-hidden ${
                       isDesktopProfilOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'
                     }`}>
                       <div className="flex flex-col py-1.5">
@@ -743,12 +763,12 @@ export default function App() {
                             }}
                             className={`text-left px-5 py-3 text-sm font-bold transition-all duration-200 relative overflow-hidden ${
                                String(activeProfilTab) === String(profil.id) && currentPage === 'profil'
-                                 ? 'text-emerald-700 bg-emerald-50/80'
-                                 : 'text-gray-600 hover:bg-gray-50 hover:text-emerald-600'
+                                 ? 'text-teal-700 bg-teal-50'
+                                 : 'text-gray-600 hover:bg-gray-50 hover:text-teal-600'
                             }`}
                           >
                              {String(activeProfilTab) === String(profil.id) && currentPage === 'profil' && (
-                               <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-400 to-emerald-600"></span>
+                               <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-teal-400 to-emerald-500"></span>
                              )}
                              {profil.judul}
                           </button>
@@ -757,7 +777,6 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Dropdown Pemerintah Desa */}
                   <div className="relative" onClick={(e: any) => e.stopPropagation()}>
                     <button
                       onClick={() => {
@@ -772,8 +791,8 @@ export default function App() {
                       }}
                       className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
                         currentPage === 'pemerintah'
-                          ? 'bg-white text-emerald-900 shadow-md'
-                          : 'text-white hover:bg-white/10 hover:text-white'
+                          ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg'
+                          : 'text-gray-200 hover:bg-white/10 hover:text-white'
                       }`}
                     >
                       <Users className="w-4 h-4 mr-2" />
@@ -781,7 +800,7 @@ export default function App() {
                       <ChevronDown className={`w-4 h-4 ml-1 opacity-70 transition-transform duration-300 ${isDesktopPemerintahOpen ? 'rotate-180' : ''}`} />
                     </button>
 
-                    <div className={`absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.15)] border border-gray-100 transition-all duration-300 transform origin-top z-50 overflow-hidden ${
+                    <div className={`absolute top-full left-0 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.2)] border border-gray-200 transition-all duration-300 transform origin-top z-50 overflow-hidden ${
                       isDesktopPemerintahOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'
                     }`}>
                       <div className="flex flex-col py-1.5">
@@ -794,12 +813,12 @@ export default function App() {
                             }}
                             className={`text-left px-5 py-3 text-sm font-bold transition-all duration-200 relative overflow-hidden ${
                                activePemerintahTab === menu.id && currentPage === 'pemerintah'
-                                 ? 'text-emerald-700 bg-emerald-50/80'
-                                 : 'text-gray-600 hover:bg-gray-50 hover:text-emerald-600'
+                                 ? 'text-teal-700 bg-teal-50'
+                                 : 'text-gray-600 hover:bg-gray-50 hover:text-teal-600'
                             }`}
                           >
                              {activePemerintahTab === menu.id && currentPage === 'pemerintah' && (
-                               <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-400 to-emerald-600"></span>
+                               <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-teal-400 to-emerald-500"></span>
                              )}
                              {menu.label}
                           </button>
@@ -808,7 +827,6 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Dropdown Berita & Grafik */}
                   <div className="relative" onClick={(e: any) => e.stopPropagation()}>
                     <button
                       onClick={() => {
@@ -823,8 +841,8 @@ export default function App() {
                       }}
                       className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
                         currentPage === 'berita'
-                          ? 'bg-white text-emerald-900 shadow-md'
-                          : 'text-white hover:bg-white/10 hover:text-white'
+                          ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg'
+                          : 'text-gray-200 hover:bg-white/10 hover:text-white'
                       }`}
                     >
                       <Newspaper className="w-4 h-4 mr-2" />
@@ -832,7 +850,7 @@ export default function App() {
                       <ChevronDown className={`w-4 h-4 ml-1 opacity-70 transition-transform duration-300 ${isDesktopBeritaOpen ? 'rotate-180' : ''}`} />
                     </button>
 
-                    <div className={`absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.15)] border border-gray-100 transition-all duration-300 transform origin-top z-50 overflow-hidden ${
+                    <div className={`absolute top-full left-0 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.2)] border border-gray-200 transition-all duration-300 transform origin-top z-50 overflow-hidden ${
                       isDesktopBeritaOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'
                     }`}>
                       <div className="flex flex-col py-1.5">
@@ -845,12 +863,12 @@ export default function App() {
                             }}
                             className={`text-left px-5 py-3 text-sm font-bold transition-all duration-200 relative overflow-hidden ${
                                activeBeritaTab === menu.id && currentPage === 'berita'
-                                 ? 'text-emerald-700 bg-emerald-50/80'
-                                 : 'text-gray-600 hover:bg-gray-50 hover:text-emerald-600'
+                                 ? 'text-teal-700 bg-teal-50'
+                                 : 'text-gray-600 hover:bg-gray-50 hover:text-teal-600'
                             }`}
                           >
                              {activeBeritaTab === menu.id && currentPage === 'berita' && (
-                               <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-400 to-emerald-600"></span>
+                               <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-teal-400 to-emerald-500"></span>
                              )}
                              <div className="flex items-center">
                                {menu.id === 'list-berita' ? <Newspaper className="w-4 h-4 mr-2 opacity-70" /> : <PieChart className="w-4 h-4 mr-2 opacity-70" />}
@@ -864,11 +882,10 @@ export default function App() {
 
                   <NavButton active={currentPage === 'kontak'} onClick={() => navigateTo('kontak')} icon={<Phone className="w-4 h-4 mr-2" />}>Kontak</NavButton>
                   
-                  {/* Tombol Admin Panel */}
                   <div className="pl-2 ml-1 border-l border-white/20 flex items-center gap-2">
                     {isAdmin ? (
                       <>
-                        <button onClick={handleLogout} className="flex items-center text-sm font-bold bg-rose-500 hover:bg-rose-600 text-white px-5 py-2.5 rounded-xl transition shadow-[0_0_15px_rgba(244,63,94,0.4)]">
+                        <button onClick={handleLogout} className="flex items-center text-sm font-bold bg-rose-500 hover:bg-rose-600 text-white px-5 py-2.5 rounded-xl transition shadow-[0_4px_15px_rgba(244,63,94,0.4)]">
                           <LogOut className="w-4 h-4 mr-2" /> Keluar
                         </button>
                       </>
@@ -882,11 +899,10 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Mobile Menu Toggle & Admin */}
               <div className="lg:hidden flex items-center gap-2">
                  {isAdmin ? (
                     <>
-                      <button onClick={handleLogout} className="p-2.5 bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.4)] rounded-xl text-white" title="Keluar">
+                      <button onClick={handleLogout} className="p-2.5 bg-rose-500 shadow-[0_4px_10px_rgba(244,63,94,0.4)] rounded-xl text-white" title="Keluar">
                         <LogOut className="w-5 h-5" />
                       </button>
                     </>
@@ -905,13 +921,11 @@ export default function App() {
             </div>
           </div>
 
-          {/* Mobile Navigation */}
           {isMobileMenuOpen && (
             <div className="lg:hidden bg-emerald-950/95 backdrop-blur-xl border-t border-white/10">
               <div className="flex flex-col px-4 pt-2 pb-4 space-y-2">
                 <MobileNavButton active={currentPage === 'beranda'} onClick={() => navigateTo('beranda')}>Beranda</MobileNavButton>
                 
-                {/* Dropdown Profil Desa Mobile */}
                 <div>
                   <button
                     onClick={() => {
@@ -921,23 +935,23 @@ export default function App() {
                     }}
                     className={`flex items-center justify-between w-full text-left px-5 py-4 rounded-xl text-lg font-bold transition-all ${
                       currentPage === 'profil' || isMobileProfilOpen
-                        ? 'bg-emerald-800 text-white border-l-4 border-emerald-400 shadow-inner'
-                        : 'text-emerald-100 hover:bg-emerald-800/80 hover:text-white'
+                        ? 'bg-gradient-to-r from-emerald-800 to-teal-800 text-white border-l-4 border-teal-400 shadow-inner'
+                        : 'text-emerald-100 hover:bg-emerald-800/50 hover:text-white'
                     }`}
                   >
                     <span>Profil Desa</span>
                     <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isMobileProfilOpen ? 'rotate-180' : ''}`} />
                   </button>
                   {isMobileProfilOpen && (
-                    <div className="flex flex-col bg-emerald-900/50 rounded-xl mt-2 mx-2 overflow-hidden border border-white/5 animate-in slide-in-from-top-2 duration-200">
+                    <div className="flex flex-col bg-emerald-900/40 rounded-xl mt-2 mx-2 overflow-hidden border border-white/5 animate-in slide-in-from-top-2 duration-200">
                       {daftarProfil.map((profil: any) => (
                         <button
                           key={profil.id}
                           onClick={() => navigateTo('profil', profil.id)}
                           className={`text-left px-6 py-3.5 text-sm font-bold transition-colors border-l-2 ${
                             String(activeProfilTab) === String(profil.id) && currentPage === 'profil'
-                              ? 'border-emerald-400 text-white bg-emerald-800/50'
-                              : 'border-transparent text-emerald-200 hover:bg-emerald-800 hover:text-white'
+                              ? 'border-teal-400 text-white bg-emerald-800/50'
+                              : 'border-transparent text-emerald-200 hover:bg-emerald-800/50 hover:text-white'
                           }`}
                         >
                           {profil.judul}
@@ -947,7 +961,6 @@ export default function App() {
                   )}
                 </div>
 
-                {/* Dropdown Pemerintah Desa Mobile */}
                 <div>
                   <button
                     onClick={() => {
@@ -957,23 +970,23 @@ export default function App() {
                     }}
                     className={`flex items-center justify-between w-full text-left px-5 py-4 rounded-xl text-lg font-bold transition-all ${
                       currentPage === 'pemerintah' || isMobilePemerintahOpen
-                        ? 'bg-emerald-800 text-white border-l-4 border-emerald-400 shadow-inner'
-                        : 'text-emerald-100 hover:bg-emerald-800/80 hover:text-white'
+                        ? 'bg-gradient-to-r from-emerald-800 to-teal-800 text-white border-l-4 border-teal-400 shadow-inner'
+                        : 'text-emerald-100 hover:bg-emerald-800/50 hover:text-white'
                     }`}
                   >
                     <span>Pemerintah Desa</span>
                     <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isMobilePemerintahOpen ? 'rotate-180' : ''}`} />
                   </button>
                   {isMobilePemerintahOpen && (
-                    <div className="flex flex-col bg-emerald-900/50 rounded-xl mt-2 mx-2 overflow-hidden border border-white/5 animate-in slide-in-from-top-2 duration-200">
+                    <div className="flex flex-col bg-emerald-900/40 rounded-xl mt-2 mx-2 overflow-hidden border border-white/5 animate-in slide-in-from-top-2 duration-200">
                       {menuPemerintah.map((menu) => (
                         <button
                           key={menu.id}
                           onClick={() => navigateTo('pemerintah', menu.id)}
                           className={`text-left px-6 py-3.5 text-sm font-bold transition-colors border-l-2 ${
                             activePemerintahTab === menu.id && currentPage === 'pemerintah'
-                              ? 'border-emerald-400 text-white bg-emerald-800/50'
-                              : 'border-transparent text-emerald-200 hover:bg-emerald-800 hover:text-white'
+                              ? 'border-teal-400 text-white bg-emerald-800/50'
+                              : 'border-transparent text-emerald-200 hover:bg-emerald-800/50 hover:text-white'
                           }`}
                         >
                           {menu.label}
@@ -983,7 +996,6 @@ export default function App() {
                   )}
                 </div>
 
-                {/* Dropdown Berita Mobile */}
                 <div>
                   <button
                     onClick={() => {
@@ -993,23 +1005,23 @@ export default function App() {
                     }}
                     className={`flex items-center justify-between w-full text-left px-5 py-4 rounded-xl text-lg font-bold transition-all ${
                       currentPage === 'berita' || isMobileBeritaOpen
-                        ? 'bg-emerald-800 text-white border-l-4 border-emerald-400 shadow-inner'
-                        : 'text-emerald-100 hover:bg-emerald-800/80 hover:text-white'
+                        ? 'bg-gradient-to-r from-emerald-800 to-teal-800 text-white border-l-4 border-teal-400 shadow-inner'
+                        : 'text-emerald-100 hover:bg-emerald-800/50 hover:text-white'
                     }`}
                   >
                     <span>Berita & Informasi</span>
                     <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isMobileBeritaOpen ? 'rotate-180' : ''}`} />
                   </button>
                   {isMobileBeritaOpen && (
-                    <div className="flex flex-col bg-emerald-900/50 rounded-xl mt-2 mx-2 overflow-hidden border border-white/5 animate-in slide-in-from-top-2 duration-200">
+                    <div className="flex flex-col bg-emerald-900/40 rounded-xl mt-2 mx-2 overflow-hidden border border-white/5 animate-in slide-in-from-top-2 duration-200">
                       {menuBerita.map((menu) => (
                         <button
                           key={menu.id}
                           onClick={() => navigateTo('berita', menu.id)}
                           className={`text-left px-6 py-3.5 text-sm font-bold transition-colors border-l-2 ${
                             activeBeritaTab === menu.id && currentPage === 'berita'
-                              ? 'border-emerald-400 text-white bg-emerald-800/50'
-                              : 'border-transparent text-emerald-200 hover:bg-emerald-800 hover:text-white'
+                              ? 'border-teal-400 text-white bg-emerald-800/50'
+                              : 'border-transparent text-emerald-200 hover:bg-emerald-800/50 hover:text-white'
                           }`}
                         >
                           {menu.label}
@@ -1025,21 +1037,20 @@ export default function App() {
           )}
         </header>
 
-        {/* Pesan Alert Login Admin Aktif */}
         {isAdmin && (
-          <div className="bg-emerald-100 text-emerald-800 px-4 py-3 text-sm font-medium text-center shadow-inner flex flex-col items-center justify-center gap-2 z-30 relative">
-             <div className="flex items-center gap-2">
-               <CheckCircle2 className="w-5 h-5 text-emerald-600" /> 
+          <div className="bg-gradient-to-r from-emerald-100 to-teal-100 text-teal-900 px-4 py-3 text-sm font-medium text-center shadow-md flex flex-col items-center justify-center gap-2 z-30 relative border-b border-teal-200">
+             <div className="flex items-center gap-2 font-bold">
+               <CheckCircle2 className="w-5 h-5 text-teal-600" /> 
                <span>Mode Admin Aktif: Anda dapat mengedit konten website.</span>
              </div>
              
              {!isDbConnected && !dbError && (
-               <div className="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full text-xs font-bold animate-pulse">
+               <div className="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-sm">
                  ⏳ Menghubungkan ke Server / Mode Offline Sementara...
                </div>
              )}
              {isDbConnected && (
-               <div className="bg-emerald-200 text-emerald-800 border border-emerald-400 px-3 py-1 rounded-full text-xs font-bold">
+               <div className="bg-emerald-500 text-white border border-emerald-600 px-3 py-1 rounded-full text-xs font-bold shadow-sm">
                  ✅ Status Database: ONLINE (Tersinkronisasi dengan Server).
                </div>
              )}
@@ -1052,7 +1063,6 @@ export default function App() {
           </div>
         )}
 
-        {/* Main Content Area */}
         <main className="flex-grow">
           {currentPage === 'beranda' && (
             <HalamanBeranda 
@@ -1102,13 +1112,12 @@ export default function App() {
           {currentPage === 'kontak' && <HalamanKontak />}
         </main>
 
-        {/* Footer Elegan */}
-        <footer className="bg-gradient-to-b from-gray-900 to-black text-white pt-16 pb-8 border-t-[6px] border-emerald-600">
+        <footer className="bg-[#0B1120] text-gray-300 pt-16 pb-8 border-t-[6px] border-teal-600">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
               <div>
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="bg-emerald-800 p-2.5 rounded-lg shadow-lg shadow-emerald-900/50">
+                  <div className="bg-gradient-to-br from-emerald-500 to-teal-700 p-2.5 rounded-lg shadow-[0_8px_20px_rgba(13,148,136,0.3)]">
                     <Landmark className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-2xl font-bold tracking-tight text-white">Desa Delta Upang</h3>
@@ -1119,35 +1128,35 @@ export default function App() {
               </div>
               <div className="md:pl-8">
                 <h4 className="text-lg font-bold mb-6 text-white flex items-center">
-                  <span className="w-8 h-1 bg-emerald-500 rounded-full mr-3"></span> Tautan Cepat
+                  <span className="w-8 h-1 bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full mr-3"></span> Tautan Cepat
                 </h4>
                 <ul className="space-y-3">
-                  <li><button onClick={() => navigateTo('beranda')} className="text-gray-400 hover:text-emerald-400 font-medium flex items-center transition duration-200 hover:translate-x-2"><ChevronRight className="w-4 h-4 mr-2 text-emerald-500"/> Beranda</button></li>
-                  <li><button onClick={() => navigateTo('profil', daftarProfil[0]?.id)} className="text-gray-400 hover:text-emerald-400 font-medium flex items-center transition duration-200 hover:translate-x-2"><ChevronRight className="w-4 h-4 mr-2 text-emerald-500"/> Profil Desa</button></li>
-                  <li><button onClick={() => navigateTo('pemerintah', 'perangkat')} className="text-gray-400 hover:text-emerald-400 font-medium flex items-center transition duration-200 hover:translate-x-2"><ChevronRight className="w-4 h-4 mr-2 text-emerald-500"/> Pemerintah Desa</button></li>
-                  <li><button onClick={() => navigateTo('berita', 'list-berita')} className="text-gray-400 hover:text-emerald-400 font-medium flex items-center transition duration-200 hover:translate-x-2"><ChevronRight className="w-4 h-4 mr-2 text-emerald-500"/> Berita Desa</button></li>
+                  <li><button onClick={() => navigateTo('beranda')} className="text-gray-400 hover:text-teal-400 font-medium flex items-center transition duration-200 hover:translate-x-2"><ChevronRight className="w-4 h-4 mr-2 text-teal-500"/> Beranda</button></li>
+                  <li><button onClick={() => navigateTo('profil', daftarProfil[0]?.id)} className="text-gray-400 hover:text-teal-400 font-medium flex items-center transition duration-200 hover:translate-x-2"><ChevronRight className="w-4 h-4 mr-2 text-teal-500"/> Profil Desa</button></li>
+                  <li><button onClick={() => navigateTo('pemerintah', 'perangkat')} className="text-gray-400 hover:text-teal-400 font-medium flex items-center transition duration-200 hover:translate-x-2"><ChevronRight className="w-4 h-4 mr-2 text-teal-500"/> Pemerintah Desa</button></li>
+                  <li><button onClick={() => navigateTo('berita', 'list-berita')} className="text-gray-400 hover:text-teal-400 font-medium flex items-center transition duration-200 hover:translate-x-2"><ChevronRight className="w-4 h-4 mr-2 text-teal-500"/> Berita Desa</button></li>
                 </ul>
               </div>
               <div>
                 <h4 className="text-lg font-bold mb-6 text-white flex items-center">
-                  <span className="w-8 h-1 bg-emerald-500 rounded-full mr-3"></span> Kontak
+                  <span className="w-8 h-1 bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full mr-3"></span> Kontak
                 </h4>
                 <ul className="space-y-4 text-gray-400 font-medium">
                   <li className="flex items-start group">
-                    <div className="bg-white/5 p-2 rounded-lg group-hover:bg-emerald-900/50 transition mr-4">
-                      <MapPin className="w-5 h-5 text-emerald-400" />
+                    <div className="bg-white/5 p-2 rounded-lg group-hover:bg-teal-900/50 transition mr-4">
+                      <MapPin className="w-5 h-5 text-teal-400" />
                     </div>
                     <span className="pt-1">Jl. Sunan Kalijaga Dusun II, Kec. Makarti Jaya, Kab. Banyuasin, Sumsel 30972</span>
                   </li>
                   <li className="flex items-center group">
-                    <div className="bg-white/5 p-2 rounded-lg group-hover:bg-emerald-900/50 transition mr-4">
-                      <Phone className="w-5 h-5 text-emerald-400" />
+                    <div className="bg-white/5 p-2 rounded-lg group-hover:bg-teal-900/50 transition mr-4">
+                      <Phone className="w-5 h-5 text-teal-400" />
                     </div>
                     <span>0822-6876-4585</span>
                   </li>
                   <li className="flex items-center group">
-                    <div className="bg-white/5 p-2 rounded-lg group-hover:bg-emerald-900/50 transition mr-4">
-                      <Mail className="w-5 h-5 text-emerald-400" />
+                    <div className="bg-white/5 p-2 rounded-lg group-hover:bg-teal-900/50 transition mr-4">
+                      <Mail className="w-5 h-5 text-teal-400" />
                     </div>
                     <span>deltaupang12@gmail.com</span>
                   </li>
@@ -1160,13 +1169,12 @@ export default function App() {
           </div>
         </footer>
 
-        {/* Floating WhatsApp Button */}
         {currentPage === 'kontak' && (
           <a
             href="https://wa.me/6282268764585"
             target="_blank"
             rel="noopener noreferrer"
-            className="fixed bottom-6 right-6 md:bottom-8 md:right-8 bg-[#25D366] hover:bg-[#128C7E] text-white p-4 rounded-full shadow-[0_10px_30px_rgba(37,211,102,0.5)] z-50 flex items-center justify-center transition-all duration-300 hover:scale-110 animate-in fade-in slide-in-from-bottom-10 group"
+            className="fixed bottom-6 right-6 md:bottom-8 md:right-8 bg-gradient-to-tr from-[#128C7E] to-[#25D366] text-white p-4 rounded-full shadow-[0_10px_30px_rgba(37,211,102,0.5)] hover:shadow-[0_0_40px_rgba(37,211,102,0.8)] z-50 flex items-center justify-center transition-all duration-300 hover:scale-110 animate-in fade-in slide-in-from-bottom-10 group border border-white/20"
           >
             <svg viewBox="0 0 24 24" className="w-7 h-7 md:w-8 md:h-8 fill-current">
               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.305-.88-.653-1.473-1.46-1.646-1.757-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
@@ -1178,9 +1186,8 @@ export default function App() {
         )}
       </div>
 
-      {/* Modal Login Elegan (Berada di luar Box Container tapi tetap Fixed di Layar) */}
       {showLoginModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[100] p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 animate-in zoom-in-95 duration-300 border border-emerald-100">
             <div className="flex justify-between items-center mb-8">
               <h3 className="text-2xl font-extrabold text-gray-800 flex items-center tracking-tight">
@@ -1201,7 +1208,7 @@ export default function App() {
                   type="text" 
                   name="username" 
                   required
-                  className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" 
+                  className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
                   placeholder="Masukkan username"
                 />
               </div>
@@ -1211,13 +1218,13 @@ export default function App() {
                   type="password" 
                   name="password" 
                   required
-                  className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" 
+                  className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
                   placeholder="Masukkan password"
                 />
               </div>
               <button 
                 type="submit" 
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-[0_8px_20px_rgba(5,150,105,0.3)] hover:shadow-[0_8px_25px_rgba(5,150,105,0.4)] hover:-translate-y-0.5 mt-4"
+                className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-[0_8px_20px_rgba(13,148,136,0.3)] hover:shadow-[0_12px_25px_rgba(13,148,136,0.4)] hover:-translate-y-0.5 mt-4"
               >
                 Masuk ke Dasbor
               </button>
@@ -1293,7 +1300,6 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
     }
   };
 
-  // ----- FUNGSI UPLOAD FOTO GALERI HEADER -----
   const handleGaleriHeaderUpload = (e: any) => {
     const files = Array.from(e.target.files);
     files.forEach((file: any) => {
@@ -1321,7 +1327,6 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
     showAlert("Perubahan selesai. Cek hasilnya!");
   };
 
-  // ----- Logika Editor Agenda -----
   const openEditorAgenda = (agenda: any = null) => {
     if (agenda) {
       setEditDataAgenda(agenda);
@@ -1347,40 +1352,22 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
     });
   };
 
-  // ----- Logika Kalender -----
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const currentDay = today.getDate();
   const [infoTanggal, setInfoTanggal] = useState<{tanggal: string, keterangan: string} | null>(null);
 
-  const handlePrevYear = () => {
-    setCurrentYear(currentYear - 1);
-    setInfoTanggal(null);
-  };
-
-  const handleNextYear = () => {
-    setCurrentYear(currentYear + 1);
-    setInfoTanggal(null);
-  };
-
+  const handlePrevYear = () => { setCurrentYear(currentYear - 1); setInfoTanggal(null); };
+  const handleNextYear = () => { setCurrentYear(currentYear + 1); setInfoTanggal(null); };
   const handlePrevMonth = () => {
-    if (currentMonth === 0) {
-      setCurrentMonth(11);
-      setCurrentYear(currentYear - 1);
-    } else {
-      setCurrentMonth(currentMonth - 1);
-    }
+    if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(currentYear - 1); } 
+    else { setCurrentMonth(currentMonth - 1); }
     setInfoTanggal(null);
   };
-
   const handleNextMonth = () => {
-    if (currentMonth === 11) {
-      setCurrentMonth(0);
-      setCurrentYear(currentYear + 1);
-    } else {
-      setCurrentMonth(currentMonth + 1);
-    }
+    if (currentMonth === 11) { setCurrentMonth(0); setCurrentYear(currentYear + 1); } 
+    else { setCurrentMonth(currentMonth + 1); }
     setInfoTanggal(null);
   };
 
@@ -1391,32 +1378,23 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
   const dayNames = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
   const calendarDays = [];
-  for (let i = 0; i < firstDayOfMonth; i++) {
-    calendarDays.push(null);
-  }
-  for (let i = 1; i <= daysInMonth; i++) {
-    calendarDays.push(i);
-  }
+  for (let i = 0; i < firstDayOfMonth; i++) calendarDays.push(null);
+  for (let i = 1; i <= daysInMonth; i++) calendarDays.push(i);
 
-  // Filter agenda untuk bulan ini (disortir berdasarkan tanggal)
   const agendaBulanIni = daftarAgenda.filter((a: any) => {
     if (!a.tanggal) return false;
     const d = new Date(a.tanggal);
     return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
   }).sort((a: any, b: any) => new Date(a.tanggal).getTime() - new Date(b.tanggal).getTime());
 
-  // Fungsi Deteksi Hari Libur Nasional & Keagamaan
   const getHolidays = (d: number, m: number, y: number) => {
     const holidays = [];
-    
-    // Libur Statis (Tanggal Pasti Setiap Tahun)
     if (d === 1 && m === 0) holidays.push("Tahun Baru Masehi");
     if (d === 1 && m === 4) holidays.push("Hari Buruh Internasional");
     if (d === 1 && m === 5) holidays.push("Hari Lahir Pancasila");
     if (d === 17 && m === 7) holidays.push("Hari Kemerdekaan RI");
     if (d === 25 && m === 11) holidays.push("Hari Raya Natal");
     
-    // Prediksi/Jadwal Libur Dinamis Keagamaan (Contoh hardcode untuk 2024 - 2026)
     if (y === 2024) {
       if (d === 8 && m === 1) holidays.push("Isra Mikraj Nabi Muhammad SAW");
       if (d === 10 && m === 1) holidays.push("Tahun Baru Imlek");
@@ -1452,7 +1430,6 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
       if (d === 16 && m === 5) holidays.push("Tahun Baru Islam");
       if (d === 25 && m === 7) holidays.push("Maulid Nabi Muhammad SAW");
     }
-
     return holidays;
   };
 
@@ -1472,11 +1449,11 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
           <div className="absolute top-6 left-6 z-30 group flex items-center">
              <button 
                onClick={() => { setEditForm(dataBeranda); setShowEditor(true); }} 
-               className="cursor-pointer bg-white/90 backdrop-blur hover:bg-white text-emerald-800 p-3.5 rounded-2xl font-bold flex items-center justify-center shadow-[0_8px_30px_rgba(0,0,0,0.3)] transition-all hover:scale-110 border border-white/50"
+               className="cursor-pointer bg-white/90 backdrop-blur hover:bg-white text-teal-800 p-3.5 rounded-2xl font-bold flex items-center justify-center shadow-[0_8px_30px_rgba(0,0,0,0.3)] transition-all hover:scale-110 border border-white/50"
              >
-                <Edit className="w-6 h-6 text-emerald-600" /> 
+                <Edit className="w-6 h-6 text-teal-600" /> 
              </button>
-             <div className="absolute left-full ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white text-emerald-800 px-4 py-2 rounded-xl font-bold shadow-lg pointer-events-none whitespace-nowrap">
+             <div className="absolute left-full ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white text-teal-800 px-4 py-2 rounded-xl font-bold shadow-lg pointer-events-none whitespace-nowrap">
                Edit Konten Beranda
              </div>
           </div>
@@ -1495,7 +1472,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
           <div className="w-full max-w-4xl mx-auto overflow-hidden relative mb-6 mt-4 py-2">
             <div className="animate-roll whitespace-nowrap">
               <span 
-                className="text-xl md:text-2xl lg:text-3xl font-black tracking-[0.15em] uppercase text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-200 drop-shadow-[0_0_15px_rgba(251,191,36,0.6)]"
+                className="text-xl md:text-2xl lg:text-3xl font-black tracking-[0.15em] uppercase text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500 drop-shadow-[0_0_15px_rgba(251,191,36,0.6)]"
               >
                 Selamat Datang di Website Resmi
               </span>
@@ -1503,7 +1480,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
           </div>
 
           <h1 className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight drop-shadow-2xl">
-            Desa <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-emerald-100">{dataBeranda.namaDesa}</span>
+            Desa <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400">{dataBeranda.namaDesa}</span>
           </h1>
           <p className="text-lg md:text-2xl text-gray-200 mb-10 max-w-3xl mx-auto font-medium leading-relaxed drop-shadow-lg whitespace-pre-line">
             {dataBeranda.deskripsiDesa}
@@ -1511,13 +1488,13 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
           <div className="flex flex-col sm:flex-row justify-center gap-5">
             <button 
               onClick={() => navigateTo('profil')}
-              className="bg-emerald-600 hover:bg-emerald-50 text-white hover:text-emerald-900 font-bold text-lg py-4 px-10 rounded-2xl shadow-[0_10px_25px_rgba(5,150,105,0.4)] transition-all transform hover:-translate-y-1 hover:shadow-[0_15px_30px_rgba(5,150,105,0.5)] border border-emerald-500 hover:border-white"
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-lg py-4 px-10 rounded-2xl shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all transform hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] border border-transparent"
             >
               Profil Desa
             </button>
             <button 
               onClick={() => navigateTo('berita', 'list-berita')}
-              className="bg-white hover:bg-gray-50 text-emerald-900 font-bold text-lg py-4 px-10 rounded-2xl shadow-[0_10px_25px_rgba(0,0,0,0.2)] transition-all transform hover:-translate-y-1 hover:shadow-[0_15px_30px_rgba(0,0,0,0.3)] border border-transparent"
+              className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-bold text-lg py-4 px-10 rounded-2xl shadow-[0_10px_25px_rgba(0,0,0,0.2)] transition-all transform hover:-translate-y-1 hover:shadow-[0_15px_30px_rgba(0,0,0,0.3)] border border-white/30"
             >
               Berita Terbaru
             </button>
@@ -1533,13 +1510,13 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
 
       <section className="py-20 bg-gray-50 relative">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 md:p-16 flex flex-col md:flex-row items-center gap-12 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-50 rounded-bl-full -z-10 opacity-50"></div>
-            <div className="absolute bottom-0 left-0 w-40 h-40 bg-emerald-50 rounded-tr-full -z-10 opacity-50"></div>
+          <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-gray-100 p-8 md:p-16 flex flex-col md:flex-row items-center gap-12 relative overflow-hidden group hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)] transition-all duration-300">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-teal-50 rounded-bl-full -z-10 opacity-60"></div>
+            <div className="absolute bottom-0 left-0 w-40 h-40 bg-emerald-50 rounded-tr-full -z-10 opacity-60"></div>
 
             <div className="w-full md:w-1/3 flex justify-center z-10">
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 to-emerald-700 rounded-2xl transform translate-x-4 translate-y-4 group-hover:translate-x-6 group-hover:translate-y-6 transition-transform duration-500 shadow-lg"></div>
+              <div className="relative group/img">
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 to-teal-700 rounded-2xl transform translate-x-4 translate-y-4 group-hover/img:translate-x-6 group-hover/img:translate-y-6 transition-transform duration-500 shadow-xl"></div>
                 <img 
                   src={dataBeranda.fotoKades} 
                   alt="Foto Kepala Desa" 
@@ -1553,13 +1530,13 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
               </div>
             </div>
             <div className="w-full md:w-2/3 z-10">
-              <span className="text-emerald-600 font-bold uppercase tracking-wider text-sm mb-2 block">Sambutan Hangat</span>
+              <span className="text-teal-600 font-bold uppercase tracking-wider text-sm mb-2 block">Sambutan Hangat</span>
               <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">Kepala Desa</h2>
-              <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-500 to-emerald-300 rounded-full mb-8"></div>
+              <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full mb-8"></div>
               <p className="text-gray-600 leading-relaxed text-lg mb-8 italic relative whitespace-pre-line">
-                <span className="absolute -top-4 -left-4 text-6xl text-emerald-200 opacity-50">"</span>
+                <span className="absolute -top-4 -left-4 text-6xl text-teal-200 opacity-50">"</span>
                 {dataBeranda.sambutanKades}
-                <span className="absolute -bottom-8 ml-2 text-6xl text-emerald-200 opacity-50">"</span>
+                <span className="absolute -bottom-8 ml-2 text-6xl text-teal-200 opacity-50">"</span>
               </p>
               <div>
                 <div className="font-extrabold text-gray-900 text-2xl mt-4">{dataBeranda.namaKades}</div>
@@ -1570,38 +1547,45 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
         </div>
       </section>
 
-      <section className="py-20 relative bg-emerald-900 overflow-hidden">
+      <section className="py-20 relative bg-gradient-to-br from-emerald-900 to-teal-900 overflow-hidden">
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1592982537447-6f2a6a0a091c?w=1920&q=80')", backgroundSize: 'cover', backgroundPosition: 'center', filter: 'grayscale(100%)' }}></div>
         
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-8 text-center">
             {dataBeranda.stats.map((stat: any) => {
               // --- SINKRONISASI DATA GRAFIK KE TOTAL PENDUDUK ---
-              let displayNum = stat.num;
-              let displayLaki = stat.subLaki;
-              let displayPerempuan = stat.subPerempuan;
+              let rawNum = parseInt(stat.num.toString().replace(/\D/g, '')) || 0;
+              let rawLaki = parseInt(stat.subLaki?.toString().replace(/\D/g, '')) || 0;
+              let rawPerempuan = parseInt(stat.subPerempuan?.toString().replace(/\D/g, '')) || 0;
 
               if (stat.id === 1 && dataGrafik) {
-                const total = (dataGrafik.lakiLaki || 0) + (dataGrafik.perempuan || 0);
-                displayNum = total.toLocaleString('id-ID');
-                displayLaki = (dataGrafik.lakiLaki || 0).toLocaleString('id-ID');
-                displayPerempuan = (dataGrafik.perempuan || 0).toLocaleString('id-ID');
+                rawLaki = dataGrafik.lakiLaki || 0;
+                rawPerempuan = dataGrafik.perempuan || 0;
+                rawNum = rawLaki + rawPerempuan;
               }
 
               return (
-                <div key={stat.id} className="p-4 sm:p-6 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.1)] hover:bg-white/10 transition-colors flex flex-col justify-center h-full relative overflow-hidden">
-                  <div className="text-3xl sm:text-5xl font-extrabold text-white mb-1 sm:mb-2 drop-shadow-md">{displayNum}</div>
-                  <div className="text-emerald-200 font-bold text-xs sm:text-lg tracking-wide">{stat.label}</div>
+                <div key={stat.id} className="p-4 sm:p-6 bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.12)] hover:bg-white/20 transition-colors flex flex-col justify-center h-full relative overflow-hidden group">
+                  <div className="absolute -right-10 -top-10 w-32 h-32 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-colors duration-500"></div>
+                  
+                  <div className="text-3xl sm:text-5xl font-extrabold text-white mb-1 sm:mb-2 drop-shadow-md">
+                    <AnimatedNumber value={rawNum} />
+                  </div>
+                  <div className="text-teal-200 font-bold text-xs sm:text-lg tracking-wide">{stat.label}</div>
 
                   {stat.id === 1 && (
-                    <div className="flex justify-between items-stretch gap-2 mt-4 pt-4 border-t border-white/20 w-full">
-                      <div className="flex flex-col items-center justify-center w-1/2 bg-white/10 rounded-xl py-2 px-1 shadow-inner border border-white/5">
-                        <span className="font-black text-white text-sm sm:text-xl leading-none drop-shadow-md">{displayLaki}</span>
-                        <span className="text-[6px] sm:text-[11px] text-emerald-100 font-bold uppercase tracking-wider mt-1.5 text-center break-words whitespace-normal leading-tight w-full">Laki-laki</span>
+                    <div className="flex justify-between items-stretch gap-2 mt-4 pt-4 border-t border-white/20 w-full relative z-10">
+                      <div className="flex flex-col items-center justify-center w-1/2 bg-white/5 rounded-xl py-2 px-1 shadow-inner border border-white/10">
+                        <span className="font-black text-white text-sm sm:text-xl leading-none drop-shadow-md">
+                          <AnimatedNumber value={rawLaki} />
+                        </span>
+                        <span className="text-[6px] sm:text-[11px] text-teal-100 font-bold uppercase tracking-wider mt-1.5 text-center break-words whitespace-normal leading-tight w-full">Laki-laki</span>
                       </div>
-                      <div className="flex flex-col items-center justify-center w-1/2 bg-white/10 rounded-xl py-2 px-1 shadow-inner border border-white/5">
-                        <span className="font-black text-white text-sm sm:text-xl leading-none drop-shadow-md">{displayPerempuan}</span>
-                        <span className="text-[6px] sm:text-[11px] text-emerald-100 font-bold uppercase tracking-wider mt-1.5 text-center break-words whitespace-normal leading-tight w-full">Perempuan</span>
+                      <div className="flex flex-col items-center justify-center w-1/2 bg-white/5 rounded-xl py-2 px-1 shadow-inner border border-white/10">
+                        <span className="font-black text-white text-sm sm:text-xl leading-none drop-shadow-md">
+                          <AnimatedNumber value={rawPerempuan} />
+                        </span>
+                        <span className="text-[6px] sm:text-[11px] text-teal-100 font-bold uppercase tracking-wider mt-1.5 text-center break-words whitespace-normal leading-tight w-full">Perempuan</span>
                       </div>
                     </div>
                   )}
@@ -1616,26 +1600,25 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
       <section className="py-20 bg-white border-t border-gray-100 relative">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="text-center mb-14">
-            <span className="text-emerald-600 font-bold tracking-widest uppercase text-sm mb-2 block">Agenda & Waktu</span>
+            <span className="text-teal-600 font-bold tracking-widest uppercase text-sm mb-2 block">Agenda & Waktu</span>
             <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-6 tracking-tight">Kalender Desa</h2>
-            <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-600 to-emerald-400 mx-auto rounded-full"></div>
+            <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-600 to-teal-400 mx-auto rounded-full"></div>
           </div>
 
           <div className="max-w-5xl mx-auto flex flex-col lg:flex-row gap-10 lg:gap-16">
-            {/* Tampilan Kalender (Kiri) */}
-            <div className="w-full lg:w-1/2 bg-white rounded-3xl shadow-[0_15px_40px_rgba(0,0,0,0.08)] border border-gray-100 p-6 sm:p-8 flex flex-col relative overflow-hidden">
+            <div className="w-full lg:w-1/2 bg-white rounded-3xl shadow-[0_15px_40px_rgba(0,0,0,0.08)] border border-gray-100 p-6 sm:p-8 flex flex-col relative overflow-hidden group hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] transition-all duration-300">
               <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100">
                 <div className="flex items-center">
-                  <CalendarDays className="w-7 h-7 text-emerald-600 mr-3" />
+                  <CalendarDays className="w-7 h-7 text-teal-600 mr-3" />
                   <span className="text-xl font-extrabold text-gray-900 min-w-[140px]">
                     {monthNames[currentMonth]} {currentYear}
                   </span>
                 </div>
                 <div className="flex gap-1.5">
-                  <button onClick={handlePrevYear} className="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-emerald-600 transition" title="Tahun Sebelumnya"><ChevronsLeft className="w-4 h-4"/></button>
-                  <button onClick={handlePrevMonth} className="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-emerald-600 transition" title="Bulan Sebelumnya"><ChevronLeft className="w-4 h-4"/></button>
-                  <button onClick={handleNextMonth} className="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-emerald-600 transition" title="Bulan Berikutnya"><ChevronRight className="w-4 h-4"/></button>
-                  <button onClick={handleNextYear} className="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-emerald-600 transition" title="Tahun Berikutnya"><ChevronsRight className="w-4 h-4"/></button>
+                  <button onClick={handlePrevYear} className="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:bg-teal-50 hover:text-teal-600 transition" title="Tahun Sebelumnya"><ChevronsLeft className="w-4 h-4"/></button>
+                  <button onClick={handlePrevMonth} className="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:bg-teal-50 hover:text-teal-600 transition" title="Bulan Sebelumnya"><ChevronLeft className="w-4 h-4"/></button>
+                  <button onClick={handleNextMonth} className="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:bg-teal-50 hover:text-teal-600 transition" title="Bulan Berikutnya"><ChevronRight className="w-4 h-4"/></button>
+                  <button onClick={handleNextYear} className="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:bg-teal-50 hover:text-teal-600 transition" title="Tahun Berikutnya"><ChevronsRight className="w-4 h-4"/></button>
                 </div>
               </div>
               
@@ -1651,7 +1634,6 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                 {calendarDays.map((day, idx) => {
                   const isToday = day === currentDay && currentMonth === today.getMonth() && currentYear === today.getFullYear();
                   
-                  // Deteksi Agenda
                   const agendaHariIni = daftarAgenda.filter((a: any) => {
                     if(!a.tanggal) return false;
                     const d = new Date(a.tanggal);
@@ -1659,7 +1641,6 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                   });
                   const hasAgenda = agendaHariIni.length > 0;
                   
-                  // Deteksi Hari Minggu & Libur Nasional
                   const isSunday = (idx % 7) === 0;
                   const liburan = day ? getHolidays(day, currentMonth, currentYear) : [];
                   const isHoliday = liburan.length > 0;
@@ -1691,9 +1672,9 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                           }}
                           className={`w-full h-full flex flex-col items-center justify-center rounded-xl font-bold text-sm sm:text-base transition-all cursor-pointer ${
                             isToday 
-                              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/40 transform scale-110 z-10' 
+                              ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-teal-500/40 transform scale-110 z-10' 
                               : hasAgenda
-                                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'
+                                ? 'bg-teal-50 text-teal-800 border border-teal-200 hover:bg-teal-100'
                                 : isRedDay 
                                   ? 'text-rose-500 hover:bg-rose-50' 
                                   : 'text-gray-700 hover:bg-gray-50'
@@ -1701,8 +1682,8 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                         >
                           {day}
                           <div className="flex gap-0.5 absolute bottom-1.5">
-                             {hasAgenda && !isToday && <span className="w-1 h-1 bg-emerald-500 rounded-full"></span>}
-                             {isHoliday && !isToday && !hasAgenda && <span className="w-1 h-1 bg-rose-500 rounded-full"></span>}
+                             {hasAgenda && !isToday && <span className="w-1.5 h-1.5 bg-teal-500 rounded-full"></span>}
+                             {isHoliday && !isToday && !hasAgenda && <span className="w-1.5 h-1.5 bg-rose-500 rounded-full"></span>}
                           </div>
                         </div>
                       )}
@@ -1711,13 +1692,12 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                 })}
               </div>
 
-              {/* Kotak Info Tanggal (Muncul Jika Tanggal Diklik) */}
               {infoTanggal && (
-                <div className="mt-6 p-4 bg-emerald-50 border border-emerald-100 rounded-xl flex items-start animate-in fade-in slide-in-from-bottom-2">
-                  <Info className="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0 mt-0.5" />
+                <div className="mt-6 p-4 bg-teal-50 border border-teal-100 rounded-xl flex items-start animate-in fade-in slide-in-from-bottom-2">
+                  <Info className="w-5 h-5 text-teal-600 mr-3 flex-shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-bold text-emerald-900 text-sm mb-1">{infoTanggal.tanggal}</h4>
-                    <p className="text-sm text-emerald-700 font-medium leading-relaxed">
+                    <h4 className="font-bold text-teal-900 text-sm mb-1">{infoTanggal.tanggal}</h4>
+                    <p className="text-sm text-teal-700 font-medium leading-relaxed">
                       {infoTanggal.keterangan}
                     </p>
                   </div>
@@ -1725,15 +1705,14 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
               )}
             </div>
 
-            {/* Agenda List (Kanan) */}
             <div className="w-full lg:w-1/2 flex flex-col">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-2xl font-extrabold text-gray-900 flex items-center">
-                   <Activity className="w-6 h-6 text-emerald-600 mr-3" />
+                   <Activity className="w-6 h-6 text-teal-600 mr-3" />
                    Agenda Bulan Ini
                 </h3>
                 {isAdmin && (
-                  <button onClick={() => openEditorAgenda()} className="text-sm bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-3 py-1.5 rounded-lg font-bold flex items-center transition shadow-sm">
+                  <button onClick={() => openEditorAgenda()} className="text-sm bg-teal-100 hover:bg-teal-200 text-teal-700 px-3 py-1.5 rounded-lg font-bold flex items-center transition shadow-sm">
                     <Plus className="w-4 h-4 mr-1" /> Tambah Agenda
                   </button>
                 )}
@@ -1747,20 +1726,20 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                     const d = new Date(agenda.tanggal);
                     const tgl = String(d.getDate()).padStart(2, '0');
                     return (
-                      <div key={agenda.id} className="bg-white border border-gray-200 rounded-2xl p-5 flex items-start hover:shadow-md transition hover:border-emerald-200 relative group">
+                      <div key={agenda.id} className="bg-white border border-gray-200 rounded-2xl p-5 flex items-start hover:shadow-[0_8px_20px_rgba(0,0,0,0.05)] transition hover:border-teal-200 relative group">
                         {isAdmin && (
                           <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button onClick={() => openEditorAgenda(agenda)} className="p-1.5 text-amber-500 hover:bg-amber-50 rounded-md transition" title="Edit Agenda"><Edit className="w-4 h-4"/></button>
                             <button onClick={() => handleDeleteAgenda(agenda.id)} className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-md transition" title="Hapus Agenda"><Trash2 className="w-4 h-4"/></button>
                           </div>
                         )}
-                        <div className="bg-emerald-50 text-emerald-700 w-16 h-16 rounded-xl flex flex-col items-center justify-center font-extrabold shadow-sm border border-emerald-100 flex-shrink-0 mr-5">
-                          <span className="text-xs uppercase tracking-widest text-emerald-500">{monthNames[d.getMonth()].substring(0,3)}</span>
+                        <div className="bg-gradient-to-br from-teal-50 to-emerald-50 text-teal-700 w-16 h-16 rounded-xl flex flex-col items-center justify-center font-extrabold shadow-sm border border-teal-100 flex-shrink-0 mr-5">
+                          <span className="text-xs uppercase tracking-widest text-teal-500">{monthNames[d.getMonth()].substring(0,3)}</span>
                           <span className="text-2xl leading-none">{tgl}</span>
                         </div>
                         <div className="pr-12">
                           <h4 className="font-extrabold text-gray-900 text-lg leading-tight">{agenda.judul}</h4>
-                          <p className="text-gray-600 text-sm mt-1.5 font-medium flex items-center"><MapPin className="w-4 h-4 mr-1 text-emerald-500"/> {agenda.lokasi}</p>
+                          <p className="text-gray-600 text-sm mt-1.5 font-medium flex items-center"><MapPin className="w-4 h-4 mr-1 text-teal-500"/> {agenda.lokasi}</p>
                         </div>
                       </div>
                     );
@@ -1769,7 +1748,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
               </div>
               
               <div className="mt-6 pt-4 border-t border-gray-100">
-                <button onClick={() => navigateTo('berita', 'list-berita')} className="text-emerald-600 font-extrabold hover:text-emerald-800 flex items-center transition group">
+                <button onClick={() => navigateTo('berita', 'list-berita')} className="text-teal-600 font-extrabold hover:text-teal-800 flex items-center transition group">
                    Lihat semua kegiatan <ArrowRight className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition" />
                 </button>
               </div>
@@ -1779,9 +1758,9 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
         </div>
       </section>
 
-      {/* Modal Edit Konten Beranda Khusus Admin */}
+      {/* Modal Editor Khusus Admin dengan Gaya UI Seragam */}
       {showEditor && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full p-8 max-h-[90vh] overflow-y-auto border border-emerald-100 animate-in zoom-in-95">
             <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100 sticky top-0 bg-white z-10">
               <h3 className="text-2xl font-extrabold text-gray-900 flex items-center">
@@ -1824,7 +1803,6 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                 </div>
               </div>
 
-              {/* FITUR BARU: PENGATURAN GALERI FOTO HEADER */}
               <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
                 <h4 className="font-extrabold text-lg text-emerald-800 mb-4 flex items-center">
                    <span className="w-6 h-1 bg-emerald-500 rounded-full mr-3"></span> Galeri Foto Header
@@ -1930,7 +1908,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                       type="text" required
                       value={editForm.namaDesa}
                       onChange={(e) => setEditForm({...editForm, namaDesa: e.target.value})}
-                      className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" 
+                      className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
                     />
                   </div>
                   <div className="col-span-full">
@@ -1939,7 +1917,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                       required rows={3}
                       value={editForm.deskripsiDesa}
                       onChange={(e) => setEditForm({...editForm, deskripsiDesa: e.target.value})}
-                      className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium leading-relaxed" 
+                      className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium leading-relaxed" 
                     ></textarea>
                   </div>
                 </div>
@@ -1956,7 +1934,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                       type="text" required
                       value={editForm.namaKades}
                       onChange={(e) => setEditForm({...editForm, namaKades: e.target.value})}
-                      className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" 
+                      className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
                     />
                   </div>
                   <div>
@@ -1965,7 +1943,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                       type="text" required
                       value={editForm.jabatanKades}
                       onChange={(e) => setEditForm({...editForm, jabatanKades: e.target.value})}
-                      className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" 
+                      className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
                     />
                   </div>
                   <div className="col-span-full">
@@ -1986,7 +1964,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                       required rows={6}
                       value={editForm.sambutanKades}
                       onChange={(e) => setEditForm({...editForm, sambutanKades: e.target.value})}
-                      className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium leading-relaxed" 
+                      className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium leading-relaxed" 
                     ></textarea>
                   </div>
                 </div>
@@ -2000,7 +1978,6 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                   {editForm.stats.map((stat: any, index: number) => {
                     const isPopulasi = stat.id === 1;
                     
-                    // Logic Sinkronisasi Display Input Editor
                     let displayNum = stat.num;
                     let displayLaki = stat.subLaki || '';
                     let displayPerempuan = stat.subPerempuan || '';
@@ -2022,7 +1999,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                            value={displayNum}
                            onChange={(e) => handleStatChange(stat.id, 'num', e.target.value)}
                            disabled={isPopulasi}
-                           className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 ${isPopulasi ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`} 
+                           className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 ${isPopulasi ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`} 
                          />
                       </div>
                       <div>
@@ -2031,7 +2008,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                            type="text" required
                            value={stat.label}
                            onChange={(e) => handleStatChange(stat.id, 'label', e.target.value)}
-                           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" 
+                           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" 
                          />
                       </div>
                       {isPopulasi && (
@@ -2077,9 +2054,8 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
         </div>
       )}
 
-      {/* Modal Editor Khusus Data Agenda */}
       {showEditorAgenda && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-in zoom-in-95 border border-emerald-100">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-extrabold text-gray-900 flex items-center tracking-tight">
@@ -2098,7 +2074,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                   type="text" required
                   value={editDataAgenda.judul}
                   onChange={(e) => setEditDataAgenda({...editDataAgenda, judul: e.target.value})}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium" 
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 font-medium" 
                 />
               </div>
               <div>
@@ -2107,7 +2083,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                   type="text" required
                   value={editDataAgenda.lokasi}
                   onChange={(e) => setEditDataAgenda({...editDataAgenda, lokasi: e.target.value})}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium" 
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 font-medium" 
                 />
               </div>
               <div>
@@ -2116,7 +2092,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                   type="date" required
                   value={editDataAgenda.tanggal}
                   onChange={(e) => setEditDataAgenda({...editDataAgenda, tanggal: e.target.value})}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium" 
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 font-medium" 
                 />
               </div>
               
@@ -2143,13 +2119,11 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
   useEffect(() => {
     if (initialTabId) {
       setActiveTabId(initialTabId);
-    // Menggunakan perbandingan String() untuk mengatasi konflik tipe data Number vs String dari localStorage
     } else if (daftarProfil.length > 0 && !daftarProfil.find((p: any) => String(p.id) === String(activeTabId))) {
       setActiveTabId(daftarProfil[0].id);
     }
   }, [initialTabId, daftarProfil, activeTabId]);
 
-  // Menggunakan perbandingan String() agar selalu cocok
   const activeProfil = daftarProfil.find((p: any) => String(p.id) === String(activeTabId));
 
   const handleDelete = (id: any) => {
@@ -2222,9 +2196,9 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
       <div className="container mx-auto px-4 lg:px-8 flex flex-col items-center justify-center">
         
         <div className="text-center mb-10 w-full max-w-4xl mx-auto">
-          <span className="text-emerald-600 font-bold tracking-widest uppercase text-sm mb-2 block">Informasi Publik</span>
+          <span className="text-teal-600 font-bold tracking-widest uppercase text-sm mb-2 block">Informasi Publik</span>
           <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">Profil Desa</h2>
-          <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-600 to-emerald-400 mx-auto rounded-full"></div>
+          <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-600 to-teal-400 mx-auto rounded-full"></div>
           <p className="mt-6 text-gray-600 text-lg leading-relaxed">
             Mengenal lebih dekat sejarah, visi misi, letak geografis, dan struktur organisasi Pemerintah Desa Delta Upang.
           </p>
@@ -2241,7 +2215,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
           </div>
         )}
 
-        <div className="w-full max-w-5xl bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden relative min-h-[500px] flex flex-col mx-auto">
+        <div className="w-full max-w-5xl bg-white rounded-3xl shadow-[0_15px_40px_rgba(0,0,0,0.06)] border border-gray-100 overflow-hidden relative min-h-[500px] flex flex-col mx-auto transition-shadow duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
           {activeProfil ? (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 flex-grow flex flex-col">
               
@@ -2268,9 +2242,9 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                       }
                     }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-gray-900/30 to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-transparent"></div>
                   <div className="absolute bottom-0 left-0 p-8 md:p-12 w-full">
-                      <div className="flex items-center gap-3 text-emerald-300 mb-3">
+                      <div className="flex items-center gap-3 text-teal-300 mb-3">
                         {renderIcon(activeProfil.iconName, "w-6 h-6")}
                         <span className="font-bold tracking-widest uppercase text-sm">Bagian Profil</span>
                       </div>
@@ -2284,10 +2258,10 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
               <div className={`p-6 md:p-12 flex-grow flex flex-col ${!activeProfil.gambar ? 'pt-16 md:pt-20' : ''}`}>
                 {!activeProfil.gambar && (
                    <div className="mb-10 text-center">
-                     <div className="inline-flex justify-center items-center bg-emerald-100 text-emerald-600 p-4 rounded-2xl mb-6 shadow-sm">
+                     <div className="inline-flex justify-center items-center bg-teal-50 text-teal-600 p-4 rounded-2xl mb-6 shadow-sm border border-teal-100">
                        {renderIcon(activeProfil.iconName, "w-10 h-10")}
                      </div>
-                     <h3 className="text-3xl md:text-5xl font-extrabold text-emerald-900 tracking-tight">
+                     <h3 className="text-3xl md:text-5xl font-extrabold text-teal-900 tracking-tight">
                        {activeProfil.judul}
                      </h3>
                    </div>
@@ -2296,20 +2270,20 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                 <div className="flex-grow max-w-4xl mx-auto w-full">
                   {isVisiMisi ? (
                     <div className="space-y-12">
-                      <div className="bg-gradient-to-br from-emerald-800 to-emerald-950 rounded-3xl shadow-2xl p-8 md:p-14 text-center transform hover:scale-[1.02] transition-transform duration-300">
+                      <div className="bg-gradient-to-br from-emerald-800 to-teal-900 rounded-3xl shadow-2xl p-8 md:p-14 text-center transform hover:scale-[1.02] transition-transform duration-300">
                         <h3 className="text-2xl font-extrabold text-white mb-6 tracking-widest">VISI KAMI</h3>
                         <p className="text-xl md:text-3xl text-emerald-50 font-medium leading-tight italic drop-shadow-md">
                           "{visiText}"
                         </p>
                       </div>
 
-                      <div className="bg-white rounded-3xl shadow-xl p-8 md:p-14 border border-gray-100 relative overflow-hidden">
-                         <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-bl-[100px] -z-10"></div>
-                        <h3 className="text-2xl md:text-3xl font-extrabold text-emerald-900 mb-8 text-center tracking-widest">MISI DESA</h3>
+                      <div className="bg-white rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] p-8 md:p-14 border border-gray-100 relative overflow-hidden">
+                         <div className="absolute top-0 right-0 w-32 h-32 bg-teal-50 rounded-bl-[100px] -z-10 opacity-70"></div>
+                        <h3 className="text-2xl md:text-3xl font-extrabold text-teal-900 mb-8 text-center tracking-widest">MISI DESA</h3>
                         <div className="space-y-5">
                           {misiList.map((misi, index) => (
-                            <div key={index} className="flex items-start bg-gray-50 hover:bg-emerald-50 p-5 md:p-6 rounded-2xl transition-colors duration-300 border border-gray-100 hover:border-emerald-200">
-                              <div className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center font-black text-lg md:text-xl mr-4 md:mr-5 shadow-sm">
+                            <div key={index} className="flex items-start bg-gray-50 hover:bg-teal-50/50 p-5 md:p-6 rounded-2xl transition-colors duration-300 border border-gray-100 hover:border-teal-200 shadow-sm">
+                              <div className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-emerald-100 to-teal-200 text-teal-800 rounded-xl flex items-center justify-center font-black text-lg md:text-xl mr-4 md:mr-5 shadow-sm border border-teal-100">
                                 {index + 1}
                               </div>
                               <p className="text-gray-700 text-base md:text-xl font-medium pt-1 md:pt-1.5 leading-relaxed">{misi}</p>
@@ -2335,7 +2309,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                 <div className="mt-16 pt-8 border-t border-gray-100 flex justify-end w-full max-w-4xl mx-auto">
                   <button 
                     onClick={() => navigateTo('beranda')}
-                    className="flex items-center text-sm md:text-base font-bold text-gray-500 hover:text-emerald-700 bg-gray-50 hover:bg-emerald-50 px-6 py-3.5 rounded-xl border border-gray-200 hover:border-emerald-200 transition-all shadow-sm hover:shadow-md"
+                    className="flex items-center text-sm md:text-base font-bold text-gray-500 hover:text-teal-700 bg-gray-50 hover:bg-teal-50 px-6 py-3.5 rounded-xl border border-gray-200 hover:border-teal-200 transition-all shadow-sm hover:shadow-md"
                   >
                     <ArrowRight className="w-5 h-5 mr-2 rotate-180" /> Kembali ke Halaman Utama
                   </button>
@@ -2353,7 +2327,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
       </div>
 
       {showEditor && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full p-8 max-h-[90vh] overflow-y-auto border border-emerald-100 animate-in zoom-in-95">
             <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-100 sticky top-0 bg-white z-10">
               <h3 className="text-2xl font-extrabold text-gray-900 flex items-center">
@@ -2376,7 +2350,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                     value={editData.judul}
                     onChange={(e) => setEditData({...editData, judul: e.target.value})}
                     placeholder="Contoh: Sejarah Desa"
-                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" 
+                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
                   />
                 </div>
                 <div>
@@ -2386,7 +2360,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                       required
                       value={editData.iconName}
                       onChange={(e) => setEditData({...editData, iconName: e.target.value})}
-                      className="w-full px-5 py-3 pl-12 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium appearance-none"
+                      className="w-full px-5 py-3 pl-12 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium appearance-none"
                     >
                       <option value="BookOpen">Buku (Sejarah/Cerita)</option>
                       <option value="Target">Target (Visi/Misi)</option>
@@ -2394,7 +2368,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                       <option value="Building2">Gedung (Struktur/Organisasi)</option>
                       <option value="Info">Info (Umum)</option>
                     </select>
-                    <div className="absolute left-4 top-3.5 text-emerald-600 pointer-events-none">
+                    <div className="absolute left-4 top-3.5 text-teal-600 pointer-events-none">
                       {renderIcon(editData.iconName, "w-5 h-5")}
                     </div>
                     <ChevronDown className="absolute right-4 top-3.5 w-5 h-5 text-gray-400 pointer-events-none" />
@@ -2428,7 +2402,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                     value={editData.konten}
                     onChange={(e) => setEditData({...editData, konten: e.target.value})}
                     placeholder="Ketikkan isi informasi di sini secara menarik dan meyakinkan..."
-                    className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium leading-relaxed" 
+                    className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium leading-relaxed" 
                   ></textarea>
                 </div>
               </div>
@@ -2539,34 +2513,28 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
     }
   };
 
-  // ----- PEMISAHAN KATEGORI UNTUK BAGAN STRUKTUR -----
   const kadesList = daftarPerangkat.filter((p: any) => p.jabatan.toUpperCase().includes('KEPALA DESA') || p.jabatan.toUpperCase() === 'KADES');
   const sekdesList = daftarPerangkat.filter((p: any) => p.jabatan.toUpperCase().includes('SEKRETARIS'));
   const kasiList = daftarPerangkat.filter((p: any) => p.jabatan.toUpperCase().includes('KASI'));
   const kaurList = daftarPerangkat.filter((p: any) => p.jabatan.toUpperCase().includes('KAUR'));
   const kasunList = daftarPerangkat.filter((p: any) => p.jabatan.toUpperCase().includes('KASUN') || p.jabatan.toUpperCase().includes('DUSUN'));
 
-  // Logika Tinggi Dinamis Container Berdasarkan Jumlah Kasun
-  const maxKasunPerRow = 6; // Maksimal 6 Kasun per baris sesuai instruksi
+  const maxKasunPerRow = 6;
   const kasunRowCount = Math.ceil(kasunList.length / maxKasunPerRow);
   
-  // Jika 0 Kasun, batang putus di garis Kaur (Y=620)
   const trunkHeight = kasunRowCount === 0 ? 360 : 680 + ((kasunRowCount - 1) * 340);
-  
-  // Tinggi Container Dinamis
   const containerHeight = kasunRowCount === 0 ? 950 : 1300 + ((kasunRowCount - 1) * 340);
 
-  // Desain Card Perangkat Persis Screenshot
   const PerangkatCard = ({ p }: any) => (
-    <div style={{ width: '160px', height: '260px' }} className="bg-white border-[3px] border-black overflow-hidden relative flex flex-col items-center shadow-lg group z-10">
+    <div style={{ width: '160px', height: '260px' }} className="bg-white border-[3px] border-emerald-900 overflow-hidden relative flex flex-col items-center shadow-lg group z-10 transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-teal-600">
        {isAdmin && (
-         <div className="absolute top-1 right-1 z-20 flex gap-1 bg-white/90 p-1 rounded backdrop-blur border border-black">
+         <div className="absolute top-1 right-1 z-20 flex gap-1 bg-white/90 p-1 rounded backdrop-blur border border-emerald-900">
            <button onClick={() => openEditorPerangkat(p)} className="text-amber-600 hover:text-amber-800 p-1"><Edit className="w-3.5 h-3.5" /></button>
            <button onClick={() => handleDeletePerangkat(p.id)} className="text-rose-600 hover:text-rose-800 p-1"><Trash2 className="w-3.5 h-3.5" /></button>
          </div>
        )}
        
-       <div style={{ height: '180px' }} className="w-full bg-red-600 border-b-[3px] border-black flex-shrink-0">
+       <div style={{ height: '180px' }} className="w-full bg-gradient-to-tr from-emerald-800 to-teal-700 border-b-[3px] border-emerald-900 flex-shrink-0">
           <img 
             src={p.foto} 
             alt={p.nama} 
@@ -2579,8 +2547,8 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
           />
        </div>
        <div className="p-2 text-center w-full bg-white flex-grow flex flex-col items-center justify-center">
-          <h3 className="text-[12px] font-black text-black leading-tight mb-1 underline uppercase text-center line-clamp-2">{p.nama}</h3>
-          <span className="text-[10px] font-bold text-black uppercase text-center leading-tight line-clamp-2">{p.jabatan}</span>
+          <h3 className="text-[12px] font-black text-gray-900 leading-tight mb-1 underline uppercase text-center line-clamp-2">{p.nama}</h3>
+          <span className="text-[10px] font-bold text-teal-700 uppercase text-center leading-tight line-clamp-2">{p.jabatan}</span>
        </div>
     </div>
   );
@@ -2590,13 +2558,13 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
       <div className="container mx-auto px-4 lg:px-8 relative">
         
         <div className="text-center mb-16">
-          <span className="text-emerald-600 font-bold tracking-widest uppercase text-sm mb-2 block">
+          <span className="text-teal-600 font-bold tracking-widest uppercase text-sm mb-2 block">
             Pemerintahan Desa
           </span>
           <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">
             {getTabTitle(activeTab)}
           </h2>
-          <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-600 to-emerald-400 mx-auto rounded-full"></div>
+          <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-600 to-teal-400 mx-auto rounded-full"></div>
           <p className="mt-6 text-gray-600 max-w-2xl mx-auto text-lg leading-relaxed">
             {getTabSubtitle(activeTab)}
           </p>
@@ -2620,57 +2588,36 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                <div className="col-span-full text-center text-gray-500 py-20 bg-white rounded-3xl border border-dashed border-gray-300 font-medium text-lg max-w-6xl mx-auto">Belum ada data perangkat desa.</div>
             ) : (
               <div className="w-full overflow-x-auto pb-10 custom-scrollbar">
-                {/* Wadah Absolut untuk struktur berjenjang yang presisi */}
-                <div style={{ width: '1300px', height: `${containerHeight}px`, position: 'relative', margin: '0 auto', marginTop: '40px' }} className="bg-white/50 rounded-3xl">
+                <div style={{ width: '1300px', height: `${containerHeight}px`, position: 'relative', margin: '0 auto', marginTop: '40px' }} className="bg-white/40 backdrop-blur-sm rounded-3xl">
 
                   {/* --- GARIS PENGHUBUNG (CONNECTOR LINES) --- */}
-                  
-                  {/* Garis BPD ke Kades */}
-                  <div style={{ position: 'absolute', left: '330px', top: '120px', width: '240px', borderTop: '4px dashed black', zIndex: 0 }}></div>
-                  
-                  {/* Batang Utama (Trunk) vertikal dari Kades turun ke Kasun */}
-                  <div style={{ position: 'absolute', left: '648px', top: '260px', width: '4px', height: `${trunkHeight}px`, backgroundColor: 'black', zIndex: 0 }}></div>
-
-                  {/* Cabang Sekdes (Kanan) */}
-                  <div style={{ position: 'absolute', left: '648px', top: '300px', width: '304px', height: '4px', backgroundColor: 'black', zIndex: 0 }}></div>
-                  <div style={{ position: 'absolute', left: '948px', top: '300px', width: '4px', height: '20px', backgroundColor: 'black', zIndex: 0 }}></div>
-                  
-                  {/* Sambungan bawah Sekdes menuju Kaur */}
-                  <div style={{ position: 'absolute', left: '948px', top: '580px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
-
-                  {/* Garis Horizontal Kaur */}
-                  <div style={{ position: 'absolute', left: '748px', top: '620px', width: '404px', height: '4px', backgroundColor: 'black', zIndex: 0 }}></div>
-                  {/* Drop Kaur 1, 2, 3 */}
-                  <div style={{ position: 'absolute', left: '748px', top: '620px', width: '4px', height: '20px', backgroundColor: 'black', zIndex: 0 }}></div>
-                  <div style={{ position: 'absolute', left: '948px', top: '620px', width: '4px', height: '20px', backgroundColor: 'black', zIndex: 0 }}></div>
-                  <div style={{ position: 'absolute', left: '1148px', top: '620px', width: '4px', height: '20px', backgroundColor: 'black', zIndex: 0 }}></div>
-
-                  {/* Cabang Kasi (Kiri) */}
-                  <div style={{ position: 'absolute', left: '148px', top: '420px', width: '504px', height: '4px', backgroundColor: 'black', zIndex: 0 }}></div>
-                  {/* Drop Kasi 1, 2, 3 */}
-                  <div style={{ position: 'absolute', left: '148px', top: '420px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
-                  <div style={{ position: 'absolute', left: '348px', top: '420px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
-                  <div style={{ position: 'absolute', left: '548px', top: '420px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '330px', top: '120px', width: '240px', borderTop: '4px dashed #064e3b', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '648px', top: '260px', width: '4px', height: `${trunkHeight}px`, backgroundColor: '#064e3b', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '648px', top: '300px', width: '304px', height: '4px', backgroundColor: '#064e3b', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '948px', top: '300px', width: '4px', height: '20px', backgroundColor: '#064e3b', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '948px', top: '580px', width: '4px', height: '40px', backgroundColor: '#064e3b', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '748px', top: '620px', width: '404px', height: '4px', backgroundColor: '#064e3b', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '748px', top: '620px', width: '4px', height: '20px', backgroundColor: '#064e3b', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '948px', top: '620px', width: '4px', height: '20px', backgroundColor: '#064e3b', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '1148px', top: '620px', width: '4px', height: '20px', backgroundColor: '#064e3b', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '148px', top: '420px', width: '504px', height: '4px', backgroundColor: '#064e3b', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '148px', top: '420px', width: '4px', height: '40px', backgroundColor: '#064e3b', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '348px', top: '420px', width: '4px', height: '40px', backgroundColor: '#064e3b', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '548px', top: '420px', width: '4px', height: '40px', backgroundColor: '#064e3b', zIndex: 0 }}></div>
 
 
                   {/* --- KARTU PERANGKAT DESA (NODES) --- */}
-                  
-                  {/* Kotak BPD (Statis) */}
-                  <div style={{ position: 'absolute', left: '170px', top: '80px', width: '160px', height: '80px', zIndex: 10 }} className="bg-white border-[3px] border-black flex items-center justify-center font-black text-2xl shadow-lg tracking-widest">
+                  <div style={{ position: 'absolute', left: '170px', top: '80px', width: '160px', height: '80px', zIndex: 10 }} className="bg-white border-[3px] border-emerald-900 text-teal-900 flex items-center justify-center font-black text-2xl shadow-lg tracking-widest">
                     BPD
                   </div>
 
-                  {/* Level 1: Kepala Desa */}
                   <div style={{ position: 'absolute', left: '570px', top: '0px', zIndex: 10 }}>
                     {kadesList[0] && <PerangkatCard p={kadesList[0]} />}
                   </div>
-
-                  {/* Level 2: Sekretaris Desa */}
                   <div style={{ position: 'absolute', left: '870px', top: '320px', zIndex: 10 }}>
                     {sekdesList[0] && <PerangkatCard p={sekdesList[0]} />}
                   </div>
 
-                  {/* Level 3: Kasi (Kiri) */}
                   <div style={{ position: 'absolute', left: '70px', top: '460px', zIndex: 10 }}>
                     {kasiList[0] && <PerangkatCard p={kasiList[0]} />}
                   </div>
@@ -2681,7 +2628,6 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                     {kasiList[2] && <PerangkatCard p={kasiList[2]} />}
                   </div>
 
-                  {/* Level 3: Kaur (Kanan) */}
                   <div style={{ position: 'absolute', left: '670px', top: '640px', zIndex: 10 }}>
                     {kaurList[0] && <PerangkatCard p={kaurList[0]} />}
                   </div>
@@ -2695,11 +2641,11 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
 
                   {/* --- RENDER DINAMIS KEPALA DUSUN --- */}
                   {(() => {
-                    const kasunGap = 200; // Jarak antar kotak kasun (dimodifikasi agar muat 6 kotak)
-                    const baseLineY = 940; // Y-koordinat garis horizontal kasun baris pertama
-                    const baseBoxY = 980; // Y-koordinat kotak kasun baris pertama
-                    const rowHeightSpacing = 340; // Jarak antar baris kasun baru
-                    const centerX = 650; // Titik tengah container
+                    const kasunGap = 200; 
+                    const baseLineY = 940; 
+                    const baseBoxY = 980; 
+                    const rowHeightSpacing = 340; 
+                    const centerX = 650; 
 
                     const rows = [];
                     for (let i = 0; i < kasunList.length; i += maxKasunPerRow) {
@@ -2711,12 +2657,10 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                       const currentBoxY = baseBoxY + (rowIndex * rowHeightSpacing);
                       const count = rowItems.length;
                       
-                      // Menghitung offset untuk meletakkan kotak presisi di tengah
                       const startOffset = -((count - 1) / 2) * kasunGap;
 
                       return (
                         <React.Fragment key={`kasun-row-${rowIndex}`}>
-                          {/* Garis Horizontal Penghubung (Hanya muncul jika lebih dari 1 kasun di baris tersebut) */}
                           {count > 1 && (
                             <div style={{
                               position: 'absolute',
@@ -2724,28 +2668,25 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                               top: `${currentLineY}px`,
                               width: `${((count - 1) * kasunGap) + 4}px`,
                               height: '4px',
-                              backgroundColor: 'black',
+                              backgroundColor: '#064e3b',
                               zIndex: 0
                             }}></div>
                           )}
 
-                          {/* Garis Vertikal Drop & Kotak Kasun */}
                           {rowItems.map((kasun: any, idx: number) => {
                             const itemCenterX = centerX + startOffset + (idx * kasunGap);
                             return (
                               <React.Fragment key={`kasun-item-${kasun.id}`}>
-                                {/* Drop Vertikal */}
                                 <div style={{
                                   position: 'absolute',
                                   left: `${itemCenterX - 2}px`,
                                   top: `${currentLineY}px`,
                                   width: '4px',
                                   height: '40px',
-                                  backgroundColor: 'black',
+                                  backgroundColor: '#064e3b',
                                   zIndex: 0
                                 }}></div>
                                 
-                                {/* Kotak Card Perangkat */}
                                 <div style={{
                                   position: 'absolute',
                                   left: `${itemCenterX - 80}px`,
@@ -2782,14 +2723,14 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
               </div>
             )}
 
-            <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-3xl shadow-[0_15px_40px_rgba(0,0,0,0.06)] border border-gray-100 overflow-hidden">
               {filteredLembaga.length === 0 ? (
                  <div className="text-center text-gray-500 py-16 bg-white font-medium text-lg">Belum ada data tersedia.</div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left whitespace-nowrap">
                     <thead>
-                      <tr className="bg-emerald-50 text-emerald-800 text-sm tracking-wide uppercase border-b-2 border-emerald-100">
+                      <tr className="bg-teal-50 text-teal-800 text-sm tracking-wide uppercase border-b-2 border-teal-100">
                         <th className="px-6 py-5 font-bold">No</th>
                         <th className="px-6 py-5 font-bold">Foto</th>
                         <th className="px-6 py-5 font-bold">Nama Lengkap</th>
@@ -2816,7 +2757,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                             />
                           </td>
                           <td className="px-6 py-4 font-extrabold text-gray-900 text-base">{item.nama}</td>
-                          <td className="px-6 py-4 text-emerald-700 font-bold bg-emerald-50/50 rounded-lg inline-block mt-3.5 mb-1.5 ml-4 px-3 py-1 border border-emerald-100/50">{item.jabatan}</td>
+                          <td className="px-6 py-4 text-teal-700 font-bold bg-teal-50/70 rounded-lg inline-block mt-3.5 mb-1.5 ml-4 px-3 py-1 border border-teal-100/50">{item.jabatan}</td>
                           <td className="px-6 py-4 font-medium text-gray-700">{item.jenisKelamin}</td>
                           <td className="px-6 py-4 font-medium text-gray-700">{item.umur} Thn</td>
                           {isAdmin && (
@@ -2844,7 +2785,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
       </div>
 
       {showEditorPerangkat && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-xl w-full p-8 max-h-[90vh] overflow-y-auto border border-emerald-100 animate-in zoom-in-95">
             <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-100">
               <h3 className="text-2xl font-extrabold text-gray-900 flex items-center">
@@ -2867,7 +2808,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                     value={editDataPerangkat.nama}
                     onChange={(e) => setEditDataPerangkat({...editDataPerangkat, nama: e.target.value})}
                     placeholder="Contoh: Bapak Fulan, S.E."
-                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" 
+                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
                   />
                 </div>
                 <div>
@@ -2877,7 +2818,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                     value={editDataPerangkat.jabatan}
                     onChange={(e) => setEditDataPerangkat({...editDataPerangkat, jabatan: e.target.value})}
                     placeholder="Ketik 'Kepala Desa' untuk posisi atas"
-                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" 
+                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
                   />
                   <p className="text-xs text-gray-500 mt-2 font-medium">*Sistem membaca teks KEPALA DESA, SEKRETARIS, KASI, KAUR, dan KASUN untuk diletakkan ke posisinya masing-masing.</p>
                 </div>
@@ -2917,7 +2858,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
       )}
 
       {showEditorLembaga && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto border border-emerald-100 animate-in zoom-in-95">
             <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-100">
               <h3 className="text-2xl font-extrabold text-gray-900 flex items-center">
@@ -2940,7 +2881,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                     value={editDataLembaga.nama}
                     onChange={(e) => setEditDataLembaga({...editDataLembaga, nama: e.target.value})}
                     placeholder="Masukkan nama lengkap"
-                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" 
+                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
                   />
                 </div>
                 <div>
@@ -2950,7 +2891,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                     value={editDataLembaga.jabatan}
                     onChange={(e) => setEditDataLembaga({...editDataLembaga, jabatan: e.target.value})}
                     placeholder="Contoh: Ketua RT 01"
-                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" 
+                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
                   />
                 </div>
                 <div>
@@ -2960,7 +2901,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                       required
                       value={editDataLembaga.jenisKelamin}
                       onChange={(e) => setEditDataLembaga({...editDataLembaga, jenisKelamin: e.target.value})}
-                      className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium appearance-none"
+                      className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium appearance-none"
                     >
                       <option value="Laki-laki">Laki-laki</option>
                       <option value="Perempuan">Perempuan</option>
@@ -2975,7 +2916,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                     value={editDataLembaga.umur}
                     onChange={(e) => setEditDataLembaga({...editDataLembaga, umur: e.target.value})}
                     placeholder="Contoh: 45"
-                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" 
+                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
                   />
                 </div>
 
@@ -3034,7 +2975,6 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
 
   const openEditorBerita = (berita: any = null) => {
     if (berita) {
-      // Pastikan ada property galeri walau dari data lama
       setEditDataBerita({ ...berita, galeri: berita.galeri || [] });
     } else {
       setEditDataBerita({ id: null, judul: '', tanggal: '', kategori: '', excerpt: '', gambar: '', galeri: [] });
@@ -3076,7 +3016,6 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
     }
   };
 
-  // ----- Logika Upload Foto Tambahan (Galeri) -----
   const handleImageTambahanUpload = (e: any) => {
     const files = Array.from(e.target.files);
     files.forEach((file: any) => {
@@ -3115,17 +3054,16 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
         {isListBerita ? (
           <>
             {selectedBerita ? (
-              <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 animate-in slide-in-from-bottom-8 duration-500">
+              <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-[0_15px_40px_rgba(0,0,0,0.06)] overflow-hidden border border-gray-100 animate-in slide-in-from-bottom-8 duration-500">
                 <div className="p-4 md:p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                    <button 
                      onClick={() => setSelectedBerita(null)} 
-                     className="flex items-center text-emerald-600 hover:text-emerald-800 font-bold transition px-4 py-2 hover:bg-emerald-50 rounded-xl"
+                     className="flex items-center text-teal-600 hover:text-teal-800 font-bold transition px-4 py-2 hover:bg-teal-50 rounded-xl"
                    >
                       <ArrowRight className="w-5 h-5 mr-2 rotate-180" /> Kembali ke Daftar Berita
                    </button>
                 </div>
                 
-                {/* Header Image Utama */}
                 <div className="w-full h-64 md:h-[450px] overflow-hidden bg-gray-200">
                    <img 
                      src={selectedBerita.gambar} 
@@ -3141,7 +3079,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                 
                 <div className="p-8 md:p-14">
                    <div className="flex items-center gap-4 mb-6">
-                      <span className="bg-emerald-100 text-emerald-800 text-xs font-extrabold px-4 py-1.5 rounded-full uppercase tracking-wider">
+                      <span className="bg-teal-100 text-teal-800 text-xs font-extrabold px-4 py-1.5 rounded-full uppercase tracking-wider">
                         {selectedBerita.kategori}
                       </span>
                       <span className="text-sm font-bold text-gray-500">{selectedBerita.tanggal}</span>
@@ -3149,9 +3087,8 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                    <h2 className="text-3xl md:text-5xl font-extrabold text-gray-900 mb-8 leading-tight tracking-tight">
                      {selectedBerita.judul}
                    </h2>
-                   <div className="w-20 h-1.5 bg-gradient-to-r from-emerald-500 to-emerald-300 rounded-full mb-10"></div>
+                   <div className="w-20 h-1.5 bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full mb-10"></div>
                    
-                   {/* Render Konten Beserta Posisi Gambar */}
                    <div className="text-gray-700 text-lg md:text-xl leading-relaxed whitespace-pre-wrap font-medium relative clearfix">
                       {(() => {
                         const galeri = selectedBerita.galeri || [];
@@ -3161,31 +3098,25 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                         const imgKanan = galeri.filter((g: any) => g.posisi === 'kanan');
                         const imgTengah = galeri.filter((g: any) => g.posisi === 'tengah');
 
-                        // Pisahkan paragraf agar gambar tengah bisa disisipkan
                         const paragraphs = selectedBerita.excerpt.split('\n');
 
                         return (
                           <React.Fragment>
-                            {/* Gambar Atas */}
                             {imgAtas.length > 0 && (
                               <div className="w-full flex flex-col gap-4 mb-8">
                                 {imgAtas.map((g: any) => <img key={g.id} src={g.url} alt="Berita Atas" className="w-full rounded-2xl shadow-md object-cover" />)}
                               </div>
                             )}
 
-                            {/* Gambar Kiri (Float) */}
                             {imgKiri.map((g: any) => (
                               <img key={g.id} src={g.url} alt="Berita Kiri" className="w-[45%] md:w-1/3 float-left mr-6 mb-4 rounded-xl shadow-sm object-cover" />
                             ))}
 
-                            {/* Gambar Kanan (Float) */}
                             {imgKanan.map((g: any) => (
                               <img key={g.id} src={g.url} alt="Berita Kanan" className="w-[45%] md:w-1/3 float-right ml-6 mb-4 rounded-xl shadow-sm object-cover" />
                             ))}
 
-                            {/* Text Berita + Sisipan Tengah */}
                             {paragraphs.map((p: string, idx: number) => {
-                              // Tentukan dimana gambar 'tengah' akan muncul. Jika paragraf sedikit, muncul di awal/akhir
                               const isMiddle = paragraphs.length > 1 ? idx === Math.floor(paragraphs.length / 2) : idx === 0;
 
                               return (
@@ -3205,7 +3136,6 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
 
                             <div className="clear-both pt-6"></div>
 
-                            {/* Gambar Bawah */}
                             {imgBawah.length > 0 && (
                               <div className="w-full flex flex-col gap-4 mt-6">
                                 {imgBawah.map((g: any) => <img key={g.id} src={g.url} alt="Berita Bawah" className="w-full rounded-2xl shadow-md object-cover" />)}
@@ -3220,9 +3150,9 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
             ) : (
               <>
                 <div className="text-center mb-16">
-                  <span className="text-emerald-600 font-bold tracking-widest uppercase text-sm mb-2 block">Pusat Informasi</span>
+                  <span className="text-teal-600 font-bold tracking-widest uppercase text-sm mb-2 block">Pusat Informasi</span>
                   <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">Berita & Informasi</h2>
-                  <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-600 to-emerald-400 mx-auto rounded-full"></div>
+                  <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-600 to-teal-400 mx-auto rounded-full"></div>
                   <p className="mt-6 text-gray-600 max-w-2xl mx-auto text-lg leading-relaxed">
                     Kabar terbaru seputar kegiatan, pengumuman, dan pembangunan di Desa Delta Upang.
                   </p>
@@ -3245,7 +3175,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                   )}
 
                   {daftarBerita.map((berita: any) => (
-                    <div key={berita.id} className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col relative border border-gray-100 group overflow-hidden">
+                    <div key={berita.id} className="bg-white rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.12)] transition-all duration-300 flex flex-col relative border border-gray-100 group overflow-hidden hover:-translate-y-1">
                       {isAdmin && (
                         <div className="absolute top-4 right-4 z-20 flex gap-2">
                           <button onClick={() => openEditorBerita(berita)} className="bg-amber-500 hover:bg-amber-600 text-white p-2.5 rounded-xl shadow-lg transition">
@@ -3268,7 +3198,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                             }
                           }}
                         />
-                        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur text-emerald-800 text-xs font-extrabold px-4 py-1.5 rounded-full shadow-sm border border-emerald-100">
+                        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur text-teal-800 text-xs font-extrabold px-4 py-1.5 rounded-full shadow-sm border border-teal-100">
                           {berita.kategori}
                         </div>
                       </div>
@@ -3276,7 +3206,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                         <div className="text-sm font-bold text-gray-400 mb-3 flex items-center">
                           <span>{berita.tanggal}</span>
                         </div>
-                        <h3 className="text-2xl font-extrabold text-gray-900 mb-4 leading-tight line-clamp-2 group-hover:text-emerald-700 transition-colors">
+                        <h3 className="text-2xl font-extrabold text-gray-900 mb-4 leading-tight line-clamp-2 group-hover:text-teal-700 transition-colors">
                           {berita.judul}
                         </h3>
                         <p className="text-gray-600 mb-6 flex-grow line-clamp-3 text-lg leading-relaxed">
@@ -3285,7 +3215,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                         
                         <button 
                           onClick={() => setSelectedBerita(berita)}
-                          className="mt-auto text-emerald-600 font-extrabold hover:text-emerald-800 flex items-center transition group-hover:underline decoration-2 underline-offset-4"
+                          className="mt-auto text-teal-600 font-extrabold hover:text-teal-800 flex items-center transition group-hover:underline decoration-2 underline-offset-4"
                         >
                           Baca Selengkapnya <ArrowRight className="w-5 h-5 ml-1.5 transform group-hover:translate-x-1 transition" />
                         </button>
@@ -3300,9 +3230,9 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
           /* TAMPILAN GRAFIK PENDUDUK */
           <div className="animate-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto">
             <div className="text-center mb-14">
-              <span className="text-emerald-600 font-bold tracking-widest uppercase text-sm mb-2 block">Visualisasi Data</span>
+              <span className="text-teal-600 font-bold tracking-widest uppercase text-sm mb-2 block">Visualisasi Data</span>
               <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">Demografi Penduduk</h2>
-              <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-600 to-emerald-400 mx-auto rounded-full"></div>
+              <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-600 to-teal-400 mx-auto rounded-full"></div>
               <p className="mt-6 text-gray-600 max-w-2xl mx-auto text-lg leading-relaxed">
                 Persentase perbandingan jumlah penduduk Laki-laki dan Perempuan di Desa Delta Upang berdasarkan pembaruan data terakhir.
               </p>
@@ -3319,9 +3249,9 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
               </div>
             )}
 
-            <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-8 md:p-14 relative overflow-hidden max-w-4xl mx-auto flex flex-col md:flex-row gap-12 items-center justify-center">
-              <div className="absolute top-0 left-0 w-32 h-32 bg-emerald-50 rounded-br-full -z-10 opacity-70"></div>
-              <div className="absolute bottom-0 right-0 w-40 h-40 bg-amber-50 rounded-tl-full -z-10 opacity-70"></div>
+            <div className="bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.08)] border border-gray-100 p-8 md:p-14 relative overflow-hidden max-w-4xl mx-auto flex flex-col md:flex-row gap-12 items-center justify-center transition-all duration-300 hover:shadow-[0_25px_60px_rgba(0,0,0,0.12)]">
+              <div className="absolute top-0 left-0 w-32 h-32 bg-teal-50 rounded-br-[100px] -z-10 opacity-70"></div>
+              <div className="absolute bottom-0 right-0 w-40 h-40 bg-amber-50 rounded-tl-[100px] -z-10 opacity-70"></div>
 
               {/* Left Side: Summary Big Number */}
               <div className="w-full md:w-1/3 text-center md:text-left z-10">
@@ -3329,9 +3259,9 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                   <TrendingUp className="w-5 h-5 mr-2" /> Total Populasi
                 </h3>
                 <div className="text-6xl md:text-7xl font-black text-gray-900 mb-2 drop-shadow-md">
-                  {totalPenduduk.toLocaleString('id-ID')}
+                  <AnimatedNumber value={totalPenduduk} duration={2500} />
                 </div>
-                <div className="inline-block bg-emerald-100 text-emerald-800 px-4 py-1.5 rounded-full font-bold text-sm tracking-wide border border-emerald-200">
+                <div className="inline-block bg-teal-50 text-teal-800 px-4 py-1.5 rounded-full font-bold text-sm tracking-wide border border-teal-200 shadow-sm mt-1">
                   Tahun {dataGrafik.tahun}
                 </div>
                 <p className="text-sm text-gray-400 mt-6 font-medium">Diperbarui: {dataGrafik.updateTerakhir}</p>
@@ -3344,25 +3274,27 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                 <div className="mb-8">
                   <div className="flex justify-between items-end mb-3">
                     <div className="flex items-center">
-                      <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex justify-center items-center mr-4 shadow-inner">
+                      <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex justify-center items-center mr-4 shadow-sm border border-blue-100">
                         <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                            <path d="M10 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z"></path><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
                         </svg>
                       </div>
                       <div>
                         <h4 className="text-2xl font-extrabold text-gray-900 tracking-tight">Laki-laki</h4>
-                        <span className="text-blue-600 font-bold text-sm bg-blue-50 px-2 py-0.5 rounded-md mt-1 inline-block border border-blue-100">{persentaseLaki}%</span>
+                        <span className="text-blue-600 font-bold text-sm bg-blue-50 px-2 py-0.5 rounded-md mt-1 inline-block border border-blue-100 shadow-sm">{persentaseLaki}%</span>
                       </div>
                     </div>
-                    <div className="text-3xl font-black text-gray-800">{dataGrafik.lakiLaki.toLocaleString('id-ID')}</div>
+                    <div className="text-3xl font-black text-gray-800">
+                      <AnimatedNumber value={dataGrafik.lakiLaki} duration={2000} />
+                    </div>
                   </div>
                   
-                  <div className="w-full bg-gray-100 h-6 rounded-full overflow-hidden shadow-inner border border-gray-200">
+                  <div className="w-full bg-gray-100 h-6 rounded-full overflow-hidden shadow-inner border border-gray-200 relative">
                     <div 
-                      className="bg-gradient-to-r from-blue-400 to-blue-600 h-full rounded-full animate-grow relative"
+                      className="bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-600 h-full rounded-full animate-grow shadow-[inset_0_-2px_4px_rgba(0,0,0,0.2)] absolute left-0 top-0"
                       style={{ width: `${persentaseLaki}%` }}
                     >
-                      <div className="absolute inset-0 bg-white/20 w-full h-full" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)', transform: 'skewX(-20deg)', animation: 'slideRight 2s infinite linear' }}></div>
+                      <div className="absolute inset-0 w-full h-full" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)', transform: 'skewX(-20deg)', animation: 'slideRight 2s infinite linear' }}></div>
                     </div>
                   </div>
                 </div>
@@ -3371,25 +3303,27 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                 <div>
                   <div className="flex justify-between items-end mb-3">
                     <div className="flex items-center">
-                      <div className="w-12 h-12 bg-rose-100 text-rose-500 rounded-2xl flex justify-center items-center mr-4 shadow-inner">
+                      <div className="w-12 h-12 bg-rose-50 text-rose-500 rounded-2xl flex justify-center items-center mr-4 shadow-sm border border-rose-100">
                         <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                            <path d="M12 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z"></path><path d="M12 13v8"></path><path d="M9 18h6"></path>
                         </svg>
                       </div>
                       <div>
                         <h4 className="text-2xl font-extrabold text-gray-900 tracking-tight">Perempuan</h4>
-                        <span className="text-rose-500 font-bold text-sm bg-rose-50 px-2 py-0.5 rounded-md mt-1 inline-block border border-rose-100">{persentasePerempuan}%</span>
+                        <span className="text-rose-500 font-bold text-sm bg-rose-50 px-2 py-0.5 rounded-md mt-1 inline-block border border-rose-100 shadow-sm">{persentasePerempuan}%</span>
                       </div>
                     </div>
-                    <div className="text-3xl font-black text-gray-800">{dataGrafik.perempuan.toLocaleString('id-ID')}</div>
+                    <div className="text-3xl font-black text-gray-800">
+                      <AnimatedNumber value={dataGrafik.perempuan} duration={2000} />
+                    </div>
                   </div>
                   
-                  <div className="w-full bg-gray-100 h-6 rounded-full overflow-hidden shadow-inner border border-gray-200">
+                  <div className="w-full bg-gray-100 h-6 rounded-full overflow-hidden shadow-inner border border-gray-200 relative">
                     <div 
-                      className="bg-gradient-to-r from-rose-400 to-rose-500 h-full rounded-full animate-grow relative"
+                      className="bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 h-full rounded-full animate-grow shadow-[inset_0_-2px_4px_rgba(0,0,0,0.2)] absolute left-0 top-0"
                       style={{ width: `${persentasePerempuan}%` }}
                     >
-                      <div className="absolute inset-0 bg-white/20 w-full h-full" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)', transform: 'skewX(-20deg)', animation: 'slideRight 2s infinite linear' }}></div>
+                      <div className="absolute inset-0 w-full h-full" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)', transform: 'skewX(-20deg)', animation: 'slideRight 2s infinite linear' }}></div>
                     </div>
                   </div>
                 </div>
@@ -3408,7 +3342,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
       </div>
 
       {showEditorBerita && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto border border-emerald-100 animate-in zoom-in-95">
             <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-100 sticky top-0 bg-white z-10">
               <h3 className="text-2xl font-extrabold text-gray-900 flex items-center">
@@ -3430,7 +3364,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                     type="text" required
                     value={editDataBerita.judul}
                     onChange={(e) => setEditDataBerita({...editDataBerita, judul: e.target.value})}
-                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" 
+                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
                   />
                 </div>
                 <div>
@@ -3439,7 +3373,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                     required
                     value={editDataBerita.kategori}
                     onChange={(e) => setEditDataBerita({...editDataBerita, kategori: e.target.value})}
-                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium"
+                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium"
                   >
                     <option value="">Pilih Kategori</option>
                     <option value="Sosial">Sosial</option>
@@ -3455,7 +3389,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                     type="text" required placeholder="Contoh: 15 Okt 2024"
                     value={editDataBerita.tanggal}
                     onChange={(e) => setEditDataBerita({...editDataBerita, tanggal: e.target.value})}
-                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" 
+                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
                   />
                 </div>
 
@@ -3485,11 +3419,10 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                     required rows={8}
                     value={editDataBerita.excerpt}
                     onChange={(e) => setEditDataBerita({...editDataBerita, excerpt: e.target.value})}
-                    className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium leading-relaxed" 
+                    className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium leading-relaxed" 
                   ></textarea>
                 </div>
 
-                {/* GALERI TAMBAHAN */}
                 <div className="col-span-full border-t border-gray-200 pt-6">
                   <label className="block text-sm font-bold text-gray-700 mb-3">Foto Tambahan (Opsional - Muncul Dalam Isi Berita)</label>
                   <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200">
@@ -3509,7 +3442,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                                 <select 
                                   value={g.posisi} 
                                   onChange={(e) => ubahPosisiGaleri(g.id, e.target.value)}
-                                  className="w-full pl-4 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-emerald-500 appearance-none"
+                                  className="w-full pl-4 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-teal-500 appearance-none"
                                 >
                                   <option value="atas">Paling Atas (Di Bawah Judul)</option>
                                   <option value="kiri">Kiri (Teks Mengalir di Kanan)</option>
@@ -3549,7 +3482,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
 
       {/* MODAL EDITOR GRAFIK */}
       {showEditorGrafik && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-in zoom-in-95 border border-emerald-100">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-extrabold text-gray-900 flex items-center tracking-tight">
@@ -3568,7 +3501,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                   type="number" required min="0"
                   value={editDataGrafik.lakiLaki}
                   onChange={(e) => setEditDataGrafik({...editDataGrafik, lakiLaki: e.target.value})}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium" 
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 font-medium" 
                 />
               </div>
               <div>
@@ -3577,7 +3510,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                   type="number" required min="0"
                   value={editDataGrafik.perempuan}
                   onChange={(e) => setEditDataGrafik({...editDataGrafik, perempuan: e.target.value})}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium" 
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 font-medium" 
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -3587,7 +3520,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                     type="number" required
                     value={editDataGrafik.tahun}
                     onChange={(e) => setEditDataGrafik({...editDataGrafik, tahun: e.target.value})}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium" 
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 font-medium" 
                   />
                 </div>
                 <div>
@@ -3596,7 +3529,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                     type="text" required placeholder="Contoh: Desember"
                     value={editDataGrafik.updateTerakhir}
                     onChange={(e) => setEditDataGrafik({...editDataGrafik, updateTerakhir: e.target.value})}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium" 
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 font-medium" 
                   />
                 </div>
               </div>
@@ -3623,9 +3556,9 @@ function HalamanKontak() {
       <div className="container mx-auto px-4 lg:px-8">
         
         <div className="text-center mb-16">
-          <span className="text-emerald-600 font-bold tracking-widest uppercase text-sm mb-2 block">Hubungi Kami</span>
+          <span className="text-teal-600 font-bold tracking-widest uppercase text-sm mb-2 block">Hubungi Kami</span>
           <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">Kontak & Layanan</h2>
-          <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-600 to-emerald-400 mx-auto rounded-full"></div>
+          <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-600 to-teal-400 mx-auto rounded-full"></div>
           <p className="mt-6 text-gray-600 max-w-2xl mx-auto text-lg leading-relaxed">
             Kami siap melayani Anda. Kunjungi kantor desa atau hubungi kami melalui kontak yang tersedia untuk informasi lebih lanjut.
           </p>
@@ -3634,9 +3567,9 @@ function HalamanKontak() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {/* Informasi Kontak */}
           <div className="space-y-8">
-            <div className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100 flex items-start hover:shadow-2xl transition-shadow duration-300 group">
-              <div className="bg-emerald-100 p-4 rounded-2xl mr-6 group-hover:bg-emerald-600 transition-colors duration-300">
-                <MapPin className="w-8 h-8 text-emerald-600 group-hover:text-white transition-colors duration-300" />
+            <div className="bg-white p-8 rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-gray-100 flex items-start hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] transition-shadow duration-300 group">
+              <div className="bg-teal-50 border border-teal-100 p-4 rounded-2xl mr-6 group-hover:bg-teal-600 transition-colors duration-300">
+                <MapPin className="w-8 h-8 text-teal-600 group-hover:text-white transition-colors duration-300" />
               </div>
               <div>
                 <h3 className="text-xl font-extrabold text-gray-900 mb-3">Alamat Kantor</h3>
@@ -3644,9 +3577,9 @@ function HalamanKontak() {
               </div>
             </div>
 
-            <div className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100 flex items-start hover:shadow-2xl transition-shadow duration-300 group">
-              <div className="bg-emerald-100 p-4 rounded-2xl mr-6 group-hover:bg-emerald-600 transition-colors duration-300">
-                <Phone className="w-8 h-8 text-emerald-600 group-hover:text-white transition-colors duration-300" />
+            <div className="bg-white p-8 rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-gray-100 flex items-start hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] transition-shadow duration-300 group">
+              <div className="bg-teal-50 border border-teal-100 p-4 rounded-2xl mr-6 group-hover:bg-teal-600 transition-colors duration-300">
+                <Phone className="w-8 h-8 text-teal-600 group-hover:text-white transition-colors duration-300" />
               </div>
               <div>
                 <h3 className="text-xl font-extrabold text-gray-900 mb-3">Telepon / WhatsApp</h3>
@@ -3654,9 +3587,9 @@ function HalamanKontak() {
               </div>
             </div>
 
-            <div className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100 flex items-start hover:shadow-2xl transition-shadow duration-300 group">
-              <div className="bg-emerald-100 p-4 rounded-2xl mr-6 group-hover:bg-emerald-600 transition-colors duration-300">
-                <Mail className="w-8 h-8 text-emerald-600 group-hover:text-white transition-colors duration-300" />
+            <div className="bg-white p-8 rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-gray-100 flex items-start hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] transition-shadow duration-300 group">
+              <div className="bg-teal-50 border border-teal-100 p-4 rounded-2xl mr-6 group-hover:bg-teal-600 transition-colors duration-300">
+                <Mail className="w-8 h-8 text-teal-600 group-hover:text-white transition-colors duration-300" />
               </div>
               <div>
                 <h3 className="text-xl font-extrabold text-gray-900 mb-3">Email</h3>
@@ -3680,8 +3613,8 @@ function HalamanKontak() {
               />
               <div className="absolute inset-0 bg-gray-900/40 group-hover:bg-gray-900/60 transition-colors duration-300 flex flex-col items-center justify-center">
                  <div className="transform transition-transform duration-300 group-hover:-translate-y-2">
-                   <div className="bg-white p-4 rounded-full shadow-2xl mb-4 group-hover:shadow-[0_0_30px_rgba(5,150,105,0.6)] transition-all flex items-center justify-center mx-auto w-16 h-16">
-                     <MapPin className="w-8 h-8 text-emerald-600" />
+                   <div className="bg-white p-4 rounded-full shadow-2xl mb-4 group-hover:shadow-[0_0_30px_rgba(13,148,136,0.6)] transition-all flex items-center justify-center mx-auto w-16 h-16">
+                     <MapPin className="w-8 h-8 text-teal-600" />
                    </div>
                    <span className="font-extrabold text-2xl text-white drop-shadow-lg text-center px-4 block">Lokasi Kantor <br/> Desa Delta Upang</span>
                  </div>
@@ -3702,8 +3635,8 @@ function NavButton({ children, active, onClick, icon }: any) {
       onClick={onClick}
       className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
         active 
-          ? 'bg-white text-emerald-900 shadow-md' 
-          : 'text-white hover:bg-white/10 hover:text-white'
+          ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg border border-transparent' 
+          : 'text-gray-200 hover:bg-white/10 hover:text-white border border-transparent'
       }`}
     >
       {icon}
@@ -3718,8 +3651,8 @@ function MobileNavButton({ children, active, onClick }: any) {
       onClick={onClick}
       className={`w-full text-left px-5 py-4 rounded-xl text-lg font-bold transition-all ${
         active 
-          ? 'bg-emerald-800 text-white border-l-4 border-emerald-400 shadow-inner' 
-          : 'text-emerald-100 hover:bg-emerald-800/80 hover:text-white'
+          ? 'bg-gradient-to-r from-emerald-800 to-teal-800 text-white border-l-4 border-teal-400 shadow-inner' 
+          : 'text-emerald-100 hover:bg-emerald-800/50 hover:text-white'
       }`}
     >
       {children}
