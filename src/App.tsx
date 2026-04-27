@@ -592,15 +592,16 @@ export default function App() {
               animation: roll-left 15s linear infinite;
             }
             
-            /* Animasi Marquee Galeri Header */
+            /* Animasi Marquee Galeri Header (Continuous / Seamless Loop) */
             @keyframes scroll-header-gallery {
-              from { transform: translateX(0); }
-              to { transform: translateX(-100%); }
+              0% { transform: translateX(0); }
+              100% { transform: translateX(-50%); } /* Bergeser sejauh 50% karena ada 2 blok persis yang sama */
             }
             .animate-scroll-gallery {
-              animation: scroll-header-gallery 20s linear infinite;
+              /* Membutuhkan 2 blok elemen di dalamnya, container digeser secara linear */
+              animation: scroll-header-gallery 35s linear infinite;
             }
-            .hover-pause:hover .animate-scroll-gallery {
+            .hover-pause:hover {
               animation-play-state: paused;
             }
             .fade-x-edges {
@@ -656,26 +657,33 @@ export default function App() {
               </div>
 
               {/* Right Desktop: Gallery (Top) & Nav (Bottom) */}
-              {/* PERBAIKAN: Menghapus overflow-hidden agar dropdown navigasi profil tidak tertutup (terpotong) layar */}
               <div className="hidden lg:flex flex-col items-end gap-2 xl:gap-3 flex-grow ml-4 xl:ml-8 z-50">
                 
-                {/* NEW FEATURE: Galeri Header Marquee Persis Seperti Referensi */}
+                {/* NEW FEATURE: Galeri Header Marquee (Seamless / Continuous Loop) */}
                 {dataBeranda.galeriHeader && dataBeranda.galeriHeader.length > 0 && (
                    <div className="w-full overflow-hidden max-w-[900px] flex items-center justify-end fade-x-edges">
-                      <div className="flex w-max hover-pause">
-                        {/* Diulang 4 kali agar pergerakan berjalan mulus walau foto hanya sedikit */}
-                        {[1, 2, 3, 4].map((setIndex) => (
-                          <div key={`set-${setIndex}`} className="flex gap-2 animate-scroll-gallery pr-2" aria-hidden={setIndex !== 1}>
-                            {dataBeranda.galeriHeader.map((img: any, idx: number) => (
-                              <img 
-                                key={`img-${setIndex}-${idx}`} 
-                                src={img} 
-                                alt="Galeri Header" 
-                                className="h-[55px] xl:h-[65px] w-28 xl:w-36 object-cover rounded-lg border-[1.5px] border-white/20 shadow-sm flex-shrink-0 cursor-pointer hover:border-emerald-400 hover:scale-105 transition-all duration-300" 
-                              />
-                            ))}
-                          </div>
-                        ))}
+                      <div className="flex w-max hover-pause animate-scroll-gallery">
+                        {/* Kita buat 2 blok identik, parent akan digeser -50% agar mulus tak ada jeda */}
+                        <div className="flex gap-2 pr-2">
+                          {Array(6).fill(dataBeranda.galeriHeader).flat().map((img: any, idx: number) => (
+                            <img 
+                              key={`img-a-${idx}`} 
+                              src={img} 
+                              alt="Galeri Header" 
+                              className="h-[55px] xl:h-[65px] w-28 xl:w-36 object-cover rounded-lg border-[1.5px] border-white/20 shadow-sm flex-shrink-0 cursor-pointer hover:border-emerald-400 hover:scale-105 transition-all duration-300" 
+                            />
+                          ))}
+                        </div>
+                        <div className="flex gap-2 pr-2" aria-hidden="true">
+                          {Array(6).fill(dataBeranda.galeriHeader).flat().map((img: any, idx: number) => (
+                            <img 
+                              key={`img-b-${idx}`} 
+                              src={img} 
+                              alt="Galeri Header" 
+                              className="h-[55px] xl:h-[65px] w-28 xl:w-36 object-cover rounded-lg border-[1.5px] border-white/20 shadow-sm flex-shrink-0 cursor-pointer hover:border-emerald-400 hover:scale-105 transition-all duration-300" 
+                            />
+                          ))}
+                        </div>
                       </div>
                    </div>
                 )}
