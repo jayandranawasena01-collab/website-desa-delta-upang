@@ -200,6 +200,12 @@ const initialBeranda = {
     { id: 2, num: "823", label: "Kepala Keluarga" },
     { id: 3, num: "3", label: "Dusun" },
     { id: 4, num: "16", label: "Rukun Tetangga (RT)" }
+  ],
+  galeriHeader: [
+    { id: 'g1', url: 'https://images.unsplash.com/photo-1593113565694-c6f130d24c3d?w=200&q=80' },
+    { id: 'g2', url: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=200&q=80' },
+    { id: 'g3', url: 'https://images.unsplash.com/photo-1592982537447-6f2a6a0a091c?w=200&q=80' },
+    { id: 'g4', url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=200&q=80' }
   ]
 };
 
@@ -331,8 +337,6 @@ export default function App() {
 
   // ================= FETCH DATA =================
   useEffect(() => {
-    // PENTING: Tunggu hingga Firebase database DAN user auth token (anonymous/custom) tersedia.
-    // Jika tidak, permintaan baca data ini akan diblokir oleh aturan izin (permission denied).
     if (!db || !user) return; 
 
     const handleServerData = (snap: any, stateSetter: any, storageKey: string) => {
@@ -388,7 +392,7 @@ export default function App() {
     return () => {
       unsubBeranda(); unsubBerita(); unsubGrafik(); unsubAgenda(); unsubPerangkat(); unsubLembaga(); unsubProfil();
     };
-  }, [user]); // Dependensi user ditambahkan agar fungsi berjalan HANYA jika terautentikasi
+  }, [user]); 
 
   // ================= UPDATE FUNCTIONS =================
   const updateBeranda = async (newData: any) => {
@@ -477,7 +481,6 @@ export default function App() {
 
     if (page === 'profil' && tabId !== null) {
       setActiveProfilTab(tabId);
-      // Diubah ke string untuk keamanan penyimpanan local storage
       if (typeof window !== 'undefined') localStorage.setItem('delta_upang_activeProfilTab', String(tabId));
     }
     if (page === 'pemerintah' && tabId !== null) {
@@ -529,18 +532,14 @@ export default function App() {
   ];
 
   return (
-    // WRAPPER UTAMA: Lebar penuh layar, gambar latar belakang di set fixed
     <div 
       className="min-h-screen w-full bg-fixed bg-cover bg-center bg-no-repeat bg-gray-100"
       style={{ backgroundImage: `url(${dataBeranda.outerBg || 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'})` }}
     >
-      {/* Overlay Transparan Gelap (Opsional, agar background tidak terlalu mengganggu warna situs) */}
       <div className="fixed inset-0 bg-black/30 pointer-events-none"></div>
 
-      {/* CONTAINER BOXED: Situs web dengan max-width di tengah layar. Hapus overflow-x-hidden agar sticky bekerja sempurna */}
       <div className="max-w-[1440px] mx-auto min-h-screen flex flex-col font-sans bg-gray-50 text-gray-800 relative shadow-[0_0_50px_rgba(0,0,0,0.4)] selection:bg-emerald-200 selection:text-emerald-900">
 
-        {/* Dialog Kustom (Pengganti Alert & Confirm) */}
         {dialog.isOpen && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
             <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 animate-in zoom-in-95 border border-emerald-100">
@@ -586,6 +585,21 @@ export default function App() {
               white-space: nowrap;
               animation: roll-left 15s linear infinite;
             }
+            
+            /* KEYFRAMES UNTUK GALERI HEADER (SCROLLING MEMUTAR) */
+            @keyframes scroll-gallery-header {
+              0% { transform: translateX(0); }
+              100% { transform: translateX(-50%); }
+            }
+            .animate-scroll-gallery {
+              display: flex;
+              width: max-content;
+              animation: scroll-gallery-header 15s linear infinite;
+            }
+            .animate-scroll-gallery:hover {
+              animation-play-state: paused;
+            }
+
             .custom-scrollbar::-webkit-scrollbar {
               height: 12px;
             }
@@ -612,10 +626,16 @@ export default function App() {
         {/* Header & Navbar */}
         <header className="bg-gradient-to-r from-emerald-900 to-emerald-800 text-white sticky top-0 z-50 shadow-xl border-b border-emerald-700">
           <div className="container mx-auto px-4 lg:px-8">
-            <div className="flex justify-between items-center py-3">
-              {/* Logo - Kontainer dan fallback icon diperbesar ukurannya */}
+            {/* Perubahan Tata Letak Header:
+               - Logo di kiri.
+               - Menu Navigasi di tengah (disembunyikan di layar kecil).
+               - Galeri Berputar (Infinite Scroll) di Pojok Kanan Atas beserta tombol admin.
+            */}
+            <div className="flex justify-between items-center py-3 w-full">
+              
+              {/* KIRI: Logo */}
               <div 
-                className="flex items-center gap-4 cursor-pointer group"
+                className="flex items-center gap-4 cursor-pointer group flex-shrink-0"
                 onClick={() => navigateTo('beranda')}
               >
                 <div className="bg-white/10 backdrop-blur-sm p-1.5 rounded-xl border border-white/20 group-hover:bg-white transition duration-300 w-16 h-16 md:w-20 md:h-20 flex items-center justify-center overflow-hidden flex-shrink-0">
@@ -626,14 +646,14 @@ export default function App() {
                   )}
                 </div>
                 <div className="hidden sm:block">
-                  <h1 className="text-2xl font-extrabold tracking-tight leading-none drop-shadow-md">Desa Delta Upang</h1>
-                  <p className="text-xs text-emerald-200 font-medium mt-1 tracking-wide">Kec. Makarti Jaya, Kab Banyuasin</p>
-                  <p className="text-xs text-emerald-200 font-medium mt-1 tracking-wide">Provinsi Sumatera Selatan</p>
+                  <h1 className="text-xl md:text-2xl font-extrabold tracking-tight leading-none drop-shadow-md whitespace-nowrap">Desa Delta Upang</h1>
+                  <p className="text-[10px] md:text-xs text-emerald-200 font-medium mt-1 tracking-wide whitespace-nowrap">Kec. Makarti Jaya, Kab Banyuasin</p>
+                  <p className="text-[10px] md:text-xs text-emerald-200 font-medium mt-1 tracking-wide whitespace-nowrap">Provinsi Sumatera Selatan</p>
                 </div>
               </div>
 
-              {/* Desktop Navigation */}
-              <nav className="hidden lg:flex space-x-1 items-center bg-black/20 p-1.5 rounded-2xl backdrop-blur-md border border-white/10">
+              {/* TENGAH: Desktop Navigation */}
+              <nav className="hidden xl:flex space-x-1 items-center bg-black/20 p-1.5 rounded-2xl backdrop-blur-md border border-white/10 flex-shrink-0">
                 <NavButton active={currentPage === 'beranda'} onClick={() => navigateTo('beranda')} icon={<Home className="w-4 h-4 mr-2" />}>Beranda</NavButton>
                 
                 {/* Dropdown Profil Desa */}
@@ -793,49 +813,55 @@ export default function App() {
                 </div>
 
                 <NavButton active={currentPage === 'kontak'} onClick={() => navigateTo('kontak')} icon={<Phone className="w-4 h-4 mr-2" />}>Kontak</NavButton>
-                
-                {/* Tombol Admin Panel */}
-                <div className="pl-2 ml-1 border-l border-white/20 flex items-center gap-2">
-                  {isAdmin ? (
-                    <>
-                      <button onClick={handleLogout} className="flex items-center text-sm font-bold bg-rose-500 hover:bg-rose-600 text-white px-5 py-2.5 rounded-xl transition shadow-[0_0_15px_rgba(244,63,94,0.4)]">
-                        <LogOut className="w-4 h-4 mr-2" /> Keluar
-                      </button>
-                    </>
-                  ) : (
-                    <button onClick={() => setShowLoginModal(true)} className="flex items-center text-sm font-bold bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-xl transition border border-white/10">
-                      <LogIn className="w-4 h-4 mr-2" /> Admin
-                    </button>
-                  )}
-                </div>
               </nav>
 
-              {/* Mobile Menu Toggle & Admin */}
-              <div className="lg:hidden flex items-center gap-2">
-                 {isAdmin ? (
-                    <>
-                      <button onClick={handleLogout} className="p-2.5 bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.4)] rounded-xl text-white" title="Keluar">
-                        <LogOut className="w-5 h-5" />
-                      </button>
-                    </>
-                  ) : (
-                    <button onClick={() => setShowLoginModal(true)} className="p-2.5 bg-white/10 border border-white/20 rounded-xl text-white">
-                      <LogIn className="w-5 h-5" />
-                    </button>
-                  )}
+              {/* KANAN: Galeri Berjalan & Tombol Admin/Mobile Menu */}
+              <div className="flex items-center gap-3 flex-shrink-0 justify-end">
+                
+                {/* GALERI POJOK KANAN (Tampil di layar menengah ke atas) */}
+                {(dataBeranda.galeriHeader && dataBeranda.galeriHeader.length > 0) && (
+                  <div className="hidden lg:flex w-[260px] h-[64px] bg-black/20 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden relative items-center shadow-inner group">
+                    {/* Saat disorot (hover), animasi otomatis berhenti karena properti pause di CSS */}
+                    <div className="animate-scroll-gallery gap-2 px-2 items-center h-full flex cursor-pointer">
+                      {/* Array digabungkan menjadi dua (duplicate) agar infinite scroll seamless tanpa putus */}
+                      {[...dataBeranda.galeriHeader, ...dataBeranda.galeriHeader].map((img: any, idx: number) => (
+                        <img 
+                          key={idx} 
+                          src={img.url} 
+                          alt="Galeri Desa" 
+                          className="w-[48px] h-[48px] rounded-lg object-cover flex-shrink-0 border border-white/20 shadow-sm" 
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Tombol Login Admin Desktop & Mobile */}
+                {isAdmin ? (
+                  <button onClick={handleLogout} className="flex items-center p-2.5 xl:px-5 xl:py-2.5 text-sm font-bold bg-rose-500 hover:bg-rose-600 text-white rounded-xl transition shadow-[0_0_15px_rgba(244,63,94,0.4)]" title="Keluar">
+                    <LogOut className="w-5 h-5 xl:mr-2 xl:w-4 xl:h-4" /> <span className="hidden xl:block">Keluar</span>
+                  </button>
+                ) : (
+                  <button onClick={() => setShowLoginModal(true)} className="flex items-center p-2.5 xl:px-5 xl:py-2.5 text-sm font-bold bg-white/10 hover:bg-white/20 text-white rounded-xl transition border border-white/10" title="Admin">
+                    <LogIn className="w-5 h-5 xl:mr-2 xl:w-4 xl:h-4" /> <span className="hidden xl:block">Admin</span>
+                  </button>
+                )}
+                
+                {/* Mobile Menu Hamburger */}
                 <button 
-                  className="p-2.5 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition"
+                  className="xl:hidden p-2.5 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition"
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 >
                   {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
                 </button>
               </div>
+
             </div>
           </div>
 
           {/* Mobile Navigation */}
           {isMobileMenuOpen && (
-            <div className="lg:hidden bg-emerald-950/95 backdrop-blur-xl border-t border-white/10">
+            <div className="xl:hidden bg-emerald-950/95 backdrop-blur-xl border-t border-white/10">
               <div className="flex flex-col px-4 pt-2 pb-4 space-y-2">
                 <MobileNavButton active={currentPage === 'beranda'} onClick={() => navigateTo('beranda')}>Beranda</MobileNavButton>
                 
@@ -1106,7 +1132,7 @@ export default function App() {
         )}
       </div>
 
-      {/* Modal Login Elegan (Berada di luar Box Container tapi tetap Fixed di Layar) */}
+      {/* Modal Login Elegan */}
       {showLoginModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 animate-in zoom-in-95 duration-300 border border-emerald-100">
@@ -1170,6 +1196,28 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
   
   const [showEditorAgenda, setShowEditorAgenda] = useState(false);
   const [editDataAgenda, setEditDataAgenda] = useState<any>({ id: null, judul: '', lokasi: '', tanggal: '' });
+
+  // Fungsi khusus Galeri Header (Memaksimalkan kompresi untuk menjamin file < 500kb)
+  const handleGaleriHeaderUpload = (e: any) => {
+    const files = Array.from(e.target.files);
+    files.forEach((file: any) => {
+      // Menggunakan lebar maksimal 600px untuk memastikan ukuran sangat kecil (< 500kb)
+      compressImage(file, 600, false, (base64: any) => {
+         setEditForm((prev: any) => ({
+           ...prev,
+           galeriHeader: [...(prev.galeriHeader || []), { id: Date.now() + Math.random(), url: base64 }]
+         }));
+      });
+    });
+    e.target.value = '';
+  };
+
+  const hapusGaleriHeader = (id: any) => {
+    setEditForm((prev: any) => ({
+      ...prev,
+      galeriHeader: (prev.galeriHeader || []).filter((g: any) => g.id !== id)
+    }));
+  };
 
   const handleOuterBgChange = (e: any) => {
     const file = e.target.files[0];
@@ -1268,33 +1316,16 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
   const currentDay = today.getDate();
   const [infoTanggal, setInfoTanggal] = useState<{tanggal: string, keterangan: string} | null>(null);
 
-  const handlePrevYear = () => {
-    setCurrentYear(currentYear - 1);
-    setInfoTanggal(null);
-  };
-
-  const handleNextYear = () => {
-    setCurrentYear(currentYear + 1);
-    setInfoTanggal(null);
-  };
-
+  const handlePrevYear = () => { setCurrentYear(currentYear - 1); setInfoTanggal(null); };
+  const handleNextYear = () => { setCurrentYear(currentYear + 1); setInfoTanggal(null); };
   const handlePrevMonth = () => {
-    if (currentMonth === 0) {
-      setCurrentMonth(11);
-      setCurrentYear(currentYear - 1);
-    } else {
-      setCurrentMonth(currentMonth - 1);
-    }
+    if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(currentYear - 1); } 
+    else { setCurrentMonth(currentMonth - 1); }
     setInfoTanggal(null);
   };
-
   const handleNextMonth = () => {
-    if (currentMonth === 11) {
-      setCurrentMonth(0);
-      setCurrentYear(currentYear + 1);
-    } else {
-      setCurrentMonth(currentMonth + 1);
-    }
+    if (currentMonth === 11) { setCurrentMonth(0); setCurrentYear(currentYear + 1); } 
+    else { setCurrentMonth(currentMonth + 1); }
     setInfoTanggal(null);
   };
 
@@ -1305,32 +1336,22 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
   const dayNames = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
   const calendarDays = [];
-  for (let i = 0; i < firstDayOfMonth; i++) {
-    calendarDays.push(null);
-  }
-  for (let i = 1; i <= daysInMonth; i++) {
-    calendarDays.push(i);
-  }
+  for (let i = 0; i < firstDayOfMonth; i++) calendarDays.push(null);
+  for (let i = 1; i <= daysInMonth; i++) calendarDays.push(i);
 
-  // Filter agenda untuk bulan ini (disortir berdasarkan tanggal)
   const agendaBulanIni = daftarAgenda.filter((a: any) => {
     if (!a.tanggal) return false;
     const d = new Date(a.tanggal);
     return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
   }).sort((a: any, b: any) => new Date(a.tanggal).getTime() - new Date(b.tanggal).getTime());
 
-  // Fungsi Deteksi Hari Libur Nasional & Keagamaan
   const getHolidays = (d: number, m: number, y: number) => {
     const holidays = [];
-    
-    // Libur Statis (Tanggal Pasti Setiap Tahun)
     if (d === 1 && m === 0) holidays.push("Tahun Baru Masehi");
     if (d === 1 && m === 4) holidays.push("Hari Buruh Internasional");
     if (d === 1 && m === 5) holidays.push("Hari Lahir Pancasila");
     if (d === 17 && m === 7) holidays.push("Hari Kemerdekaan RI");
     if (d === 25 && m === 11) holidays.push("Hari Raya Natal");
-    
-    // Prediksi/Jadwal Libur Dinamis Keagamaan (Contoh hardcode untuk 2024 - 2026)
     if (y === 2024) {
       if (d === 8 && m === 1) holidays.push("Isra Mikraj Nabi Muhammad SAW");
       if (d === 10 && m === 1) holidays.push("Tahun Baru Imlek");
@@ -1342,31 +1363,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
       if (d === 17 && m === 5) holidays.push("Hari Raya Idul Adha");
       if (d === 7 && m === 6) holidays.push("Tahun Baru Islam");
       if (d === 16 && m === 8) holidays.push("Maulid Nabi Muhammad SAW");
-    } else if (y === 2025) {
-      if (d === 27 && m === 0) holidays.push("Isra Mikraj Nabi Muhammad SAW");
-      if (d === 29 && m === 0) holidays.push("Tahun Baru Imlek");
-      if (d === 29 && m === 2) holidays.push("Hari Suci Nyepi");
-      if ((d === 31 && m === 2) || (d === 1 && m === 3)) holidays.push("Hari Raya Idul Fitri");
-      if (d === 18 && m === 3) holidays.push("Wafat Isa Almasih");
-      if (d === 12 && m === 4) holidays.push("Hari Raya Waisak");
-      if (d === 29 && m === 4) holidays.push("Kenaikan Isa Almasih");
-      if (d === 6 && m === 5) holidays.push("Hari Raya Idul Adha");
-      if (d === 26 && m === 5) holidays.push("Tahun Baru Islam");
-      if (d === 5 && m === 8) holidays.push("Maulid Nabi Muhammad SAW");
-    } else if (y === 2026) {
-      if (d === 16 && m === 0) holidays.push("Isra Mikraj Nabi Muhammad SAW");
-      if (d === 17 && m === 0) holidays.push("Tahun Baru Imlek");
-      if (d === 19 && m === 2) holidays.push("Hari Suci Nyepi");
-      if (d === 20 && m === 2) holidays.push("Hari Raya Idul Fitri");
-      if (d === 21 && m === 2) holidays.push("Hari Raya Idul Fitri");
-      if (d === 3 && m === 3) holidays.push("Wafat Isa Almasih");
-      if (d === 14 && m === 4) holidays.push("Kenaikan Isa Almasih");
-      if (d === 31 && m === 4) holidays.push("Hari Raya Waisak");
-      if (d === 27 && m === 4) holidays.push("Hari Raya Idul Adha");
-      if (d === 16 && m === 5) holidays.push("Tahun Baru Islam");
-      if (d === 25 && m === 7) holidays.push("Maulid Nabi Muhammad SAW");
     }
-
     return holidays;
   };
 
@@ -1490,7 +1487,6 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-8 text-center">
             {dataBeranda.stats.map((stat: any) => {
-              // --- SINKRONISASI DATA GRAFIK KE TOTAL PENDUDUK ---
               let displayNum = stat.num;
               let displayLaki = stat.subLaki;
               let displayPerempuan = stat.subPerempuan;
@@ -1536,7 +1532,6 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
           </div>
 
           <div className="max-w-5xl mx-auto flex flex-col lg:flex-row gap-10 lg:gap-16">
-            {/* Tampilan Kalender (Kiri) */}
             <div className="w-full lg:w-1/2 bg-white rounded-3xl shadow-[0_15px_40px_rgba(0,0,0,0.08)] border border-gray-100 p-6 sm:p-8 flex flex-col relative overflow-hidden">
               <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100">
                 <div className="flex items-center">
@@ -1564,20 +1559,15 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
               <div className="grid grid-cols-7 gap-2 sm:gap-4 flex-grow content-start">
                 {calendarDays.map((day, idx) => {
                   const isToday = day === currentDay && currentMonth === today.getMonth() && currentYear === today.getFullYear();
-                  
-                  // Deteksi Agenda
                   const agendaHariIni = daftarAgenda.filter((a: any) => {
                     if(!a.tanggal) return false;
                     const d = new Date(a.tanggal);
                     return d.getDate() === day && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
                   });
                   const hasAgenda = agendaHariIni.length > 0;
-                  
-                  // Deteksi Hari Minggu & Libur Nasional
                   const isSunday = (idx % 7) === 0;
                   const liburan = day ? getHolidays(day, currentMonth, currentYear) : [];
                   const isHoliday = liburan.length > 0;
-
                   const isRedDay = isHoliday || isSunday;
 
                   return (
@@ -1625,7 +1615,6 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                 })}
               </div>
 
-              {/* Kotak Info Tanggal (Muncul Jika Tanggal Diklik) */}
               {infoTanggal && (
                 <div className="mt-6 p-4 bg-emerald-50 border border-emerald-100 rounded-xl flex items-start animate-in fade-in slide-in-from-bottom-2">
                   <Info className="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0 mt-0.5" />
@@ -1639,7 +1628,6 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
               )}
             </div>
 
-            {/* Agenda List (Kanan) */}
             <div className="w-full lg:w-1/2 flex flex-col">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-2xl font-extrabold text-gray-900 flex items-center">
@@ -1711,7 +1699,6 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
             
             <form onSubmit={handleSave} className="space-y-8">
               
-              {/* FITUR BARU: GAMBAR LATAR OUTER (BOXED) */}
               <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
                 <h4 className="font-extrabold text-lg text-emerald-800 mb-4 flex items-center">
                    <span className="w-6 h-1 bg-emerald-500 rounded-full mr-3"></span> Pengaturan Tampilan Situs
@@ -1736,6 +1723,42 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+
+              {/* SECTION BARU: UPLOAD GALERI HEADER */}
+              <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
+                <h4 className="font-extrabold text-lg text-emerald-800 mb-2 flex items-center">
+                   <span className="w-6 h-1 bg-emerald-500 rounded-full mr-3"></span> Galeri Header (Pojok Kanan Atas)
+                </h4>
+                <div className="mb-4 text-sm text-gray-500 font-medium">
+                  Upload foto tanpa batas. Maksimal otomatis dikompres hingga aman (di bawah 500KB) untuk performa web. Gambar akan tampil berjalan memutar tanpa henti (disarankan minimal 4 foto).
+                </div>
+                <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 px-5 py-3 rounded-xl font-bold flex items-center justify-center transition-all shadow-sm w-full mb-5">
+                  <Upload className="w-5 h-5 mr-2" /> Tambah Foto Galeri Header
+                  {/* Atribut multiple agar admin dapat mengunggah banyak foto sekaligus */}
+                  <input type="file" accept="image/*" multiple className="hidden" onChange={handleGaleriHeaderUpload} />
+                </label>
+                
+                <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 gap-3">
+                  {(editForm.galeriHeader || []).map((img: any) => (
+                    <div key={img.id} className="relative group animate-in fade-in zoom-in">
+                      <img src={img.url} className="w-full aspect-square object-cover rounded-xl border border-gray-200 shadow-sm" alt="Galeri" />
+                      <button 
+                        type="button" 
+                        onClick={() => hapusGaleriHeader(img.id)}
+                        className="absolute top-1 right-1 bg-rose-500 hover:bg-rose-600 text-white p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition shadow"
+                        title="Hapus"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                  {(editForm.galeriHeader || []).length === 0 && (
+                    <div className="col-span-full py-6 text-center text-gray-400 font-medium bg-white rounded-xl border border-dashed border-gray-300">
+                      Belum ada foto galeri.
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1880,7 +1903,6 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                   {editForm.stats.map((stat: any, index: number) => {
                     const isPopulasi = stat.id === 1;
                     
-                    // Logic Sinkronisasi Display Input Editor
                     let displayNum = stat.num;
                     let displayLaki = stat.subLaki || '';
                     let displayPerempuan = stat.subPerempuan || '';
@@ -1957,7 +1979,6 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
         </div>
       )}
 
-      {/* Modal Editor Khusus Data Agenda */}
       {showEditorAgenda && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-in zoom-in-95 border border-emerald-100">
@@ -2023,13 +2044,11 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
   useEffect(() => {
     if (initialTabId) {
       setActiveTabId(initialTabId);
-    // Menggunakan perbandingan String() untuk mengatasi konflik tipe data Number vs String dari localStorage
     } else if (daftarProfil.length > 0 && !daftarProfil.find((p: any) => String(p.id) === String(activeTabId))) {
       setActiveTabId(daftarProfil[0].id);
     }
   }, [initialTabId, daftarProfil, activeTabId]);
 
-  // Menggunakan perbandingan String() agar selalu cocok
   const activeProfil = daftarProfil.find((p: any) => String(p.id) === String(activeTabId));
 
   const handleDelete = (id: any) => {
@@ -2329,7 +2348,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
   );
 }
 
-// ============== HALAMAN PEMERINTAHAN (STRUKTUR SOTK PERSIS GAMBAR) ==============
+// ============== HALAMAN PEMERINTAHAN ==============
 function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPerangkat, daftarLembaga, setDaftarLembaga, showConfirm }: any) {
   const isPerangkat = activeTab === 'perangkat' || !activeTab;
   
@@ -2419,24 +2438,17 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
     }
   };
 
-  // ----- PEMISAHAN KATEGORI UNTUK BAGAN STRUKTUR -----
   const kadesList = daftarPerangkat.filter((p: any) => p.jabatan.toUpperCase().includes('KEPALA DESA') || p.jabatan.toUpperCase() === 'KADES');
   const sekdesList = daftarPerangkat.filter((p: any) => p.jabatan.toUpperCase().includes('SEKRETARIS'));
   const kasiList = daftarPerangkat.filter((p: any) => p.jabatan.toUpperCase().includes('KASI'));
   const kaurList = daftarPerangkat.filter((p: any) => p.jabatan.toUpperCase().includes('KAUR'));
   const kasunList = daftarPerangkat.filter((p: any) => p.jabatan.toUpperCase().includes('KASUN') || p.jabatan.toUpperCase().includes('DUSUN'));
 
-  // Logika Tinggi Dinamis Container Berdasarkan Jumlah Kasun
-  const maxKasunPerRow = 6; // Maksimal 6 Kasun per baris sesuai instruksi
+  const maxKasunPerRow = 6; 
   const kasunRowCount = Math.ceil(kasunList.length / maxKasunPerRow);
-  
-  // Jika 0 Kasun, batang putus di garis Kaur (Y=620)
   const trunkHeight = kasunRowCount === 0 ? 360 : 680 + ((kasunRowCount - 1) * 340);
-  
-  // Tinggi Container Dinamis
   const containerHeight = kasunRowCount === 0 ? 950 : 1300 + ((kasunRowCount - 1) * 340);
 
-  // Desain Card Perangkat Persis Screenshot
   const PerangkatCard = ({ p }: any) => (
     <div style={{ width: '160px', height: '260px' }} className="bg-white border-[3px] border-black overflow-hidden relative flex flex-col items-center shadow-lg group z-10">
        {isAdmin && (
@@ -2482,7 +2494,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
           </p>
         </div>
 
-        {/* =========== TAMPILAN PERANGKAT DESA (HIERARKI BAGAN ABSOLUTE) =========== */}
+        {/* =========== TAMPILAN PERANGKAT DESA =========== */}
         {isPerangkat && (
           <div className="animate-in fade-in duration-500 max-w-full">
             {isAdmin && (
@@ -2500,57 +2512,38 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                <div className="col-span-full text-center text-gray-500 py-20 bg-white rounded-3xl border border-dashed border-gray-300 font-medium text-lg max-w-6xl mx-auto">Belum ada data perangkat desa.</div>
             ) : (
               <div className="w-full overflow-x-auto pb-10 custom-scrollbar">
-                {/* Wadah Absolut untuk struktur berjenjang yang presisi */}
                 <div style={{ width: '1300px', height: `${containerHeight}px`, position: 'relative', margin: '0 auto', marginTop: '40px' }} className="bg-white/50 rounded-3xl">
 
-                  {/* --- GARIS PENGHUBUNG (CONNECTOR LINES) --- */}
-                  
-                  {/* Garis BPD ke Kades */}
                   <div style={{ position: 'absolute', left: '330px', top: '120px', width: '240px', borderTop: '4px dashed black', zIndex: 0 }}></div>
-                  
-                  {/* Batang Utama (Trunk) vertikal dari Kades turun ke Kasun */}
                   <div style={{ position: 'absolute', left: '648px', top: '260px', width: '4px', height: `${trunkHeight}px`, backgroundColor: 'black', zIndex: 0 }}></div>
 
-                  {/* Cabang Sekdes (Kanan) */}
                   <div style={{ position: 'absolute', left: '648px', top: '300px', width: '304px', height: '4px', backgroundColor: 'black', zIndex: 0 }}></div>
                   <div style={{ position: 'absolute', left: '948px', top: '300px', width: '4px', height: '20px', backgroundColor: 'black', zIndex: 0 }}></div>
                   
-                  {/* Sambungan bawah Sekdes menuju Kaur */}
                   <div style={{ position: 'absolute', left: '948px', top: '580px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
 
-                  {/* Garis Horizontal Kaur */}
                   <div style={{ position: 'absolute', left: '748px', top: '620px', width: '404px', height: '4px', backgroundColor: 'black', zIndex: 0 }}></div>
-                  {/* Drop Kaur 1, 2, 3 */}
                   <div style={{ position: 'absolute', left: '748px', top: '620px', width: '4px', height: '20px', backgroundColor: 'black', zIndex: 0 }}></div>
                   <div style={{ position: 'absolute', left: '948px', top: '620px', width: '4px', height: '20px', backgroundColor: 'black', zIndex: 0 }}></div>
                   <div style={{ position: 'absolute', left: '1148px', top: '620px', width: '4px', height: '20px', backgroundColor: 'black', zIndex: 0 }}></div>
 
-                  {/* Cabang Kasi (Kiri) */}
                   <div style={{ position: 'absolute', left: '148px', top: '420px', width: '504px', height: '4px', backgroundColor: 'black', zIndex: 0 }}></div>
-                  {/* Drop Kasi 1, 2, 3 */}
                   <div style={{ position: 'absolute', left: '148px', top: '420px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
                   <div style={{ position: 'absolute', left: '348px', top: '420px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
                   <div style={{ position: 'absolute', left: '548px', top: '420px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
 
-
-                  {/* --- KARTU PERANGKAT DESA (NODES) --- */}
-                  
-                  {/* Kotak BPD (Statis) */}
                   <div style={{ position: 'absolute', left: '170px', top: '80px', width: '160px', height: '80px', zIndex: 10 }} className="bg-white border-[3px] border-black flex items-center justify-center font-black text-2xl shadow-lg tracking-widest">
                     BPD
                   </div>
 
-                  {/* Level 1: Kepala Desa */}
                   <div style={{ position: 'absolute', left: '570px', top: '0px', zIndex: 10 }}>
                     {kadesList[0] && <PerangkatCard p={kadesList[0]} />}
                   </div>
 
-                  {/* Level 2: Sekretaris Desa */}
                   <div style={{ position: 'absolute', left: '870px', top: '320px', zIndex: 10 }}>
                     {sekdesList[0] && <PerangkatCard p={sekdesList[0]} />}
                   </div>
 
-                  {/* Level 3: Kasi (Kiri) */}
                   <div style={{ position: 'absolute', left: '70px', top: '460px', zIndex: 10 }}>
                     {kasiList[0] && <PerangkatCard p={kasiList[0]} />}
                   </div>
@@ -2561,7 +2554,6 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                     {kasiList[2] && <PerangkatCard p={kasiList[2]} />}
                   </div>
 
-                  {/* Level 3: Kaur (Kanan) */}
                   <div style={{ position: 'absolute', left: '670px', top: '640px', zIndex: 10 }}>
                     {kaurList[0] && <PerangkatCard p={kaurList[0]} />}
                   </div>
@@ -2572,14 +2564,12 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                     {kaurList[2] && <PerangkatCard p={kaurList[2]} />}
                   </div>
 
-
-                  {/* --- RENDER DINAMIS KEPALA DUSUN --- */}
                   {(() => {
-                    const kasunGap = 200; // Jarak antar kotak kasun (dimodifikasi agar muat 6 kotak)
-                    const baseLineY = 940; // Y-koordinat garis horizontal kasun baris pertama
-                    const baseBoxY = 980; // Y-koordinat kotak kasun baris pertama
-                    const rowHeightSpacing = 340; // Jarak antar baris kasun baru
-                    const centerX = 650; // Titik tengah container
+                    const kasunGap = 200; 
+                    const baseLineY = 940; 
+                    const baseBoxY = 980; 
+                    const rowHeightSpacing = 340; 
+                    const centerX = 650; 
 
                     const rows = [];
                     for (let i = 0; i < kasunList.length; i += maxKasunPerRow) {
@@ -2590,13 +2580,10 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                       const currentLineY = baseLineY + (rowIndex * rowHeightSpacing);
                       const currentBoxY = baseBoxY + (rowIndex * rowHeightSpacing);
                       const count = rowItems.length;
-                      
-                      // Menghitung offset untuk meletakkan kotak presisi di tengah
                       const startOffset = -((count - 1) / 2) * kasunGap;
 
                       return (
                         <React.Fragment key={`kasun-row-${rowIndex}`}>
-                          {/* Garis Horizontal Penghubung (Hanya muncul jika lebih dari 1 kasun di baris tersebut) */}
                           {count > 1 && (
                             <div style={{
                               position: 'absolute',
@@ -2609,12 +2596,10 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                             }}></div>
                           )}
 
-                          {/* Garis Vertikal Drop & Kotak Kasun */}
                           {rowItems.map((kasun: any, idx: number) => {
                             const itemCenterX = centerX + startOffset + (idx * kasunGap);
                             return (
                               <React.Fragment key={`kasun-item-${kasun.id}`}>
-                                {/* Drop Vertikal */}
                                 <div style={{
                                   position: 'absolute',
                                   left: `${itemCenterX - 2}px`,
@@ -2624,8 +2609,6 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                                   backgroundColor: 'black',
                                   zIndex: 0
                                 }}></div>
-                                
-                                {/* Kotak Card Perangkat */}
                                 <div style={{
                                   position: 'absolute',
                                   left: `${itemCenterX - 80}px`,
@@ -2648,7 +2631,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
           </div>
         )}
 
-        {/* =========== TAMPILAN LEMBAGA/LAINNYA (TABEL) =========== */}
+        {/* =========== TAMPILAN LEMBAGA =========== */}
         {!isPerangkat && (
           <div className="animate-in slide-in-from-bottom-4 duration-500 max-w-6xl mx-auto">
             {isAdmin && (
@@ -2777,7 +2760,6 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                         <Upload className="w-5 h-5 mr-2" /> Upload Foto Baru
                         <input type="file" accept="image/*" required={!editDataPerangkat.foto} className="hidden" onChange={handleImageUploadPerangkat} />
                       </label>
-                      <p className="text-sm text-gray-500 mt-3 font-medium">Otomatis dikecilkan agar memori aman.</p>
                     </div>
                   </div>
                 </div>
@@ -2874,7 +2856,6 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                         <Upload className="w-5 h-5 mr-2" /> Upload Foto Baru
                         <input type="file" accept="image/*" className="hidden" onChange={handleImageUploadLembaga} />
                       </label>
-                      <p className="text-sm text-gray-500 mt-2 font-medium">Opsional. Otomatis dikecilkan agar aman.</p>
                     </div>
                   </div>
                 </div>
@@ -2914,7 +2895,6 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
 
   const openEditorBerita = (berita: any = null) => {
     if (berita) {
-      // Pastikan ada property galeri walau dari data lama
       setEditDataBerita({ ...berita, galeri: berita.galeri || [] });
     } else {
       setEditDataBerita({ id: null, judul: '', tanggal: '', kategori: '', excerpt: '', gambar: '', galeri: [] });
@@ -2956,7 +2936,6 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
     }
   };
 
-  // ----- Logika Upload Foto Tambahan (Galeri) -----
   const handleImageTambahanUpload = (e: any) => {
     const files = Array.from(e.target.files);
     files.forEach((file: any) => {
@@ -3005,7 +2984,6 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                    </button>
                 </div>
                 
-                {/* Header Image Utama */}
                 <div className="w-full h-64 md:h-[450px] overflow-hidden bg-gray-200">
                    <img 
                      src={selectedBerita.gambar} 
@@ -3031,7 +3009,6 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                    </h2>
                    <div className="w-20 h-1.5 bg-gradient-to-r from-emerald-500 to-emerald-300 rounded-full mb-10"></div>
                    
-                   {/* Render Konten Beserta Posisi Gambar */}
                    <div className="text-gray-700 text-lg md:text-xl leading-relaxed whitespace-pre-wrap font-medium relative clearfix">
                       {(() => {
                         const galeri = selectedBerita.galeri || [];
@@ -3041,31 +3018,25 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                         const imgKanan = galeri.filter((g: any) => g.posisi === 'kanan');
                         const imgTengah = galeri.filter((g: any) => g.posisi === 'tengah');
 
-                        // Pisahkan paragraf agar gambar tengah bisa disisipkan
                         const paragraphs = selectedBerita.excerpt.split('\n');
 
                         return (
                           <React.Fragment>
-                            {/* Gambar Atas */}
                             {imgAtas.length > 0 && (
                               <div className="w-full flex flex-col gap-4 mb-8">
                                 {imgAtas.map((g: any) => <img key={g.id} src={g.url} alt="Berita Atas" className="w-full rounded-2xl shadow-md object-cover" />)}
                               </div>
                             )}
 
-                            {/* Gambar Kiri (Float) */}
                             {imgKiri.map((g: any) => (
                               <img key={g.id} src={g.url} alt="Berita Kiri" className="w-[45%] md:w-1/3 float-left mr-6 mb-4 rounded-xl shadow-sm object-cover" />
                             ))}
 
-                            {/* Gambar Kanan (Float) */}
                             {imgKanan.map((g: any) => (
                               <img key={g.id} src={g.url} alt="Berita Kanan" className="w-[45%] md:w-1/3 float-right ml-6 mb-4 rounded-xl shadow-sm object-cover" />
                             ))}
 
-                            {/* Text Berita + Sisipan Tengah */}
                             {paragraphs.map((p: string, idx: number) => {
-                              // Tentukan dimana gambar 'tengah' akan muncul. Jika paragraf sedikit, muncul di awal/akhir
                               const isMiddle = paragraphs.length > 1 ? idx === Math.floor(paragraphs.length / 2) : idx === 0;
 
                               return (
@@ -3085,7 +3056,6 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
 
                             <div className="clear-both pt-6"></div>
 
-                            {/* Gambar Bawah */}
                             {imgBawah.length > 0 && (
                               <div className="w-full flex flex-col gap-4 mt-6">
                                 {imgBawah.map((g: any) => <img key={g.id} src={g.url} alt="Berita Bawah" className="w-full rounded-2xl shadow-md object-cover" />)}
@@ -3177,7 +3147,6 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
             )}
           </>
         ) : (
-          /* TAMPILAN GRAFIK PENDUDUK */
           <div className="animate-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto">
             <div className="text-center mb-14">
               <span className="text-emerald-600 font-bold tracking-widest uppercase text-sm mb-2 block">Visualisasi Data</span>
@@ -3203,7 +3172,6 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
               <div className="absolute top-0 left-0 w-32 h-32 bg-emerald-50 rounded-br-full -z-10 opacity-70"></div>
               <div className="absolute bottom-0 right-0 w-40 h-40 bg-amber-50 rounded-tl-full -z-10 opacity-70"></div>
 
-              {/* Left Side: Summary Big Number */}
               <div className="w-full md:w-1/3 text-center md:text-left z-10">
                 <h3 className="text-xl font-bold text-gray-500 mb-2 uppercase tracking-widest flex justify-center md:justify-start items-center">
                   <TrendingUp className="w-5 h-5 mr-2" /> Total Populasi
@@ -3217,10 +3185,8 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                 <p className="text-sm text-gray-400 mt-6 font-medium">Diperbarui: {dataGrafik.updateTerakhir}</p>
               </div>
 
-              {/* Right Side: Awesome Custom CSS Bar Chart */}
               <div className="w-full md:w-2/3 z-10">
                 
-                {/* Laki-Laki Bar */}
                 <div className="mb-8">
                   <div className="flex justify-between items-end mb-3">
                     <div className="flex items-center">
@@ -3247,7 +3213,6 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                   </div>
                 </div>
 
-                {/* Perempuan Bar */}
                 <div>
                   <div className="flex justify-between items-end mb-3">
                     <div className="flex items-center">
@@ -3369,7 +3334,6 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                   ></textarea>
                 </div>
 
-                {/* GALERI TAMBAHAN */}
                 <div className="col-span-full border-t border-gray-200 pt-6">
                   <label className="block text-sm font-bold text-gray-700 mb-3">Foto Tambahan (Opsional - Muncul Dalam Isi Berita)</label>
                   <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200">
@@ -3425,7 +3389,6 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
         </div>
       )}
 
-      {/* Modal Editor Khusus Data Grafik */}
       {showEditorGrafik && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 animate-in zoom-in-95 border border-emerald-100">
@@ -3555,7 +3518,6 @@ function HalamanKontak() {
             </div>
           </div>
 
-          {/* Menambahkan tag tautan (a) untuk membuat peta dapat diklik */}
           <div className="bg-white p-3 rounded-3xl shadow-xl h-full min-h-[500px] border border-gray-100">
             <a 
               href="https://maps.app.goo.gl/YUxS68MLjqc1JLrR6" 
