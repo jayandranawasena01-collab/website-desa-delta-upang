@@ -663,39 +663,39 @@ export default function App() {
               </div>
 
               {/* Right Desktop: Gallery (Top) & Nav (Bottom) */}
-              <div className="hidden lg:flex flex-col items-end gap-2 xl:gap-3 flex-grow ml-4 xl:ml-8 z-50">
-                
-                {/* NEW FEATURE: Galeri Header Marquee (Seamless / Continuous Loop) */}
-                {dataBeranda.galeriHeader && dataBeranda.galeriHeader.length > 0 && (
-                   // Container dibuat selebar pas untuk 4 foto agar persis seperti referensi SS
-                   <div className="flex overflow-hidden fade-x-edges w-[540px] xl:w-[620px] shrink-0 group py-1">
-                      {/* Track 1: Bergeser ke kiri sejauh lebarnya sendiri (-100%) */}
-                      <div className="flex gap-3 pr-3 animate-scroll-gallery w-max">
-                        {expandedGaleri.map((img: any, idx: number) => (
-                          <img 
-                            key={`img-a-${idx}`} 
-                            src={img} 
-                            alt="Galeri Header" 
-                            className="h-[65px] w-[125px] xl:h-[75px] xl:w-[145px] object-cover rounded-xl border-[2px] border-white/20 shadow-md flex-shrink-0 cursor-pointer hover:border-emerald-400 transition-colors duration-300" 
-                          />
-                        ))}
-                      </div>
-                      {/* Track 2: Identik dengan Track 1, langsung mengikuti dari belakang agar tak ada ruang kosong */}
-                      <div className="flex gap-3 pr-3 animate-scroll-gallery w-max" aria-hidden="true">
-                        {expandedGaleri.map((img: any, idx: number) => (
-                          <img 
-                            key={`img-b-${idx}`} 
-                            src={img} 
-                            alt="Galeri Header" 
-                            className="h-[65px] w-[125px] xl:h-[75px] xl:w-[145px] object-cover rounded-xl border-[2px] border-white/20 shadow-md flex-shrink-0 cursor-pointer hover:border-emerald-400 transition-colors duration-300" 
-                          />
-                        ))}
-                      </div>
-                   </div>
-                )}
+              <div className="hidden lg:flex flex-col items-end flex-grow ml-4 xl:ml-8 z-50">
+                <div className="flex flex-col items-stretch gap-2 xl:gap-3 w-max">
+                  {/* NEW FEATURE: Galeri Header Marquee (Seamless / Continuous Loop) */}
+                  {dataBeranda.galeriHeader && dataBeranda.galeriHeader.length > 0 && (
+                     // Container diset w-full agar lebarnya otomatis mengikuti panjang navbar di bawahnya
+                     <div className="flex overflow-hidden fade-x-edges w-full shrink-0 group py-1">
+                        {/* Track 1: Bergeser ke kiri sejauh lebarnya sendiri (-100%) */}
+                        <div className="flex gap-3 pr-3 animate-scroll-gallery w-max">
+                          {expandedGaleri.map((img: any, idx: number) => (
+                            <img 
+                              key={`img-a-${idx}`} 
+                              src={img} 
+                              alt="Galeri Header" 
+                              className="h-[65px] w-[125px] xl:h-[75px] xl:w-[145px] object-cover rounded-xl border-[2px] border-white/20 shadow-md flex-shrink-0 cursor-pointer hover:border-emerald-400 transition-colors duration-300" 
+                            />
+                          ))}
+                        </div>
+                        {/* Track 2: Identik dengan Track 1, langsung mengikuti dari belakang agar tak ada ruang kosong */}
+                        <div className="flex gap-3 pr-3 animate-scroll-gallery w-max" aria-hidden="true">
+                          {expandedGaleri.map((img: any, idx: number) => (
+                            <img 
+                              key={`img-b-${idx}`} 
+                              src={img} 
+                              alt="Galeri Header" 
+                              className="h-[65px] w-[125px] xl:h-[75px] xl:w-[145px] object-cover rounded-xl border-[2px] border-white/20 shadow-md flex-shrink-0 cursor-pointer hover:border-emerald-400 transition-colors duration-300" 
+                            />
+                          ))}
+                        </div>
+                     </div>
+                  )}
 
-                {/* Desktop Navigation */}
-                <nav className="flex space-x-1 items-center bg-black/20 p-1.5 rounded-2xl backdrop-blur-md border border-white/10">
+                  {/* Desktop Navigation */}
+                  <nav className="flex space-x-1 items-center bg-black/20 p-1.5 rounded-2xl backdrop-blur-md border border-white/10">
                   <NavButton active={currentPage === 'beranda'} onClick={() => navigateTo('beranda')} icon={<Home className="w-4 h-4 mr-2" />}>Beranda</NavButton>
                   
                   {/* Dropdown Profil Desa */}
@@ -871,6 +871,7 @@ export default function App() {
                     )}
                   </div>
                 </nav>
+                </div>
               </div>
 
               {/* Mobile Menu Toggle & Admin */}
