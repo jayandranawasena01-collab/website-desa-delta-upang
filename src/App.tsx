@@ -699,25 +699,25 @@ export default function App() {
                 
                 {/* Galeri - Tampil di Mobile, Tablet, Desktop */}
                 {dataBeranda.galeriHeader && dataBeranda.galeriHeader.length > 0 && (
-                   <div className="relative w-full h-[40px] sm:h-[50px] lg:h-[55px] xl:h-[65px] overflow-hidden fade-x-edges rounded-xl group mb-0 lg:mb-2 xl:mb-3">
+                   <div className="relative w-full max-w-[180px] sm:max-w-[250px] md:max-w-[400px] lg:max-w-[600px] xl:max-w-[800px] h-[45px] md:h-[60px] lg:h-[80px] overflow-hidden fade-x-edges rounded-xl lg:rounded-2xl group mb-1 lg:mb-4">
                       <div className="absolute top-0 left-0 h-full flex w-max animate-scroll-gallery hover-pause">
-                        <div className="flex gap-1.5 sm:gap-2 pr-1.5 sm:pr-2 h-full">
+                        <div className="flex gap-2 pr-2 h-full">
                           {expandedGaleri.map((img: any, idx: number) => (
                             <img 
                               key={`img-a-${idx}`} 
                               src={img} 
                               alt="Galeri" 
-                              className="h-full w-[70px] sm:w-[90px] lg:w-[110px] xl:w-[135px] object-cover rounded-lg border border-white/10 shadow-sm cursor-pointer hover:border-teal-400 transition-colors duration-300" 
+                              className="h-full w-[80px] md:w-[110px] lg:w-[150px] object-cover rounded-lg lg:rounded-xl border border-white/10 shadow-sm cursor-pointer hover:border-teal-400 transition-colors duration-300" 
                             />
                           ))}
                         </div>
-                        <div className="flex gap-1.5 sm:gap-2 pr-1.5 sm:pr-2 h-full" aria-hidden="true">
+                        <div className="flex gap-2 pr-2 h-full" aria-hidden="true">
                           {expandedGaleri.map((img: any, idx: number) => (
                             <img 
                               key={`img-b-${idx}`} 
                               src={img} 
                               alt="Galeri" 
-                              className="h-full w-[70px] sm:w-[90px] lg:w-[110px] xl:w-[135px] object-cover rounded-lg border border-white/10 shadow-sm cursor-pointer hover:border-teal-400 transition-colors duration-300" 
+                              className="h-full w-[80px] md:w-[110px] lg:w-[150px] object-cover rounded-lg lg:rounded-xl border border-white/10 shadow-sm cursor-pointer hover:border-teal-400 transition-colors duration-300" 
                             />
                           ))}
                         </div>
