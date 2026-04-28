@@ -677,7 +677,7 @@ export default function App() {
             <div className="flex justify-between items-center py-2 lg:py-3 gap-2 sm:gap-6">
               
               <div 
-                className="flex items-center gap-2 sm:gap-4 cursor-pointer group shrink-0"
+                className="flex items-center gap-2 sm:gap-4 cursor-pointer group shrink-0 min-w-0"
                 onClick={() => navigateTo('beranda')}
               >
                 <div className="bg-white/10 backdrop-blur-md p-1.5 rounded-xl border border-white/20 group-hover:bg-white transition duration-300 w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg">
@@ -687,10 +687,10 @@ export default function App() {
                     <Landmark className="h-8 w-8 md:h-12 md:w-12 text-white group-hover:text-teal-800 transition duration-300" />
                   )}
                 </div>
-                <div className="hidden sm:block">
-                  <h1 className="text-xl md:text-2xl font-extrabold tracking-tight leading-none drop-shadow-md text-transparent bg-clip-text bg-gradient-to-r from-emerald-100 to-white">Desa {dataBeranda.namaDesa}</h1>
-                  <p className="text-[10px] md:text-xs text-teal-200 font-medium mt-1 tracking-wide">Kec. Makarti Jaya, Kab Banyuasin</p>
-                  <p className="text-[10px] md:text-xs text-teal-200 font-medium mt-1 tracking-wide">Provinsi Sumatera Selatan</p>
+                <div className="hidden sm:flex flex-col justify-center min-w-0 pr-2">
+                  <h1 className="text-lg md:text-xl lg:text-2xl font-extrabold tracking-tight leading-tight drop-shadow-md text-transparent bg-clip-text bg-gradient-to-r from-emerald-100 to-white truncate">Desa {dataBeranda.namaDesa}</h1>
+                  <p className="text-[10px] md:text-xs text-teal-200 font-medium mt-0.5 tracking-wide truncate">Kec. Makarti Jaya, Kab Banyuasin</p>
+                  <p className="text-[10px] md:text-xs text-teal-200 font-medium mt-0.5 tracking-wide truncate">Provinsi Sumatera Selatan</p>
                 </div>
               </div>
 
@@ -1127,7 +1127,7 @@ export default function App() {
                   <div className="bg-gradient-to-br from-emerald-500 to-teal-700 p-2.5 rounded-lg shadow-[0_8px_20px_rgba(13,148,136,0.3)]">
                     <Landmark className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-10xl font-bold tracking-tight text-white">Desa Delta Upang</h3>
+                  <h3 className="text-2xl font-bold tracking-tight text-white">Desa Delta Upang</h3>
                 </div>
                 <p className="text-gray-400 leading-relaxed mb-6 font-medium">
                   Website resmi Pemerintah Desa Delta Upang, Kecamatan Makarti Jaya, Kabupaten Banyuasin, Sumatera Selatan. Melayani masyarakat dengan transparansi dan inovasi.
