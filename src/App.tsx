@@ -1127,7 +1127,7 @@ export default function App() {
                   <div className="bg-gradient-to-br from-emerald-500 to-teal-700 p-2.5 rounded-lg shadow-[0_8px_20px_rgba(13,148,136,0.3)]">
                     <Landmark className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold tracking-tight text-white">Desa Delta Upang</h3>
+                  <h3 className="text-10xl font-bold tracking-tight text-white">Desa Delta Upang</h3>
                 </div>
                 <p className="text-gray-400 leading-relaxed mb-6 font-medium">
                   Website resmi Pemerintah Desa Delta Upang, Kecamatan Makarti Jaya, Kabupaten Banyuasin, Sumatera Selatan. Melayani masyarakat dengan transparansi dan inovasi.
