@@ -4,7 +4,7 @@ import {
   MapPin, Mail, ChevronRight, Landmark, ArrowRight,
   LogIn, LogOut, Edit, Trash2, Plus, Image as ImageIcon, Save, Upload, CheckCircle2,
   BookOpen, Target, Map, Building2, ChevronDown, CalendarDays, PieChart, TrendingUp, Activity,
-  ChevronLeft, ChevronsLeft, ChevronsRight
+  ChevronLeft, ChevronsLeft, ChevronsRight, MessageSquare, Inbox, Eye, Send, Paperclip
 } from 'lucide-react';
 
 // ================= FIREBASE CLOUD STORAGE SETUP =================
@@ -261,7 +261,7 @@ export default function App() {
   const [dbError, setDbError] = useState(""); 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // State Active Pages & Tabs disimpan di localStorage agar tidak kembali ke beranda saat refresh
+  // State Active Pages & Tabs
   const [currentPage, setCurrentPage] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('delta_upang_currentPage') || 'beranda';
@@ -308,6 +308,18 @@ export default function App() {
   });
   const [showLoginModal, setShowLoginModal] = useState(false);
 
+  // Modal Pengaduan & Inbox State
+  const [showPengaduanForm, setShowPengaduanForm] = useState(false);
+  const [showInboxAdmin, setShowInboxAdmin] = useState(false);
+  const [selectedPengaduan, setSelectedPengaduan] = useState<any>(null);
+  const [pengaduanForm, setPengaduanForm] = useState({
+    nama: '',
+    wa: '',
+    kategori: '',
+    isi: '',
+    lampiran: ''
+  });
+
   // Custom Modal Alert/Confirm
   const [dialog, setDialog] = useState<any>({ isOpen: false, type: 'alert', message: '', onConfirm: null });
   const showAlert = (message: string) => setDialog({ isOpen: true, type: 'alert', message, onConfirm: null });
@@ -329,6 +341,7 @@ export default function App() {
   const [daftarLembaga, setDaftarLembaga] = useState(() => getInitialData('delta_upang_lembaga', initialLembaga));
   const [daftarProfil, setDaftarProfil] = useState(() => getInitialData('delta_upang_profil', initialProfil));
   const [dataBeranda, setDataBeranda] = useState(() => getInitialData('delta_upang_beranda', initialBeranda));
+  const [daftarPengaduan, setDaftarPengaduan] = useState(() => getInitialData('delta_upang_pengaduan', [])); // State Pengaduan
 
   // ================= MONITORING KONEKSI =================
   useEffect(() => {
@@ -410,33 +423,30 @@ export default function App() {
     const unsubBeranda = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_beranda', 'main'), 
       (snap) => handleServerData(snap, setDataBeranda, 'delta_upang_beranda'), handleServerError
     );
-
     const unsubBerita = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_berita', 'main'), 
       (snap) => handleServerData(snap, setDaftarBerita, 'delta_upang_berita'), handleServerError
     );
-    
     const unsubGrafik = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_grafik', 'main'), 
       (snap) => handleServerData(snap, setDataGrafik, 'delta_upang_grafik'), handleServerError
     );
-
     const unsubAgenda = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_agenda', 'main'), 
       (snap) => handleServerData(snap, setDaftarAgenda, 'delta_upang_agenda'), handleServerError
     );
-
     const unsubPerangkat = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_perangkat', 'main'), 
       (snap) => handleServerData(snap, setDaftarPerangkat, 'delta_upang_perangkat'), handleServerError
     );
-
     const unsubLembaga = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_lembaga', 'main'), 
       (snap) => handleServerData(snap, setDaftarLembaga, 'delta_upang_lembaga'), handleServerError
     );
-
     const unsubProfil = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_profil', 'main'), 
       (snap) => handleServerData(snap, setDaftarProfil, 'delta_upang_profil'), handleServerError
     );
+    const unsubPengaduan = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_pengaduan', 'main'), 
+      (snap) => handleServerData(snap, setDaftarPengaduan, 'delta_upang_pengaduan'), handleServerError
+    );
 
     return () => {
-      unsubBeranda(); unsubBerita(); unsubGrafik(); unsubAgenda(); unsubPerangkat(); unsubLembaga(); unsubProfil();
+      unsubBeranda(); unsubBerita(); unsubGrafik(); unsubAgenda(); unsubPerangkat(); unsubLembaga(); unsubProfil(); unsubPengaduan();
     };
   }, [user]);
 
@@ -450,7 +460,6 @@ export default function App() {
       showAlert("Perubahan disimpan secara LOKAL. Aktifkan koneksi database untuk mensinkronisasi.");
     }
   };
-  
   const updateBerita = async (newData: any) => {
     setDaftarBerita(newData);
     if (typeof window !== 'undefined') localStorage.setItem('delta_upang_berita', JSON.stringify(newData));
@@ -458,7 +467,6 @@ export default function App() {
       try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_berita', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
-  
   const updateGrafik = async (newData: any) => {
     setDataGrafik(newData);
     if (typeof window !== 'undefined') localStorage.setItem('delta_upang_grafik', JSON.stringify(newData));
@@ -466,7 +474,6 @@ export default function App() {
       try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_grafik', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
-
   const updateAgenda = async (newData: any) => {
     setDaftarAgenda(newData);
     if (typeof window !== 'undefined') localStorage.setItem('delta_upang_agenda', JSON.stringify(newData));
@@ -474,7 +481,6 @@ export default function App() {
       try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_agenda', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
-
   const updatePerangkat = async (newData: any) => {
     setDaftarPerangkat(newData);
     if (typeof window !== 'undefined') localStorage.setItem('delta_upang_perangkat', JSON.stringify(newData));
@@ -494,6 +500,13 @@ export default function App() {
     if (typeof window !== 'undefined') localStorage.setItem('delta_upang_profil', JSON.stringify(newData));
     if(db && user) {
       try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_profil', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
+    }
+  };
+  const updatePengaduan = async (newData: any) => {
+    setDaftarPengaduan(newData);
+    if (typeof window !== 'undefined') localStorage.setItem('delta_upang_pengaduan', JSON.stringify(newData));
+    if(db && user) {
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_pengaduan', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
 
@@ -564,6 +577,45 @@ export default function App() {
     showConfirm('Yakin ingin keluar dari sesi Admin?', () => setIsAdmin(false));
   };
 
+  // Handler Pengaduan Form (Upload batas 500kb)
+  const handleLampiranPengaduan = (e: any) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validasi batas 500 KB (500 * 1024 bytes)
+      if (file.size > 500 * 1024) {
+        showAlert("Maaf, ukuran file foto lampiran maksimal 500 KB!");
+        e.target.value = ''; // Reset input file
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event: any) => {
+        setPengaduanForm({ ...pengaduanForm, lampiran: event.target.result });
+      };
+    }
+  };
+
+  const kirimPengaduan = (e: any) => {
+    e.preventDefault();
+    const newAduan = {
+      ...pengaduanForm,
+      id: Date.now(),
+      tanggal: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    };
+    updatePengaduan([newAduan, ...daftarPengaduan]);
+    setShowPengaduanForm(false);
+    setPengaduanForm({ nama: '', wa: '', kategori: '', isi: '', lampiran: '' });
+    showAlert("Pengaduan Anda berhasil dikirim dan akan segera ditindaklanjuti oleh Pemerintah Desa.");
+  };
+
+  const handleDeletePengaduan = (id: any) => {
+    showConfirm('Yakin ingin menghapus data pengaduan ini secara permanen?', () => {
+      updatePengaduan(daftarPengaduan.filter((p: any) => p.id !== id));
+      setSelectedPengaduan(null);
+    });
+  };
+
   const menuPemerintah = [
     { id: 'perangkat', label: 'Perangkat Desa' },
     { id: 'bpd', label: 'BPD' },
@@ -591,7 +643,7 @@ export default function App() {
       <div className="max-w-[1440px] mx-auto min-h-screen flex flex-col font-sans bg-gray-50 text-gray-800 relative shadow-[0_0_60px_rgba(0,0,0,0.6)] selection:bg-teal-200 selection:text-teal-900">
 
         {dialog.isOpen && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[100] p-4">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[200] p-4">
             <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 animate-in zoom-in-95 border border-emerald-100">
               <h3 className="text-xl font-extrabold text-gray-900 mb-4 flex items-center">
                 <Info className="w-6 h-6 mr-2 text-teal-600"/>
@@ -650,6 +702,7 @@ export default function App() {
             }
             .custom-scrollbar::-webkit-scrollbar {
               height: 12px;
+              width: 8px;
             }
             .custom-scrollbar::-webkit-scrollbar-track {
               background: #f1f1f1; 
@@ -1045,23 +1098,35 @@ export default function App() {
         </header>
 
         {isAdmin && (
-          <div className="bg-gradient-to-r from-emerald-100 to-teal-100 text-teal-900 px-4 py-3 text-sm font-medium text-center shadow-md flex flex-col items-center justify-center gap-2 z-30 relative border-b border-teal-200">
+          <div className="bg-gradient-to-r from-emerald-100 to-teal-100 text-teal-900 px-4 py-3 text-sm font-medium text-center shadow-md flex flex-col md:flex-row items-center justify-center gap-2 md:gap-6 z-30 relative border-b border-teal-200">
              <div className="flex items-center gap-2 font-bold">
                <CheckCircle2 className="w-5 h-5 text-teal-600" /> 
                <span>Mode Admin Aktif: Anda dapat mengedit konten website.</span>
              </div>
              
+             {/* Tambahan Menu Khusus Admin untuk Kotak Masuk Pengaduan */}
+             <div className="flex items-center gap-3 w-full md:w-auto">
+               <button onClick={() => setShowInboxAdmin(true)} className="flex-1 md:flex-none flex items-center justify-center bg-white border-2 border-teal-500 hover:bg-teal-50 text-teal-700 px-4 py-1.5 rounded-lg font-extrabold transition shadow-sm relative group">
+                 <Inbox className="w-4 h-4 mr-2 group-hover:animate-bounce" /> 
+                 Kotak Pengaduan 
+                 {daftarPengaduan.length > 0 && (
+                   <span className="ml-2 bg-rose-500 text-white text-xs px-2 py-0.5 rounded-full font-bold shadow-sm">
+                     {daftarPengaduan.length}
+                   </span>
+                 )}
+               </button>
+             </div>
+             
              {!isDbConnected && !dbError && (
                <div className="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-sm">
-                 ⏳ Menghubungkan ke Server / Mode Offline Sementara...
+                 ⏳ Menghubungkan ke Server / Mode Offline...
                </div>
              )}
              {isDbConnected && (
                <div className="bg-emerald-500 text-white border border-emerald-600 px-3 py-1 rounded-full text-xs font-bold shadow-sm">
-                 ✅ Status Database: ONLINE (Tersinkronisasi dengan Server).
+                 ✅ Database ONLINE
                </div>
              )}
-
              {dbError && (
                <div className="bg-rose-200 text-rose-800 border border-rose-400 px-4 py-2 rounded-xl text-xs font-bold w-full max-w-2xl mt-1 text-left sm:text-center shadow-sm">
                  ⚠️ {dbError}
@@ -1176,12 +1241,24 @@ export default function App() {
           </div>
         </footer>
 
+        {/* ================= TOMBOL MENGAMBANG (FLOATING BUTTONS) ================= */}
+        
+        {/* Tombol Pengaduan (Tampil di semua halaman) */}
+        <button
+          onClick={() => setShowPengaduanForm(true)}
+          className={`fixed right-6 z-50 flex items-center justify-center transition-all duration-300 hover:scale-110 animate-in fade-in group ${currentPage === 'kontak' ? 'bottom-24 md:bottom-[110px]' : 'bottom-6 md:bottom-8'} bg-[#e67e80] hover:bg-[#d66e70] text-white px-5 py-3 rounded-full shadow-[0_8px_20px_rgba(230,126,128,0.4)] border-2 border-white`}
+        >
+          <MessageSquare className="w-5 h-5 mr-2 fill-current" />
+          <span className="font-extrabold tracking-wide">Pengaduan</span>
+        </button>
+
+        {/* Tombol WhatsApp (Hanya tampil di halaman kontak) */}
         {currentPage === 'kontak' && (
           <a
             href="https://wa.me/6282268764585"
             target="_blank"
             rel="noopener noreferrer"
-            className="fixed bottom-6 right-6 md:bottom-8 md:right-8 bg-gradient-to-tr from-[#128C7E] to-[#25D366] text-white p-4 rounded-full shadow-[0_10px_30px_rgba(37,211,102,0.5)] hover:shadow-[0_0_40px_rgba(37,211,102,0.8)] z-50 flex items-center justify-center transition-all duration-300 hover:scale-110 animate-in fade-in slide-in-from-bottom-10 group border border-white/20"
+            className="fixed bottom-6 right-6 md:bottom-8 md:right-8 bg-gradient-to-tr from-[#128C7E] to-[#25D366] text-white p-4 rounded-full shadow-[0_10px_30px_rgba(37,211,102,0.5)] hover:shadow-[0_0_40px_rgba(37,211,102,0.8)] z-50 flex items-center justify-center transition-all duration-300 hover:scale-110 animate-in fade-in slide-in-from-bottom-10 group border-2 border-white"
           >
             <svg viewBox="0 0 24 24" className="w-7 h-7 md:w-8 md:h-8 fill-current">
               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.305-.88-.653-1.473-1.46-1.646-1.757-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
@@ -1191,8 +1268,10 @@ export default function App() {
             </span>
           </a>
         )}
+
       </div>
 
+      {/* ================= MODAL LOGIN ADMIN ================= */}
       {showLoginModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[100] p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 animate-in zoom-in-95 duration-300 border border-emerald-100">
@@ -1244,6 +1323,231 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* ================= MODAL FORM PENGADUAN (PENGUNJUNG) ================= */}
+      {showPengaduanForm && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[150] p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-in zoom-in-95 duration-200 relative overflow-hidden flex flex-col max-h-[95vh]">
+            <div className="flex justify-between items-center p-5 border-b border-gray-100 bg-white z-10 sticky top-0 shrink-0">
+               <h3 className="text-lg font-bold text-[#1a202c] flex items-center">
+                 Formulir Pengaduan
+               </h3>
+               <button type="button" onClick={() => setShowPengaduanForm(false)} className="text-gray-400 hover:text-rose-500 transition-colors p-1 rounded-full hover:bg-gray-100">
+                 <X className="w-5 h-5" />
+               </button>
+            </div>
+
+            <div className="overflow-y-auto custom-scrollbar p-6">
+              <form id="formPengaduan" onSubmit={kirimPengaduan} className="space-y-4">
+                <div>
+                  <label className="block text-[13px] font-bold text-[#1a202c] mb-1.5">Nama <span className="text-rose-500">*</span></label>
+                  <input 
+                    type="text" required
+                    value={pengaduanForm.nama}
+                    onChange={(e) => setPengaduanForm({...pengaduanForm, nama: e.target.value})}
+                    placeholder="Masukkan nama Anda"
+                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 transition-all text-sm font-medium outline-none placeholder:font-normal" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-[13px] font-bold text-[#1a202c] mb-1.5">Nomor Telepon/WA <span className="text-rose-500">*</span></label>
+                  <input 
+                    type="text" required
+                    value={pengaduanForm.wa}
+                    onChange={(e) => setPengaduanForm({...pengaduanForm, wa: e.target.value})}
+                    placeholder="Masukkan nomor HP/WhatsApp"
+                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 transition-all text-sm font-medium outline-none placeholder:font-normal" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-[13px] font-bold text-[#1a202c] mb-1.5">Kategori Pengaduan <span className="text-rose-500">*</span></label>
+                  <div className="relative">
+                    <select 
+                      required
+                      value={pengaduanForm.kategori}
+                      onChange={(e) => setPengaduanForm({...pengaduanForm, kategori: e.target.value})}
+                      className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 transition-all text-sm font-medium appearance-none outline-none text-gray-500"
+                    >
+                      <option value="" disabled className="text-gray-400">Pilih kategori pengaduan</option>
+                      <option value="Infrastruktur" className="text-gray-800">Infrastruktur & Pembangunan</option>
+                      <option value="Pelayanan Publik" className="text-gray-800">Pelayanan Publik</option>
+                      <option value="Keamanan & Ketertiban" className="text-gray-800">Keamanan & Ketertiban</option>
+                      <option value="Kebersihan & Lingkungan" className="text-gray-800">Kebersihan & Lingkungan</option>
+                      <option value="Lainnya" className="text-gray-800">Lainnya</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-3 w-4 h-4 text-gray-400 pointer-events-none" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[13px] font-bold text-[#1a202c] mb-1.5">Pengaduan <span className="text-rose-500">*</span></label>
+                  <textarea 
+                    required rows={4}
+                    value={pengaduanForm.isi}
+                    onChange={(e) => setPengaduanForm({...pengaduanForm, isi: e.target.value})}
+                    placeholder="Masukkan kesan, informasi, atau detail aduan Anda"
+                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 transition-all text-sm font-medium outline-none placeholder:font-normal resize-none" 
+                  ></textarea>
+                </div>
+                <div>
+                  <label className="block text-[13px] font-bold text-[#1a202c] mb-1.5">Lampiran <span className="text-gray-400 font-normal ml-1">(Maks 500KB)</span></label>
+                  <div className="relative">
+                    <input 
+                      type="file" 
+                      accept="image/*"
+                      onChange={handleLampiranPengaduan}
+                      id="uploadLampiran"
+                      className="hidden" 
+                    />
+                    <label htmlFor="uploadLampiran" className="flex items-center w-full px-3.5 py-2.5 bg-[#f8fafc] border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors text-sm text-gray-400 font-medium">
+                      <Paperclip className="w-4 h-4 mr-2 text-gray-400" />
+                      {pengaduanForm.lampiran ? <span className="text-teal-600">Foto terpilih. Klik untuk ganti.</span> : "Unggah foto jika ada"}
+                    </label>
+                  </div>
+                  {pengaduanForm.lampiran && (
+                    <div className="mt-3 relative w-full h-32 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
+                      <img src={pengaduanForm.lampiran} alt="Preview Lampiran" className="w-full h-full object-contain" />
+                      <button type="button" onClick={() => setPengaduanForm({...pengaduanForm, lampiran: ''})} className="absolute top-2 right-2 bg-rose-500 text-white p-1 rounded-full shadow-md"><X className="w-4 h-4" /></button>
+                    </div>
+                  )}
+                </div>
+              </form>
+            </div>
+            
+            <div className="p-5 border-t border-gray-100 bg-white flex justify-end shrink-0">
+               <button 
+                 type="submit" 
+                 form="formPengaduan"
+                 className="bg-[#82d85b] hover:bg-[#71cc49] text-white px-6 py-2.5 rounded-lg font-bold flex items-center transition-colors text-sm"
+               >
+                 <Send className="w-4 h-4 mr-2" /> Kirim
+               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL KOTAK MASUK PENGADUAN (KHUSUS ADMIN) ================= */}
+      {showInboxAdmin && isAdmin && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[150] p-4">
+          <div className="bg-gray-50 rounded-3xl shadow-2xl w-full max-w-5xl animate-in zoom-in-95 duration-200 border border-teal-100 flex flex-col h-[90vh] md:h-[80vh] overflow-hidden">
+            
+            <div className="bg-white px-6 py-4 border-b border-gray-200 flex justify-between items-center shadow-sm shrink-0">
+               <h3 className="text-xl font-extrabold text-teal-900 flex items-center">
+                 <div className="bg-teal-100 p-2 rounded-xl mr-3">
+                   <Inbox className="w-5 h-5 text-teal-700" />
+                 </div>
+                 Kotak Masuk Pengaduan 
+                 <span className="ml-3 bg-rose-100 text-rose-600 text-sm px-3 py-0.5 rounded-full border border-rose-200">
+                    Total: {daftarPengaduan.length}
+                 </span>
+               </h3>
+               <button onClick={() => {setShowInboxAdmin(false); setSelectedPengaduan(null);}} className="bg-gray-100 hover:bg-gray-200 text-gray-500 p-2 rounded-full transition-colors">
+                 <X className="w-5 h-5" />
+               </button>
+            </div>
+
+            <div className="flex flex-col md:flex-row flex-grow overflow-hidden relative">
+              
+              {/* Kolom Kiri: Daftar Pesan */}
+              <div className={`w-full md:w-2/5 bg-white border-r border-gray-200 flex flex-col h-full overflow-y-auto custom-scrollbar ${selectedPengaduan ? 'hidden md:flex' : 'flex'}`}>
+                {daftarPengaduan.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full p-8 text-center text-gray-400">
+                    <Inbox className="w-16 h-16 mb-4 opacity-50" />
+                    <p className="font-medium text-lg">Belum ada pengaduan masuk.</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-gray-100">
+                    {daftarPengaduan.map((aduan: any) => (
+                      <div 
+                        key={aduan.id} 
+                        onClick={() => setSelectedPengaduan(aduan)}
+                        className={`p-5 cursor-pointer transition-colors hover:bg-teal-50 border-l-4 ${selectedPengaduan?.id === aduan.id ? 'bg-teal-50/50 border-teal-500' : 'border-transparent'}`}
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                           <span className="font-extrabold text-gray-900 truncate pr-2">{aduan.nama}</span>
+                           <span className="text-[11px] font-bold text-gray-400 shrink-0">{aduan.tanggal.split(' ')[0]} {aduan.tanggal.split(' ')[1]}</span>
+                        </div>
+                        <div className="mb-2">
+                           <span className="inline-block bg-gray-100 text-gray-600 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
+                             {aduan.kategori}
+                           </span>
+                        </div>
+                        <p className="text-sm text-gray-500 line-clamp-2 font-medium">
+                           {aduan.isi}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Kolom Kanan: Detail Pesan */}
+              <div className={`w-full md:w-3/5 bg-gray-50 flex flex-col h-full overflow-y-auto custom-scrollbar ${!selectedPengaduan ? 'hidden md:flex' : 'flex'}`}>
+                {selectedPengaduan ? (
+                  <div className="p-6 md:p-8 animate-in fade-in">
+                     <button onClick={() => setSelectedPengaduan(null)} className="md:hidden flex items-center text-teal-600 font-bold mb-6 text-sm bg-teal-50 py-2 px-4 rounded-lg w-max">
+                        <ChevronLeft className="w-4 h-4 mr-1" /> Kembali ke Daftar
+                     </button>
+                     
+                     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                       <div className="p-6 border-b border-gray-100 flex flex-wrap justify-between gap-4 items-start bg-gray-50/50">
+                         <div>
+                           <h2 className="text-2xl font-extrabold text-gray-900 mb-1">{selectedPengaduan.nama}</h2>
+                           <div className="flex items-center text-teal-700 font-medium text-sm">
+                             <Phone className="w-4 h-4 mr-1.5" /> {selectedPengaduan.wa}
+                           </div>
+                         </div>
+                         <div className="text-right">
+                           <span className="block text-xs font-bold text-gray-400 mb-1">Dikirim pada:</span>
+                           <span className="block text-sm font-medium text-gray-700">{selectedPengaduan.tanggal}</span>
+                         </div>
+                       </div>
+                       
+                       <div className="p-6">
+                         <span className="inline-block bg-teal-100 text-teal-800 font-extrabold text-xs px-3 py-1 rounded-full mb-6 border border-teal-200">
+                           Kategori: {selectedPengaduan.kategori}
+                         </span>
+                         
+                         <h4 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-3">Isi Pengaduan</h4>
+                         <div className="bg-gray-50 p-5 rounded-xl border border-gray-100 text-gray-800 leading-relaxed whitespace-pre-wrap font-medium mb-6">
+                           {selectedPengaduan.isi}
+                         </div>
+
+                         {selectedPengaduan.lampiran && (
+                           <>
+                             <h4 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-3 flex items-center">
+                               <Paperclip className="w-4 h-4 mr-2" /> Lampiran Foto
+                             </h4>
+                             <div className="rounded-xl overflow-hidden border border-gray-200 bg-gray-100 max-w-sm">
+                               <img src={selectedPengaduan.lampiran} alt="Lampiran" className="w-full object-contain" />
+                             </div>
+                           </>
+                         )}
+                       </div>
+                       
+                       <div className="p-5 bg-gray-50 border-t border-gray-100 flex justify-end">
+                          <button 
+                            onClick={() => handleDeletePengaduan(selectedPengaduan.id)}
+                            className="bg-rose-50 hover:bg-rose-500 text-rose-600 hover:text-white px-5 py-2.5 rounded-lg font-bold transition-colors flex items-center shadow-sm border border-rose-200 hover:border-transparent"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" /> Hapus Pengaduan
+                          </button>
+                       </div>
+                     </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full p-8 text-center text-gray-400">
+                    <Eye className="w-16 h-16 mb-4 opacity-50" />
+                    <p className="font-medium text-lg">Pilih pesan di sebelah kiri untuk melihat detail.</p>
+                  </div>
+                )}
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
@@ -3376,93 +3680,99 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">Kategori</label>
-                  <select 
-                    required
-                    value={editDataBerita.kategori}
-                    onChange={(e) => setEditDataBerita({...editDataBerita, kategori: e.target.value})}
-                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium"
-                  >
-                    <option value="">Pilih Kategori</option>
-                    <option value="Sosial">Sosial</option>
-                    <option value="Kegiatan">Kegiatan</option>
-                    <option value="Pemberdayaan">Pemberdayaan</option>
-                    <option value="Pemerintahan">Pemerintahan</option>
-                    <option value="Pengumuman">Pengumuman</option>
-                  </select>
+                  <div className="relative">
+                    <select 
+                      required
+                      value={editDataBerita.kategori}
+                      onChange={(e) => setEditDataBerita({...editDataBerita, kategori: e.target.value})}
+                      className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium appearance-none"
+                    >
+                      <option value="" disabled>Pilih Kategori</option>
+                      <option value="Kegiatan">Kegiatan</option>
+                      <option value="Pembangunan">Pembangunan</option>
+                      <option value="Pemberdayaan">Pemberdayaan</option>
+                      <option value="Sosial">Sosial</option>
+                      <option value="Pengumuman">Pengumuman</option>
+                    </select>
+                    <ChevronDown className="absolute right-4 top-3.5 w-5 h-5 text-gray-400 pointer-events-none" />
+                  </div>
                 </div>
+
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">Tanggal Publikasi</label>
                   <input 
-                    type="text" required placeholder="Contoh: 15 Okt 2024"
+                    type="text" required
                     value={editDataBerita.tanggal}
                     onChange={(e) => setEditDataBerita({...editDataBerita, tanggal: e.target.value})}
+                    placeholder="Contoh: 12 Okt 2024"
                     className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
                   />
                 </div>
 
                 <div className="col-span-full">
-                  <label className="block text-sm font-bold text-gray-700 mb-3">Foto Sampul Utama</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-3">Foto Utama (Thumbnail)</label>
                   <div className="flex items-center gap-5 bg-gray-50 p-4 rounded-2xl border border-gray-200">
                     {editDataBerita.gambar ? (
-                      <img src={editDataBerita.gambar} alt="Preview" className="w-32 h-32 object-cover rounded-xl shadow-sm border border-gray-200" />
+                      <img src={editDataBerita.gambar} alt="Preview" className="w-32 h-20 object-cover rounded-xl shadow-sm border border-gray-200" />
                     ) : (
-                      <div className="w-32 h-32 bg-gray-200 rounded-xl flex items-center justify-center border border-gray-300 border-dashed">
+                      <div className="w-32 h-20 bg-gray-200 rounded-xl flex items-center justify-center border border-gray-300 border-dashed">
                         <ImageIcon className="w-8 h-8 text-gray-400" />
                       </div>
                     )}
                     <div className="flex-1">
                       <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 hover:border-emerald-300 px-5 py-3 rounded-xl font-bold flex items-center justify-center transition-all shadow-sm w-max">
-                        <Upload className="w-5 h-5 mr-2" /> Upload Foto Baru
+                        <Upload className="w-5 h-5 mr-2" /> Upload Foto Utama
                         <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
                       </label>
-                      <p className="text-sm text-gray-500 mt-3 font-medium">Gambar ini akan tampil di daftar berita utama.</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="col-span-full">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Ringkasan / Isi Berita (Gunakan Enter untuk Baris Baru)</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Isi Berita Lengkap (Gunakan enter untuk baris baru)</label>
                   <textarea 
                     required rows={8}
                     value={editDataBerita.excerpt}
                     onChange={(e) => setEditDataBerita({...editDataBerita, excerpt: e.target.value})}
+                    placeholder="Ketikkan isi berita..."
                     className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium leading-relaxed" 
                   ></textarea>
                 </div>
 
-                <div className="col-span-full border-t border-gray-200 pt-6">
-                  <label className="block text-sm font-bold text-gray-700 mb-3">Foto Tambahan (Opsional - Muncul Dalam Isi Berita)</label>
+                <div className="col-span-full">
+                  <label className="block text-sm font-bold text-gray-700 mb-3">Galeri Tambahan (Di dalam berita)</label>
                   <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200">
-                    <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 px-5 py-3 rounded-xl font-bold flex items-center justify-center transition-all shadow-sm w-full">
-                      <Upload className="w-5 h-5 mr-2" /> Pilih Beberapa Foto Tambahan
+                    <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 px-5 py-3 rounded-xl font-bold flex items-center justify-center transition-all shadow-sm w-full mb-4">
+                      <Upload className="w-5 h-5 mr-2" /> Tambah Foto Ke Galeri
                       <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageTambahanUpload} />
                     </label>
                     
-                    {(editDataBerita.galeri && editDataBerita.galeri.length > 0) && (
-                      <div className="space-y-4 mt-5">
-                        {editDataBerita.galeri.map((g: any) => (
-                          <div key={g.id} className="flex items-center gap-4 bg-white p-3 rounded-xl border border-gray-200 shadow-sm animate-in fade-in">
-                            <img src={g.url} alt="Preview Tambahan" className="w-20 h-20 object-cover rounded-lg shadow-sm border border-gray-100" />
-                            <div className="flex-1">
-                              <label className="block text-xs font-bold text-gray-600 mb-1.5">Posisi Foto Terhadap Teks</label>
+                    {editDataBerita.galeri && editDataBerita.galeri.length > 0 && (
+                      <div className="flex flex-col gap-4 mt-4">
+                        {editDataBerita.galeri.map((img: any) => (
+                          <div key={img.id} className="flex flex-col sm:flex-row items-center gap-4 bg-white p-3 rounded-xl border border-gray-200 shadow-sm relative">
+                            <img src={img.url} alt="Galeri" className="w-32 h-20 object-cover rounded-lg border border-gray-200" />
+                            <div className="flex-1 w-full">
+                              <label className="block text-xs font-bold text-gray-500 mb-1">Posisi Gambar</label>
                               <div className="relative">
                                 <select 
-                                  value={g.posisi} 
-                                  onChange={(e) => ubahPosisiGaleri(g.id, e.target.value)}
-                                  className="w-full pl-4 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-teal-500 appearance-none"
+                                  value={img.posisi}
+                                  onChange={(e) => ubahPosisiGaleri(img.id, e.target.value)}
+                                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 appearance-none"
                                 >
-                                  <option value="atas">Paling Atas (Di Bawah Judul)</option>
-                                  <option value="kiri">Kiri (Teks Mengalir di Kanan)</option>
-                                  <option value="kanan">Kanan (Teks Mengalir di Kiri)</option>
-                                  <option value="tengah">Tengah (Di Antara Paragraf)</option>
+                                  <option value="atas">Atas (Sebelum Teks)</option>
+                                  <option value="bawah">Bawah (Setelah Teks)</option>
+                                  <option value="kiri">Melayang Kiri (Float Left)</option>
+                                  <option value="kanan">Melayang Kanan (Float Right)</option>
+                                  <option value="tengah">Tengah (Di sela paragraf)</option>
                                 </select>
                                 <ChevronDown className="absolute right-3 top-2.5 w-4 h-4 text-gray-400 pointer-events-none" />
                               </div>
                             </div>
                             <button 
                               type="button" 
-                              onClick={() => hapusImageGaleri(g.id)}
-                              className="p-2.5 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded-lg transition-colors border border-rose-100"
+                              onClick={() => hapusImageGaleri(img.id)}
+                              className="bg-rose-50 hover:bg-rose-500 text-rose-500 hover:text-white p-2 rounded-lg transition-colors border border-rose-200 hover:border-transparent absolute top-2 right-2 sm:static"
                             >
                               <Trash2 className="w-5 h-5" />
                             </button>
@@ -3472,9 +3782,10 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                     )}
                   </div>
                 </div>
+
               </div>
               
-              <div className="flex justify-end gap-4 pt-6 sticky bottom-0 bg-white p-4 -mx-8 -mb-8 rounded-b-3xl">
+              <div className="flex justify-end gap-4 pt-6 sticky bottom-0 bg-white p-4 -mx-8 -mb-8 rounded-b-3xl border-t border-gray-100">
                 <button type="button" onClick={() => setShowEditorBerita(false)} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
                   Batal
                 </button>
@@ -3487,14 +3798,12 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
         </div>
       )}
 
-      {/* MODAL EDITOR GRAFIK */}
       {showEditorGrafik && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-in zoom-in-95 border border-emerald-100">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 animate-in zoom-in-95 border border-emerald-100">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-extrabold text-gray-900 flex items-center tracking-tight">
-                <PieChart className="w-6 h-6 mr-2 text-emerald-600" /> 
-                Edit Data Penduduk
+                <PieChart className="w-6 h-6 mr-2 text-emerald-600" /> Edit Grafik
               </h3>
               <button onClick={() => setShowEditorGrafik(false)} className="text-gray-400 hover:bg-gray-100 p-2 rounded-full transition">
                 <X className="w-5 h-5" />
@@ -3503,7 +3812,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
             
             <form onSubmit={handleSaveGrafik} className="space-y-5">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Jumlah Penduduk Laki-laki</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Jumlah Laki-laki</label>
                 <input 
                   type="number" required min="0"
                   value={editDataGrafik.lakiLaki}
@@ -3512,7 +3821,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Jumlah Penduduk Perempuan</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Jumlah Perempuan</label>
                 <input 
                   type="number" required min="0"
                   value={editDataGrafik.perempuan}
@@ -3520,31 +3829,29 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                   className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 font-medium" 
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Tahun Data</label>
-                  <input 
-                    type="number" required
-                    value={editDataGrafik.tahun}
-                    onChange={(e) => setEditDataGrafik({...editDataGrafik, tahun: e.target.value})}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 font-medium" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Bulan Update</label>
-                  <input 
-                    type="text" required placeholder="Contoh: Desember"
-                    value={editDataGrafik.updateTerakhir}
-                    onChange={(e) => setEditDataGrafik({...editDataGrafik, updateTerakhir: e.target.value})}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 font-medium" 
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Tahun Data</label>
+                <input 
+                  type="number" required min="2000"
+                  value={editDataGrafik.tahun}
+                  onChange={(e) => setEditDataGrafik({...editDataGrafik, tahun: e.target.value})}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 font-medium" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Update Terakhir</label>
+                <input 
+                  type="text" required
+                  value={editDataGrafik.updateTerakhir}
+                  onChange={(e) => setEditDataGrafik({...editDataGrafik, updateTerakhir: e.target.value})}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 font-medium" 
+                />
               </div>
               
               <div className="flex justify-end gap-3 pt-4">
                 <button type="button" onClick={() => setShowEditorGrafik(false)} className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition">Batal</button>
                 <button type="submit" className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-lg transition-all hover:-translate-y-0.5 flex items-center">
-                  <Save className="w-4 h-4 mr-2" /> Simpan Data
+                  <Save className="w-4 h-4 mr-2" /> Simpan
                 </button>
               </div>
             </form>
@@ -3557,74 +3864,75 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
 }
 
 /* ================= Halaman Kontak ================= */
+
 function HalamanKontak() {
   return (
     <div className="animate-in fade-in zoom-in-95 duration-500 py-16 bg-gray-50 min-h-[70vh]">
-      <div className="container mx-auto px-4 lg:px-8">
-        
+      <div className="container mx-auto px-4 lg:px-8 max-w-6xl">
         <div className="text-center mb-16">
-          <span className="text-teal-600 font-bold tracking-widest uppercase text-sm mb-2 block">Hubungi Kami</span>
-          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">Kontak & Layanan</h2>
+          <span className="text-teal-600 font-bold tracking-widest uppercase text-sm mb-2 block">Layanan Informasi</span>
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">Kontak Kami</h2>
           <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-600 to-teal-400 mx-auto rounded-full"></div>
           <p className="mt-6 text-gray-600 max-w-2xl mx-auto text-lg leading-relaxed">
-            Kami siap melayani Anda. Kunjungi kantor desa atau hubungi kami melalui kontak yang tersedia untuk informasi lebih lanjut.
+            Hubungi Pemerintah Desa Delta Upang melalui informasi kontak di bawah ini, atau kunjungi kantor kami pada jam kerja operasional.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
-          {/* Informasi Kontak */}
-          <div className="space-y-8">
-            <div className="bg-white p-8 rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-gray-100 flex items-start hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] transition-shadow duration-300 group">
-              <div className="bg-teal-50 border border-teal-100 p-4 rounded-2xl mr-6 group-hover:bg-teal-600 transition-colors duration-300">
-                <MapPin className="w-8 h-8 text-teal-600 group-hover:text-white transition-colors duration-300" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <div className="space-y-6">
+            <div className="bg-white p-8 rounded-3xl shadow-[0_15px_40px_rgba(0,0,0,0.06)] border border-gray-100 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] transition-all flex items-start group">
+              <div className="bg-teal-50 p-4 rounded-2xl mr-6 group-hover:bg-teal-600 transition-colors duration-300">
+                <MapPin className="w-8 h-8 text-teal-600 group-hover:text-white transition-colors" />
               </div>
               <div>
-                <h3 className="text-xl font-extrabold text-gray-900 mb-3">Alamat Kantor</h3>
-                <p className="text-gray-600 text-lg leading-relaxed font-medium">Jl. Sunan Kalijaga Dusun II<br/>Kecamatan Makarti Jaya, Kab. Banyuasin<br/>Provinsi Sumatera Selatan 30972</p>
+                <h4 className="text-xl font-extrabold text-gray-900 mb-2">Alamat Kantor</h4>
+                <p className="text-gray-600 leading-relaxed font-medium">Jl. Sunan Kalijaga Dusun II<br/>Kecamatan Makarti Jaya, Kabupaten Banyuasin<br/>Provinsi Sumatera Selatan, Kode Pos 30972</p>
               </div>
             </div>
 
-            <div className="bg-white p-8 rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-gray-100 flex items-start hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] transition-shadow duration-300 group">
-              <div className="bg-teal-50 border border-teal-100 p-4 rounded-2xl mr-6 group-hover:bg-teal-600 transition-colors duration-300">
-                <Phone className="w-8 h-8 text-teal-600 group-hover:text-white transition-colors duration-300" />
+            <div className="bg-white p-8 rounded-3xl shadow-[0_15px_40px_rgba(0,0,0,0.06)] border border-gray-100 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] transition-all flex items-start group">
+              <div className="bg-teal-50 p-4 rounded-2xl mr-6 group-hover:bg-teal-600 transition-colors duration-300">
+                <Phone className="w-8 h-8 text-teal-600 group-hover:text-white transition-colors" />
               </div>
               <div>
-                <h3 className="text-xl font-extrabold text-gray-900 mb-3">Telepon / WhatsApp</h3>
-                <p className="text-gray-600 text-lg leading-relaxed font-medium">0822-6876-4585<br/>Layanan aktif pada jam kerja.</p>
+                <h4 className="text-xl font-extrabold text-gray-900 mb-2">Telepon / WhatsApp</h4>
+                <p className="text-gray-600 text-lg font-medium">0822-6876-4585</p>
               </div>
             </div>
 
-            <div className="bg-white p-8 rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-gray-100 flex items-start hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] transition-shadow duration-300 group">
-              <div className="bg-teal-50 border border-teal-100 p-4 rounded-2xl mr-6 group-hover:bg-teal-600 transition-colors duration-300">
-                <Mail className="w-8 h-8 text-teal-600 group-hover:text-white transition-colors duration-300" />
+            <div className="bg-white p-8 rounded-3xl shadow-[0_15px_40px_rgba(0,0,0,0.06)] border border-gray-100 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] transition-all flex items-start group">
+              <div className="bg-teal-50 p-4 rounded-2xl mr-6 group-hover:bg-teal-600 transition-colors duration-300">
+                <Mail className="w-8 h-8 text-teal-600 group-hover:text-white transition-colors" />
               </div>
               <div>
-                <h3 className="text-xl font-extrabold text-gray-900 mb-3">Email</h3>
-                <p className="text-gray-600 text-lg leading-relaxed font-medium">deltaupang12@gmail.com<br/>Untuk keperluan surat-menyurat resmi.</p>
+                <h4 className="text-xl font-extrabold text-gray-900 mb-2">Email</h4>
+                <p className="text-gray-600 text-lg font-medium">deltaupang12@gmail.com</p>
               </div>
             </div>
           </div>
 
-          {/* Peta Lokasi */}
-          <div className="h-full min-h-[400px]">
+          <div className="bg-white p-4 rounded-3xl shadow-[0_15px_40px_rgba(0,0,0,0.06)] border border-gray-100 h-full min-h-[400px] overflow-hidden relative group">
             <a 
-              href="https://maps.app.goo.gl/o1v4m8G5F5R4t4vP8" 
+              href="https://maps.app.goo.gl/9yBscK8m2KovPzS96" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="block w-full h-full bg-gray-200 rounded-3xl overflow-hidden shadow-xl border-4 border-white relative group cursor-pointer"
+              className="absolute inset-0 z-10"
+              title="Buka Peta Google Maps"
             >
-              <img 
-                src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                alt="Peta Lokasi" 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-              />
-              <div className="absolute inset-0 bg-teal-900/40 group-hover:bg-teal-900/20 transition-colors duration-300 flex items-center justify-center">
-                 <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20 shadow-2xl transform group-hover:scale-110 transition-transform duration-300">
-                   <div className="bg-white p-3 rounded-xl mb-4 shadow-inner flex items-center justify-center mx-auto w-16 h-16">
-                     <MapPin className="w-8 h-8 text-teal-600" />
+              <div className="w-full h-full bg-gray-200 relative overflow-hidden rounded-2xl">
+                 <img 
+                   src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                   alt="Peta Lokasi" 
+                   className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" 
+                 />
+                 <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent flex items-center justify-center">
+                   <div className="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-3xl shadow-2xl transform group-hover:-translate-y-2 transition-transform duration-300">
+                     <div className="bg-white rounded-full p-4 mb-4 flex items-center justify-center mx-auto w-16 h-16">
+                       <MapPin className="w-8 h-8 text-teal-600" />
+                     </div>
+                     <span className="font-extrabold text-2xl text-white drop-shadow-lg text-center px-4 block">Lokasi Kantor <br/> Desa Delta Upang</span>
                    </div>
-                   <span className="font-extrabold text-2xl text-white drop-shadow-lg text-center px-4 block">Lokasi Kantor <br/> Desa Delta Upang</span>
-                 </div>
+                </div>
               </div>
             </a>
           </div>
