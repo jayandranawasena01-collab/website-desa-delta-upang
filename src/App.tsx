@@ -4,8 +4,7 @@ import {
   MapPin, Mail, ChevronRight, Landmark, ArrowRight,
   LogIn, LogOut, Edit, Trash2, Plus, Image as ImageIcon, Save, Upload, CheckCircle2,
   BookOpen, Target, Map, Building2, ChevronDown, CalendarDays, PieChart, TrendingUp, Activity,
-  ChevronLeft, ChevronsLeft, ChevronsRight,
-  Headphones, Send, FileText, Inbox, Check, Clock
+  ChevronLeft, ChevronsLeft, ChevronsRight
 } from 'lucide-react';
 
 // ================= FIREBASE CLOUD STORAGE SETUP =================
@@ -21,14 +20,14 @@ declare const __initial_auth_token: any;
 let app: any = null;
 let auth: any = null;
 let db: any = null;
-let appId = 'desa-sungai-semut';
+let appId = 'desa-delta-upang';
 
 // ================= KONFIGURASI DATABASE MANUAL =================
 const firebaseConfigManual = {
   apiKey: "AIzaSyBIl0_tSPDJux9rr2FIL_-ZLZFqLPQ4WCY",
-  authDomain: "web-desa-sungai-semut.firebaseapp.com",
-  projectId: "web-desa-sungai-semut",
-  storageBucket: "web-desa-sungai-semut.firebasestorage.app",
+  authDomain: "web-desa-delta-upang.firebaseapp.com",
+  projectId: "web-desa-delta-upang",
+  storageBucket: "web-desa-delta-upang.firebasestorage.app",
   messagingSenderId: "673276122437",
   appId: "1:673276122437:web:dc2de24a0209f40e6e5a2c",
   measurementId: "G-JLGMKQXVV4"
@@ -37,7 +36,7 @@ const firebaseConfigManual = {
 // Mencegah Firebase berjalan saat proses "Build" di server Vercel (SSR)
 if (typeof window !== 'undefined') {
   try {
-    appId = typeof __app_id !== 'undefined' ? __app_id : 'desa-sungai-semut';
+    appId = typeof __app_id !== 'undefined' ? __app_id : 'desa-delta-upang';
     
     // Prioritaskan config dari environment (Canvas) jika ada, jika tidak gunakan config manual
     const firebaseConfig = (typeof __firebase_config !== 'undefined' && __firebase_config) 
@@ -137,11 +136,11 @@ const AnimatedNumber = ({ value, duration = 2000 }: { value: number, duration?: 
 const initialBerita = [
   {
     id: 1,
-    judul: "Penyaluran Bantuan Langsung Tunai (BLT) Dana desa delta upang Tahap III",
+    judul: "Penyaluran Bantuan Langsung Tunai (BLT) Dana Desa Delta Upang Tahap III",
     tanggal: "12 Okt 2024",
     kategori: "Sosial",
     gambar: "https://images.unsplash.com/photo-1593113565694-c6f130d24c3d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-    excerpt: "Pemerintah desa delta upang kembali menyalurkan Bantuan Langsung Tunai (BLT) yang bersumber dari Dana Desa (DD) kepada keluarga penerima manfaat...\n\nBantuan ini diharapkan dapat meringankan beban ekonomi warga, terutama dalam memenuhi kebutuhan pokok sehari-hari. Kepala Desa menghimbau agar dana tersebut digunakan sebaik-baiknya untuk kebutuhan primer.",
+    excerpt: "Pemerintah Desa Delta Upang kembali menyalurkan Bantuan Langsung Tunai (BLT) yang bersumber dari Dana Desa (DD) kepada keluarga penerima manfaat...\n\nBantuan ini diharapkan dapat meringankan beban ekonomi warga, terutama dalam memenuhi kebutuhan pokok sehari-hari. Kepala Desa menghimbau agar dana tersebut digunakan sebaik-baiknya untuk kebutuhan primer.",
     galeri: []
   },
   {
@@ -150,7 +149,7 @@ const initialBerita = [
     tanggal: "05 Okt 2024",
     kategori: "Kegiatan",
     gambar: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-    excerpt: "Mengantisipasi datangnya musim penghujan, warga desa delta upang bergotong royong membersihkan saluran air dan fasilitas umum guna mencegah banjir...\n\nKegiatan ini diikuti oleh seluruh elemen masyarakat. Selain membersihkan selokan, warga juga melakukan pemangkasan dahan pohon yang rawan tumbang serta membersihkan area pekarangan fasilitas umum.",
+    excerpt: "Mengantisipasi datangnya musim penghujan, warga Desa Delta Upang bergotong royong membersihkan saluran air dan fasilitas umum guna mencegah banjir...\n\nKegiatan ini diikuti oleh seluruh elemen masyarakat. Selain membersihkan selokan, warga juga melakukan pemangkasan dahan pohon yang rawan tumbang serta membersihkan area pekarangan fasilitas umum.",
     galeri: []
   },
   {
@@ -159,7 +158,7 @@ const initialBerita = [
     tanggal: "28 Sep 2024",
     kategori: "Pemberdayaan",
     gambar: "https://images.unsplash.com/photo-1592982537447-6f2a6a0a091c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-    excerpt: "BUMDes bekerja sama dengan penyuluh pertanian kecamatan mengadakan pelatihan pembuatan pupuk kompos organik yang diikuti oleh petani lokal delta upang...\n\nPelatihan ini bertujuan untuk meningkatkan kemandirian petani dalam penyediaan pupuk, menekan biaya produksi pertanian, sekaligus mengedukasi warga tentang pengelolaan limbah organik.",
+    excerpt: "BUMDes bekerja sama dengan penyuluh pertanian kecamatan mengadakan pelatihan pembuatan pupuk kompos organik yang diikuti oleh petani lokal Delta Upang...\n\nPelatihan ini bertujuan untuk meningkatkan kemandirian petani dalam penyediaan pupuk, menekan biaya produksi pertanian, sekaligus mengedukasi warga tentang pengelolaan limbah organik.",
     galeri: []
   }
 ];
@@ -175,8 +174,8 @@ const thn = new Date().getFullYear();
 const bln = String(new Date().getMonth() + 1).padStart(2, '0');
 const initialAgenda = [
   { id: 1, judul: "Kerja Bakti Bersih Desa", lokasi: "Seluruh Area Dusun", tanggal: `${thn}-${bln}-05` },
-  { id: 2, judul: "Penyaluran BLT Tahap Lanjutan", lokasi: "Balai desa delta upang", tanggal: `${thn}-${bln}-12` },
-  { id: 3, judul: "Musyawarah Perencanaan Pembangunan", lokasi: "Balai desa delta upang", tanggal: `${thn}-${bln}-28` }
+  { id: 2, judul: "Penyaluran BLT Tahap Lanjutan", lokasi: "Balai Desa Delta Upang", tanggal: `${thn}-${bln}-12` },
+  { id: 3, judul: "Musyawarah Perencanaan Pembangunan", lokasi: "Balai Desa Delta Upang", tanggal: `${thn}-${bln}-28` }
 ];
 
 const initialPerangkat = [
@@ -206,28 +205,28 @@ const initialProfil = [
     iconName: "BookOpen",
     judul: "Sejarah",
     gambar: "https://images.unsplash.com/photo-1572005996025-06900f6b6474?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-    konten: "desa delta upang memiliki sejarah panjang yang mengakar pada nilai-nilai perjuangan dan semangat gotong royong masyarakat. Sejak awal berdirinya, desa ini terus berkembang menjadi pusat harmoni sosial tempat bertemunya keberagaman budaya yang menyatu dalam kehangatan.\n\nPerjalanan panjang desa ini tidak lepas dari peran serta tetua adat dan tokoh masyarakat yang bahu-membahu membangun peradaban dari tanah yang dulunya terpencil menjadi kawasan yang kian maju dan terbuka terhadap inovasi."
+    konten: "Desa Delta Upang memiliki sejarah panjang yang mengakar pada nilai-nilai perjuangan dan semangat gotong royong masyarakat. Sejak awal berdirinya, desa ini terus berkembang menjadi pusat harmoni sosial tempat bertemunya keberagaman budaya yang menyatu dalam kehangatan.\n\nPerjalanan panjang desa ini tidak lepas dari peran serta tetua adat dan tokoh masyarakat yang bahu-membahu membangun peradaban dari tanah yang dulunya terpencil menjadi kawasan yang kian maju dan terbuka terhadap inovasi."
   },
   {
     id: 2,
     iconName: "Target",
     judul: "Visi & Misi",
     gambar: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-    konten: "VISI KAMI:\n\"Terwujudnya desa delta upang yang Mandiri, Sejahtera, Religius, dan Berbudaya melalui Tata Kelola Pemerintahan yang Baik dan Inovatif.\"\n\nMISI DESA:\n1. Meningkatkan kualitas pelayanan publik administrasi kependudukan yang cepat, tepat, dan transparan.\n2. Meningkatkan pembangunan infrastruktur jalan, jembatan, dan fasilitas umum desa yang berkualitas dan merata.\n3. Memberdayakan ekonomi kerakyatan dan pertanian melalui optimalisasi BUMDes dan Kelompok Tani.\n4. Meningkatkan kualitas sumber daya manusia melalui dukungan pada sektor pendidikan dan kesehatan dasar.\n5. Melestarikan nilai-nilai gotong royong, budaya lokal, dan kerukunan antar umat beragama."
+    konten: "VISI KAMI:\n\"Terwujudnya Desa Delta Upang yang Mandiri, Sejahtera, Religius, dan Berbudaya melalui Tata Kelola Pemerintahan yang Baik dan Inovatif.\"\n\nMISI DESA:\n1. Meningkatkan kualitas pelayanan publik administrasi kependudukan yang cepat, tepat, dan transparan.\n2. Meningkatkan pembangunan infrastruktur jalan, jembatan, dan fasilitas umum desa yang berkualitas dan merata.\n3. Memberdayakan ekonomi kerakyatan dan pertanian melalui optimalisasi BUMDes dan Kelompok Tani.\n4. Meningkatkan kualitas sumber daya manusia melalui dukungan pada sektor pendidikan dan kesehatan dasar.\n5. Melestarikan nilai-nilai gotong royong, budaya lokal, dan kerukunan antar umat beragama."
   },
   {
     id: 3,
     iconName: "Map",
     judul: "Kondisi Geografis",
     gambar: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-    konten: "Terletak di bentang alam yang subur dan dialiri oleh perairan sungai yang strategis, desa delta upang menyimpan potensi agraris dan perikanan yang sangat melimpah.\n\nKondisi topografi dataran rendah dengan curah hujan yang seimbang menjadikan tanah di desa kami sangat cocok untuk pengembangan sektor pertanian unggulan. Suasana pedesaan yang asri, udara yang segar, serta hamparan alam yang masih terjaga menjadikan delta upang tidak hanya makmur secara ekonomi namun juga nyaman untuk ditinggali."
+    konten: "Terletak di bentang alam yang subur dan dialiri oleh perairan sungai yang strategis, Desa Delta Upang menyimpan potensi agraris dan perikanan yang sangat melimpah.\n\nKondisi topografi dataran rendah dengan curah hujan yang seimbang menjadikan tanah di desa kami sangat cocok untuk pengembangan sektor pertanian unggulan. Suasana pedesaan yang asri, udara yang segar, serta hamparan alam yang masih terjaga menjadikan Delta Upang tidak hanya makmur secara ekonomi namun juga nyaman untuk ditinggali."
   },
   {
     id: 4,
     iconName: "Building2",
     judul: "Struktur Organisasi",
     gambar: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-    konten: "Pemerintahan desa delta upang didukung oleh struktur organisasi yang tangguh, responsif, dan adaptif terhadap kemajuan zaman. Diisi oleh putra-putri terbaik desa yang berdedikasi tinggi, kami melayani masyarakat dengan sepenuh hati.\n\nSetiap fungsi pemerintahan, mulai dari Kepala Desa, Sekretaris, jajaran Kepala Urusan (Kaur), Kepala Seksi (Kasi), hingga Kepala Dusun, berjalan secara sinergis dengan menjunjung tinggi prinsip transparansi dan profesionalisme demi kemajuan bersama seluruh elemen masyarakat delta upang."
+    konten: "Pemerintahan Desa Delta Upang didukung oleh struktur organisasi yang tangguh, responsif, dan adaptif terhadap kemajuan zaman. Diisi oleh putra-putri terbaik desa yang berdedikasi tinggi, kami melayani masyarakat dengan sepenuh hati.\n\nSetiap fungsi pemerintahan, mulai dari Kepala Desa, Sekretaris, jajaran Kepala Urusan (Kaur), Kepala Seksi (Kasi), hingga Kepala Dusun, berjalan secara sinergis dengan menjunjung tinggi prinsip transparansi dan profesionalisme demi kemajuan bersama seluruh elemen masyarakat Delta Upang."
   }
 ];
 
@@ -242,12 +241,12 @@ const initialBeranda = {
     "https://images.unsplash.com/photo-1592982537447-6f2a6a0a091c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
     "https://images.unsplash.com/photo-1552058544-f2b08422138a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
   ],
-  namaDesa: "delta upang",
+  namaDesa: "Delta Upang",
   deskripsiDesa: "Kecamatan Makarti Jaya, Kabupaten Banyuasin \nProvinsi Sumatera Selatan",
   fotoKades: "https://images.unsplash.com/photo-1552058544-f2b08422138a?w=400&q=80",
-  namaKades: "Herman",
-  jabatanKades: "Kepala desa delta upang",
-  sambutanKades: "Assalamu'alaikum Warahmatullahi Wabarakatuh. Puji syukur kita panjatkan ke hadirat Allah SWT. Selamat datang di website resmi desa delta upang. Melalui media ini, kami berupaya mewujudkan transparansi dan kemudahan akses informasi bagi seluruh warga dan masyarakat luas mengenai program kerja, kegiatan, dan pembangunan di desa kita tercinta.",
+  namaKades: "Hasanuddin, S.IP",
+  jabatanKades: "Kepala Desa Delta Upang",
+  sambutanKades: "Assalamu'alaikum Warahmatullahi Wabarakatuh. Puji syukur kita panjatkan ke hadirat Allah SWT. Selamat datang di website resmi Desa Delta Upang. Melalui media ini, kami berupaya mewujudkan transparansi dan kemudahan akses informasi bagi seluruh warga dan masyarakat luas mengenai program kerja, kegiatan, dan pembangunan di desa kita tercinta.",
   stats: [
     { id: 1, num: "3.689", label: "Total Penduduk", subLaki: "1.874", subPerempuan: "1.815" },
     { id: 2, num: "823", label: "Kepala Keluarga" },
@@ -261,23 +260,18 @@ export default function App() {
   const [isDbConnected, setIsDbConnected] = useState(false); 
   const [dbError, setDbError] = useState(""); 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isPengaduanOpen, setIsPengaduanOpen] = useState(false);
   
-  // State Admin Pengaduan
-  const [showAdminPengaduan, setShowAdminPengaduan] = useState(false);
-  const [lampiranPengaduan, setLampiranPengaduan] = useState<string>('');
-
   // State Active Pages & Tabs disimpan di localStorage agar tidak kembali ke beranda saat refresh
   const [currentPage, setCurrentPage] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('sungai_semut_currentPage') || 'beranda';
+      return localStorage.getItem('delta_upang_currentPage') || 'beranda';
     }
     return 'beranda';
   });
 
   const [activeProfilTab, setActiveProfilTab] = useState<any>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('sungai_semut_activeProfilTab');
+      const saved = localStorage.getItem('delta_upang_activeProfilTab');
       return saved ? saved : null;
     }
     return null;
@@ -285,14 +279,14 @@ export default function App() {
 
   const [activePemerintahTab, setActivePemerintahTab] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('sungai_semut_activePemerintahTab') || 'perangkat';
+      return localStorage.getItem('delta_upang_activePemerintahTab') || 'perangkat';
     }
     return 'perangkat';
   });
 
   const [activeBeritaTab, setActiveBeritaTab] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('sungai_semut_activeBeritaTab') || 'list-berita';
+      return localStorage.getItem('delta_upang_activeBeritaTab') || 'list-berita';
     }
     return 'list-berita';
   });
@@ -308,7 +302,7 @@ export default function App() {
   // State Admin
   const [isAdmin, setIsAdmin] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('sungai_semut_admin') === 'true';
+      return localStorage.getItem('delta_upang_admin') === 'true';
     }
     return false;
   });
@@ -328,14 +322,13 @@ export default function App() {
     return fallback;
   };
 
-  const [daftarBerita, setDaftarBerita] = useState(() => getInitialData('sungai_semut_berita', initialBerita));
-  const [dataGrafik, setDataGrafik] = useState(() => getInitialData('sungai_semut_grafik', initialGrafik));
-  const [daftarAgenda, setDaftarAgenda] = useState(() => getInitialData('sungai_semut_agenda', initialAgenda));
-  const [daftarPerangkat, setDaftarPerangkat] = useState(() => getInitialData('sungai_semut_perangkat', initialPerangkat));
-  const [daftarLembaga, setDaftarLembaga] = useState(() => getInitialData('sungai_semut_lembaga', initialLembaga));
-  const [daftarProfil, setDaftarProfil] = useState(() => getInitialData('sungai_semut_profil', initialProfil));
-  const [dataBeranda, setDataBeranda] = useState(() => getInitialData('sungai_semut_beranda', initialBeranda));
-  const [daftarPengaduan, setDaftarPengaduan] = useState(() => getInitialData('sungai_semut_pengaduan', []));
+  const [daftarBerita, setDaftarBerita] = useState(() => getInitialData('delta_upang_berita', initialBerita));
+  const [dataGrafik, setDataGrafik] = useState(() => getInitialData('delta_upang_grafik', initialGrafik));
+  const [daftarAgenda, setDaftarAgenda] = useState(() => getInitialData('delta_upang_agenda', initialAgenda));
+  const [daftarPerangkat, setDaftarPerangkat] = useState(() => getInitialData('delta_upang_perangkat', initialPerangkat));
+  const [daftarLembaga, setDaftarLembaga] = useState(() => getInitialData('delta_upang_lembaga', initialLembaga));
+  const [daftarProfil, setDaftarProfil] = useState(() => getInitialData('delta_upang_profil', initialProfil));
+  const [dataBeranda, setDataBeranda] = useState(() => getInitialData('delta_upang_beranda', initialBeranda));
 
   // ================= MONITORING KONEKSI =================
   useEffect(() => {
@@ -414,49 +407,45 @@ export default function App() {
       }
     };
 
-    const unsubBeranda = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'sungai_semut_beranda', 'main'), 
-      (snap) => handleServerData(snap, setDataBeranda, 'sungai_semut_beranda'), handleServerError
+    const unsubBeranda = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_beranda', 'main'), 
+      (snap) => handleServerData(snap, setDataBeranda, 'delta_upang_beranda'), handleServerError
     );
 
-    const unsubBerita = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'sungai_semut_berita', 'main'), 
-      (snap) => handleServerData(snap, setDaftarBerita, 'sungai_semut_berita'), handleServerError
+    const unsubBerita = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_berita', 'main'), 
+      (snap) => handleServerData(snap, setDaftarBerita, 'delta_upang_berita'), handleServerError
     );
     
-    const unsubGrafik = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'sungai_semut_grafik', 'main'), 
-      (snap) => handleServerData(snap, setDataGrafik, 'sungai_semut_grafik'), handleServerError
+    const unsubGrafik = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_grafik', 'main'), 
+      (snap) => handleServerData(snap, setDataGrafik, 'delta_upang_grafik'), handleServerError
     );
 
-    const unsubAgenda = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'sungai_semut_agenda', 'main'), 
-      (snap) => handleServerData(snap, setDaftarAgenda, 'sungai_semut_agenda'), handleServerError
+    const unsubAgenda = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_agenda', 'main'), 
+      (snap) => handleServerData(snap, setDaftarAgenda, 'delta_upang_agenda'), handleServerError
     );
 
-    const unsubPerangkat = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'sungai_semut_perangkat', 'main'), 
-      (snap) => handleServerData(snap, setDaftarPerangkat, 'sungai_semut_perangkat'), handleServerError
+    const unsubPerangkat = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_perangkat', 'main'), 
+      (snap) => handleServerData(snap, setDaftarPerangkat, 'delta_upang_perangkat'), handleServerError
     );
 
-    const unsubLembaga = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'sungai_semut_lembaga', 'main'), 
-      (snap) => handleServerData(snap, setDaftarLembaga, 'sungai_semut_lembaga'), handleServerError
+    const unsubLembaga = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_lembaga', 'main'), 
+      (snap) => handleServerData(snap, setDaftarLembaga, 'delta_upang_lembaga'), handleServerError
     );
 
-    const unsubProfil = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'sungai_semut_profil', 'main'), 
-      (snap) => handleServerData(snap, setDaftarProfil, 'sungai_semut_profil'), handleServerError
-    );
-
-    const unsubPengaduan = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'sungai_semut_pengaduan', 'main'), 
-      (snap) => handleServerData(snap, setDaftarPengaduan, 'sungai_semut_pengaduan'), handleServerError
+    const unsubProfil = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_profil', 'main'), 
+      (snap) => handleServerData(snap, setDaftarProfil, 'delta_upang_profil'), handleServerError
     );
 
     return () => {
-      unsubBeranda(); unsubBerita(); unsubGrafik(); unsubAgenda(); unsubPerangkat(); unsubLembaga(); unsubProfil(); unsubPengaduan();
+      unsubBeranda(); unsubBerita(); unsubGrafik(); unsubAgenda(); unsubPerangkat(); unsubLembaga(); unsubProfil();
     };
   }, [user]);
 
   // ================= UPDATE FUNCTIONS =================
   const updateBeranda = async (newData: any) => {
     setDataBeranda(newData);
-    if (typeof window !== 'undefined') localStorage.setItem('sungai_semut_beranda', JSON.stringify(newData));
+    if (typeof window !== 'undefined') localStorage.setItem('delta_upang_beranda', JSON.stringify(newData));
     if(db && user) {
-      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sungai_semut_beranda', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_beranda', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     } else {
       showAlert("Perubahan disimpan secara LOKAL. Aktifkan koneksi database untuk mensinkronisasi.");
     }
@@ -464,54 +453,47 @@ export default function App() {
   
   const updateBerita = async (newData: any) => {
     setDaftarBerita(newData);
-    if (typeof window !== 'undefined') localStorage.setItem('sungai_semut_berita', JSON.stringify(newData));
+    if (typeof window !== 'undefined') localStorage.setItem('delta_upang_berita', JSON.stringify(newData));
     if(db && user) {
-      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sungai_semut_berita', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_berita', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
   
   const updateGrafik = async (newData: any) => {
     setDataGrafik(newData);
-    if (typeof window !== 'undefined') localStorage.setItem('sungai_semut_grafik', JSON.stringify(newData));
+    if (typeof window !== 'undefined') localStorage.setItem('delta_upang_grafik', JSON.stringify(newData));
     if(db && user) {
-      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sungai_semut_grafik', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_grafik', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
 
   const updateAgenda = async (newData: any) => {
     setDaftarAgenda(newData);
-    if (typeof window !== 'undefined') localStorage.setItem('sungai_semut_agenda', JSON.stringify(newData));
+    if (typeof window !== 'undefined') localStorage.setItem('delta_upang_agenda', JSON.stringify(newData));
     if(db && user) {
-      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sungai_semut_agenda', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_agenda', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
 
   const updatePerangkat = async (newData: any) => {
     setDaftarPerangkat(newData);
-    if (typeof window !== 'undefined') localStorage.setItem('sungai_semut_perangkat', JSON.stringify(newData));
+    if (typeof window !== 'undefined') localStorage.setItem('delta_upang_perangkat', JSON.stringify(newData));
     if(db && user) {
-      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sungai_semut_perangkat', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_perangkat', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
   const updateLembaga = async (newData: any) => {
     setDaftarLembaga(newData);
-    if (typeof window !== 'undefined') localStorage.setItem('sungai_semut_lembaga', JSON.stringify(newData));
+    if (typeof window !== 'undefined') localStorage.setItem('delta_upang_lembaga', JSON.stringify(newData));
     if(db && user) {
-      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sungai_semut_lembaga', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_lembaga', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
   const updateProfil = async (newData: any) => {
     setDaftarProfil(newData);
-    if (typeof window !== 'undefined') localStorage.setItem('sungai_semut_profil', JSON.stringify(newData));
+    if (typeof window !== 'undefined') localStorage.setItem('delta_upang_profil', JSON.stringify(newData));
     if(db && user) {
-      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sungai_semut_profil', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
-    }
-  };
-  const updatePengaduan = async (newData: any) => {
-    setDaftarPengaduan(newData);
-    if (typeof window !== 'undefined') localStorage.setItem('sungai_semut_pengaduan', JSON.stringify(newData));
-    if(db && user) {
-      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sungai_semut_pengaduan', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'delta_upang_profil', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
 
@@ -533,27 +515,27 @@ export default function App() {
 
   useEffect(() => { 
     if (typeof window !== 'undefined') {
-      try { localStorage.setItem('sungai_semut_admin', isAdmin.toString()); } catch(e){} 
+      try { localStorage.setItem('delta_upang_admin', isAdmin.toString()); } catch(e){} 
     }
   }, [isAdmin]);
 
   const navigateTo = (page: string, tabId: any = null) => {
     setCurrentPage(page);
     if (typeof window !== 'undefined') {
-      localStorage.setItem('sungai_semut_currentPage', page);
+      localStorage.setItem('delta_upang_currentPage', page);
     }
 
     if (page === 'profil' && tabId !== null) {
       setActiveProfilTab(tabId);
-      if (typeof window !== 'undefined') localStorage.setItem('sungai_semut_activeProfilTab', String(tabId));
+      if (typeof window !== 'undefined') localStorage.setItem('delta_upang_activeProfilTab', String(tabId));
     }
     if (page === 'pemerintah' && tabId !== null) {
       setActivePemerintahTab(tabId);
-      if (typeof window !== 'undefined') localStorage.setItem('sungai_semut_activePemerintahTab', tabId);
+      if (typeof window !== 'undefined') localStorage.setItem('delta_upang_activePemerintahTab', tabId);
     }
     if (page === 'berita' && tabId !== null) {
       setActiveBeritaTab(tabId);
-      if (typeof window !== 'undefined') localStorage.setItem('sungai_semut_activeBeritaTab', tabId);
+      if (typeof window !== 'undefined') localStorage.setItem('delta_upang_activeBeritaTab', tabId);
     }
 
     setIsMobileMenuOpen(false);
@@ -582,36 +564,6 @@ export default function App() {
     showConfirm('Yakin ingin keluar dari sesi Admin?', () => setIsAdmin(false));
   };
 
-  const handleLampiranPengaduan = (e: any) => {
-    const file = e.target.files[0];
-    if (file) {
-      compressImage(file, 800, false, (base64: any) => {
-        setLampiranPengaduan(base64);
-      });
-    }
-  };
-
-  const handleSubmitPengaduan = (e: any) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const newPengaduan = {
-      id: Date.now(),
-      nama: formData.get('nama'),
-      wa: formData.get('wa'),
-      kategori: formData.get('kategori'),
-      isi: formData.get('isi'),
-      lampiran: lampiranPengaduan,
-      tanggal: new Date().toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' }),
-      status: 'baru'
-    };
-    
-    updatePengaduan([newPengaduan, ...daftarPengaduan]);
-    showAlert('Pengaduan berhasil dikirim! Terima kasih atas partisipasi Anda.');
-    setIsPengaduanOpen(false);
-    setLampiranPengaduan('');
-    e.target.reset();
-  };
-
   const menuPemerintah = [
     { id: 'perangkat', label: 'Perangkat Desa' },
     { id: 'bpd', label: 'BPD' },
@@ -631,12 +583,38 @@ export default function App() {
 
   return (
     <div 
-      className="min-h-screen w-full bg-fixed bg-cover bg-center bg-no-repeat bg-gray-100 relative"
+      className="min-h-screen w-full bg-fixed bg-cover bg-center bg-no-repeat bg-gray-100"
       style={{ backgroundImage: `url(${dataBeranda.outerBg || 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'})` }}
     >
-      <div className="fixed inset-0 bg-black/40 pointer-events-none z-0"></div>
+      <div className="fixed inset-0 bg-black/40 pointer-events-none"></div>
 
-      <div className="max-w-[1440px] mx-auto min-h-screen flex flex-col font-sans bg-gray-50 text-gray-800 relative shadow-[0_0_60px_rgba(0,0,0,0.6)] selection:bg-sky-200 selection:text-sky-900 z-10">
+      <div className="max-w-[1440px] mx-auto min-h-screen flex flex-col font-sans bg-gray-50 text-gray-800 relative shadow-[0_0_60px_rgba(0,0,0,0.6)] selection:bg-teal-200 selection:text-teal-900">
+
+        {dialog.isOpen && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[100] p-4">
+            <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 animate-in zoom-in-95 border border-emerald-100">
+              <h3 className="text-xl font-extrabold text-gray-900 mb-4 flex items-center">
+                <Info className="w-6 h-6 mr-2 text-teal-600"/>
+                {dialog.type === 'confirm' ? 'Konfirmasi' : 'Pemberitahuan'}
+              </h3>
+              <p className="text-gray-600 mb-8 font-medium">{dialog.message}</p>
+              <div className="flex justify-end gap-3">
+                {dialog.type === 'confirm' && (
+                  <button onClick={() => setDialog({ isOpen: false, type: 'alert', message: '', onConfirm: null })} className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition">Batal</button>
+                )}
+                <button
+                  onClick={() => {
+                    if (dialog.onConfirm) dialog.onConfirm();
+                    setDialog({ isOpen: false, type: 'alert', message: '', onConfirm: null });
+                  }}
+                  className={`px-5 py-2.5 text-white rounded-xl font-bold shadow-[0_8px_20px_rgba(13,148,136,0.3)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_25px_rgba(13,148,136,0.4)] ${dialog.type === 'confirm' ? 'bg-gradient-to-r from-emerald-600 to-teal-600' : 'bg-gradient-to-r from-emerald-600 to-teal-600'}`}
+                >
+                  {dialog.type === 'confirm' ? 'Ya, Lanjutkan' : 'Tutup'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <style>
           {`
@@ -694,7 +672,7 @@ export default function App() {
         </style>
 
         {/* Header & Navbar dengan Efek Glassmorphism yang Elegan */}
-        <header className="bg-blue-950/90 backdrop-blur-xl text-white sticky top-0 z-50 shadow-[0_4px_30px_rgba(0,0,0,0.15)] border-b border-white/10">
+        <header className="bg-emerald-950/90 backdrop-blur-xl text-white sticky top-0 z-50 shadow-[0_4px_30px_rgba(0,0,0,0.15)] border-b border-white/10">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="flex justify-between items-center py-2 lg:py-3 gap-2 sm:gap-6">
               
@@ -706,13 +684,13 @@ export default function App() {
                   {dataBeranda.headerLogo ? (
                     <img src={dataBeranda.headerLogo} alt="Logo" className="w-full h-full object-contain" />
                   ) : (
-                    <Landmark className="h-8 w-8 md:h-12 md:w-12 text-white group-hover:text-sky-800 transition duration-300" />
+                    <Landmark className="h-8 w-8 md:h-12 md:w-12 text-white group-hover:text-teal-800 transition duration-300" />
                   )}
                 </div>
                 <div className="hidden sm:flex flex-col justify-center min-w-0 pr-2">
-                  <h1 className="text-lg md:text-xl lg:text-2xl font-extrabold tracking-tight leading-tight drop-shadow-md text-transparent bg-clip-text bg-gradient-to-r from-blue-100 to-white truncate">Desa {dataBeranda.namaDesa}</h1>
-                  <p className="text-[10px] md:text-xs text-sky-200 font-medium mt-0.5 tracking-wide truncate">Kec. Makarti Jaya, Kab Banyuasin</p>
-                  <p className="text-[10px] md:text-xs text-sky-200 font-medium mt-0.5 tracking-wide truncate">Provinsi Sumatera Selatan</p>
+                  <h1 className="text-lg md:text-xl lg:text-2xl font-extrabold tracking-tight leading-tight drop-shadow-md text-transparent bg-clip-text bg-gradient-to-r from-emerald-100 to-white truncate">Desa {dataBeranda.namaDesa}</h1>
+                  <p className="text-[10px] md:text-xs text-teal-200 font-medium mt-0.5 tracking-wide truncate">Kec. Makarti Jaya, Kab Banyuasin</p>
+                  <p className="text-[10px] md:text-xs text-teal-200 font-medium mt-0.5 tracking-wide truncate">Provinsi Sumatera Selatan</p>
                 </div>
               </div>
 
@@ -731,7 +709,7 @@ export default function App() {
                                    key={`img-a-${idx}`} 
                                    src={img} 
                                    alt="Galeri" 
-                                   className="h-full w-[80px] md:w-[110px] lg:w-[150px] object-cover rounded-lg border border-white/20 shadow-sm cursor-pointer hover:border-sky-400 transition-colors duration-300" 
+                                   className="h-full w-[80px] md:w-[110px] lg:w-[150px] object-cover rounded-lg border border-white/20 shadow-sm cursor-pointer hover:border-teal-400 transition-colors duration-300" 
                                  />
                                ))}
                              </div>
@@ -741,7 +719,7 @@ export default function App() {
                                    key={`img-b-${idx}`} 
                                    src={img} 
                                    alt="Galeri" 
-                                   className="h-full w-[80px] md:w-[110px] lg:w-[150px] object-cover rounded-lg border border-white/20 shadow-sm cursor-pointer hover:border-sky-400 transition-colors duration-300" 
+                                   className="h-full w-[80px] md:w-[110px] lg:w-[150px] object-cover rounded-lg border border-white/20 shadow-sm cursor-pointer hover:border-teal-400 transition-colors duration-300" 
                                  />
                                ))}
                              </div>
@@ -769,7 +747,7 @@ export default function App() {
                           }}
                           className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
                             currentPage === 'profil'
-                              ? 'bg-gradient-to-r from-blue-500 to-sky-500 text-white shadow-lg border border-transparent'
+                              ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg border border-transparent'
                               : 'text-gray-200 hover:bg-white/10 hover:text-white border border-transparent'
                           }`}
                         >
@@ -791,12 +769,12 @@ export default function App() {
                                 }}
                                 className={`text-left px-5 py-3 text-sm font-bold transition-all duration-200 relative overflow-hidden ${
                                    String(activeProfilTab) === String(profil.id) && currentPage === 'profil'
-                                     ? 'text-sky-700 bg-sky-50'
-                                     : 'text-gray-600 hover:bg-gray-50 hover:text-sky-600'
+                                     ? 'text-teal-700 bg-teal-50'
+                                     : 'text-gray-600 hover:bg-gray-50 hover:text-teal-600'
                                 }`}
                               >
                                  {String(activeProfilTab) === String(profil.id) && currentPage === 'profil' && (
-                                   <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-sky-400 to-blue-500"></span>
+                                   <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-teal-400 to-emerald-500"></span>
                                  )}
                                  {profil.judul}
                               </button>
@@ -809,7 +787,7 @@ export default function App() {
                         <button
                           onClick={() => {
                             setIsDesktopProfilOpen(false);
-                            setIsDesktopPemerintahOpen(false);
+                            setIsDesktopBeritaOpen(false);
                             if (currentPage === 'pemerintah') {
                               setIsDesktopPemerintahOpen(!isDesktopPemerintahOpen);
                             } else {
@@ -819,7 +797,7 @@ export default function App() {
                           }}
                           className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
                             currentPage === 'pemerintah'
-                              ? 'bg-gradient-to-r from-blue-500 to-sky-500 text-white shadow-lg border border-transparent'
+                              ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg border border-transparent'
                               : 'text-gray-200 hover:bg-white/10 hover:text-white border border-transparent'
                           }`}
                         >
@@ -841,12 +819,12 @@ export default function App() {
                                 }}
                                 className={`text-left px-5 py-3 text-sm font-bold transition-all duration-200 relative overflow-hidden ${
                                    activePemerintahTab === menu.id && currentPage === 'pemerintah'
-                                     ? 'text-sky-700 bg-sky-50'
-                                     : 'text-gray-600 hover:bg-gray-50 hover:text-sky-600'
+                                     ? 'text-teal-700 bg-teal-50'
+                                     : 'text-gray-600 hover:bg-gray-50 hover:text-teal-600'
                                 }`}
                               >
                                  {activePemerintahTab === menu.id && currentPage === 'pemerintah' && (
-                                   <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-sky-400 to-blue-500"></span>
+                                   <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-teal-400 to-emerald-500"></span>
                                  )}
                                  {menu.label}
                               </button>
@@ -869,7 +847,7 @@ export default function App() {
                           }}
                           className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
                             currentPage === 'berita'
-                              ? 'bg-gradient-to-r from-blue-500 to-sky-500 text-white shadow-lg border border-transparent'
+                              ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg border border-transparent'
                               : 'text-gray-200 hover:bg-white/10 hover:text-white border border-transparent'
                           }`}
                         >
@@ -891,12 +869,12 @@ export default function App() {
                                 }}
                                 className={`text-left px-5 py-3 text-sm font-bold transition-all duration-200 relative overflow-hidden ${
                                    activeBeritaTab === menu.id && currentPage === 'berita'
-                                     ? 'text-sky-700 bg-sky-50'
-                                     : 'text-gray-600 hover:bg-gray-50 hover:text-sky-600'
+                                     ? 'text-teal-700 bg-teal-50'
+                                     : 'text-gray-600 hover:bg-gray-50 hover:text-teal-600'
                                 }`}
                               >
                                  {activeBeritaTab === menu.id && currentPage === 'berita' && (
-                                   <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-sky-400 to-blue-500"></span>
+                                   <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-teal-400 to-emerald-500"></span>
                                  )}
                                  <div className="flex items-center">
                                    {menu.id === 'list-berita' ? <Newspaper className="w-4 h-4 mr-2 opacity-70" /> : <PieChart className="w-4 h-4 mr-2 opacity-70" />}
@@ -951,7 +929,7 @@ export default function App() {
           </div>
 
           {isMobileMenuOpen && (
-            <div className="lg:hidden bg-blue-950/95 backdrop-blur-xl border-t border-white/10">
+            <div className="lg:hidden bg-emerald-950/95 backdrop-blur-xl border-t border-white/10">
               <div className="flex flex-col px-4 pt-2 pb-4 space-y-2">
                 <MobileNavButton active={currentPage === 'beranda'} onClick={() => navigateTo('beranda')}>Beranda</MobileNavButton>
                 
@@ -964,23 +942,23 @@ export default function App() {
                     }}
                     className={`flex items-center justify-between w-full text-left px-5 py-4 rounded-xl text-lg font-bold transition-all ${
                       currentPage === 'profil' || isMobileProfilOpen
-                        ? 'bg-gradient-to-r from-blue-800 to-sky-800 text-white border-l-4 border-sky-400 shadow-inner'
-                        : 'text-blue-100 hover:bg-blue-800/50 hover:text-white'
+                        ? 'bg-gradient-to-r from-emerald-800 to-teal-800 text-white border-l-4 border-teal-400 shadow-inner'
+                        : 'text-emerald-100 hover:bg-emerald-800/50 hover:text-white'
                     }`}
                   >
                     <span>Profil Desa</span>
                     <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isMobileProfilOpen ? 'rotate-180' : ''}`} />
                   </button>
                   {isMobileProfilOpen && (
-                    <div className="flex flex-col bg-blue-900/40 rounded-xl mt-2 mx-2 overflow-hidden border border-white/5 animate-in slide-in-from-top-2 duration-200">
+                    <div className="flex flex-col bg-emerald-900/40 rounded-xl mt-2 mx-2 overflow-hidden border border-white/5 animate-in slide-in-from-top-2 duration-200">
                       {daftarProfil.map((profil: any) => (
                         <button
                           key={profil.id}
                           onClick={() => navigateTo('profil', profil.id)}
                           className={`text-left px-6 py-3.5 text-sm font-bold transition-colors border-l-2 ${
                             String(activeProfilTab) === String(profil.id) && currentPage === 'profil'
-                              ? 'border-sky-400 text-white bg-blue-800/50'
-                              : 'border-transparent text-blue-200 hover:bg-blue-800/50 hover:text-white'
+                              ? 'border-teal-400 text-white bg-emerald-800/50'
+                              : 'border-transparent text-emerald-200 hover:bg-emerald-800/50 hover:text-white'
                           }`}
                         >
                           {profil.judul}
@@ -999,23 +977,23 @@ export default function App() {
                     }}
                     className={`flex items-center justify-between w-full text-left px-5 py-4 rounded-xl text-lg font-bold transition-all ${
                       currentPage === 'pemerintah' || isMobilePemerintahOpen
-                        ? 'bg-gradient-to-r from-blue-800 to-sky-800 text-white border-l-4 border-sky-400 shadow-inner'
-                        : 'text-blue-100 hover:bg-blue-800/50 hover:text-white'
+                        ? 'bg-gradient-to-r from-emerald-800 to-teal-800 text-white border-l-4 border-teal-400 shadow-inner'
+                        : 'text-emerald-100 hover:bg-emerald-800/50 hover:text-white'
                     }`}
                   >
                     <span>Pemerintah Desa</span>
                     <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isMobilePemerintahOpen ? 'rotate-180' : ''}`} />
                   </button>
                   {isMobilePemerintahOpen && (
-                    <div className="flex flex-col bg-blue-900/40 rounded-xl mt-2 mx-2 overflow-hidden border border-white/5 animate-in slide-in-from-top-2 duration-200">
+                    <div className="flex flex-col bg-emerald-900/40 rounded-xl mt-2 mx-2 overflow-hidden border border-white/5 animate-in slide-in-from-top-2 duration-200">
                       {menuPemerintah.map((menu) => (
                         <button
                           key={menu.id}
                           onClick={() => navigateTo('pemerintah', menu.id)}
                           className={`text-left px-6 py-3.5 text-sm font-bold transition-colors border-l-2 ${
                             activePemerintahTab === menu.id && currentPage === 'pemerintah'
-                              ? 'border-sky-400 text-white bg-blue-800/50'
-                              : 'border-transparent text-blue-200 hover:bg-blue-800/50 hover:text-white'
+                              ? 'border-teal-400 text-white bg-emerald-800/50'
+                              : 'border-transparent text-emerald-200 hover:bg-emerald-800/50 hover:text-white'
                           }`}
                         >
                           {menu.label}
@@ -1034,23 +1012,23 @@ export default function App() {
                     }}
                     className={`flex items-center justify-between w-full text-left px-5 py-4 rounded-xl text-lg font-bold transition-all ${
                       currentPage === 'berita' || isMobileBeritaOpen
-                        ? 'bg-gradient-to-r from-blue-800 to-sky-800 text-white border-l-4 border-sky-400 shadow-inner'
-                        : 'text-blue-100 hover:bg-blue-800/50 hover:text-white'
+                        ? 'bg-gradient-to-r from-emerald-800 to-teal-800 text-white border-l-4 border-teal-400 shadow-inner'
+                        : 'text-emerald-100 hover:bg-emerald-800/50 hover:text-white'
                     }`}
                   >
                     <span>Berita & Informasi</span>
                     <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isMobileBeritaOpen ? 'rotate-180' : ''}`} />
                   </button>
                   {isMobileBeritaOpen && (
-                    <div className="flex flex-col bg-blue-900/40 rounded-xl mt-2 mx-2 overflow-hidden border border-white/5 animate-in slide-in-from-top-2 duration-200">
+                    <div className="flex flex-col bg-emerald-900/40 rounded-xl mt-2 mx-2 overflow-hidden border border-white/5 animate-in slide-in-from-top-2 duration-200">
                       {menuBerita.map((menu) => (
                         <button
                           key={menu.id}
                           onClick={() => navigateTo('berita', menu.id)}
                           className={`text-left px-6 py-3.5 text-sm font-bold transition-colors border-l-2 ${
                             activeBeritaTab === menu.id && currentPage === 'berita'
-                              ? 'border-sky-400 text-white bg-blue-800/50'
-                              : 'border-transparent text-blue-200 hover:bg-blue-800/50 hover:text-white'
+                              ? 'border-teal-400 text-white bg-emerald-800/50'
+                              : 'border-transparent text-emerald-200 hover:bg-emerald-800/50 hover:text-white'
                           }`}
                         >
                           {menu.label}
@@ -1067,32 +1045,19 @@ export default function App() {
         </header>
 
         {isAdmin && (
-          <div className="bg-gradient-to-r from-blue-100 to-sky-100 text-sky-900 px-4 py-3 text-sm font-medium text-center shadow-md flex flex-col items-center justify-center z-30 relative border-b border-sky-200">
+          <div className="bg-gradient-to-r from-emerald-100 to-teal-100 text-teal-900 px-4 py-3 text-sm font-medium text-center shadow-md flex flex-col items-center justify-center gap-2 z-30 relative border-b border-teal-200">
              <div className="flex items-center gap-2 font-bold">
-               <CheckCircle2 className="w-5 h-5 text-sky-600" /> 
+               <CheckCircle2 className="w-5 h-5 text-teal-600" /> 
                <span>Mode Admin Aktif: Anda dapat mengedit konten website.</span>
              </div>
              
-             <button
-               onClick={() => setShowAdminPengaduan(true)}
-               className="mt-2 mb-1 flex items-center bg-white border border-sky-300 text-sky-700 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm hover:bg-sky-50 transition"
-             >
-               <Inbox className="w-4 h-4 mr-2" />
-               Kotak Masuk Pengaduan
-               {daftarPengaduan.filter((p:any) => p.status === 'baru').length > 0 && (
-                 <span className="ml-2 bg-rose-500 text-white px-2 py-0.5 rounded-full text-[10px] animate-pulse">
-                   {daftarPengaduan.filter((p:any) => p.status === 'baru').length} Baru
-                 </span>
-               )}
-             </button>
-             
              {!isDbConnected && !dbError && (
-               <div className="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-sm mt-1">
+               <div className="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-sm">
                  ⏳ Menghubungkan ke Server / Mode Offline Sementara...
                </div>
              )}
              {isDbConnected && (
-               <div className="bg-blue-500 text-white border border-blue-600 px-3 py-1 rounded-full text-xs font-bold shadow-sm mt-1">
+               <div className="bg-emerald-500 text-white border border-emerald-600 px-3 py-1 rounded-full text-xs font-bold shadow-sm">
                  ✅ Status Database: ONLINE (Tersinkronisasi dengan Server).
                </div>
              )}
@@ -1154,51 +1119,51 @@ export default function App() {
           {currentPage === 'kontak' && <HalamanKontak />}
         </main>
 
-        <footer className="bg-slate-900 text-gray-300 pt-16 pb-8 border-t-[6px] border-sky-600">
+        <footer className="bg-[#0B1120] text-gray-300 pt-16 pb-8 border-t-[6px] border-teal-600">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
               <div>
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="bg-gradient-to-br from-blue-500 to-sky-700 p-2.5 rounded-lg shadow-[0_8px_20px_rgba(14,165,233,0.3)]">
+                  <div className="bg-gradient-to-br from-emerald-500 to-teal-700 p-2.5 rounded-lg shadow-[0_8px_20px_rgba(13,148,136,0.3)]">
                     <Landmark className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold tracking-tight text-white">desa delta upang</h3>
+                  <h3 className="text-2xl font-bold tracking-tight text-white">Desa Delta Upang</h3>
                 </div>
                 <p className="text-gray-400 leading-relaxed mb-6 font-medium">
-                  Website resmi Pemerintah desa delta upang, Kecamatan Makarti Jaya, Kabupaten Banyuasin, Sumatera Selatan. Melayani masyarakat dengan transparansi dan inovasi.
+                  Website resmi Pemerintah Desa Delta Upang, Kecamatan Makarti Jaya, Kabupaten Banyuasin, Sumatera Selatan. Melayani masyarakat dengan transparansi dan inovasi.
                 </p>
               </div>
               <div className="md:pl-8">
                 <h4 className="text-lg font-bold mb-6 text-white flex items-center">
-                  <span className="w-8 h-1 bg-gradient-to-r from-blue-500 to-sky-400 rounded-full mr-3"></span> Tautan Cepat
+                  <span className="w-8 h-1 bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full mr-3"></span> Tautan Cepat
                 </h4>
                 <ul className="space-y-3">
-                  <li><button onClick={() => navigateTo('beranda')} className="text-gray-400 hover:text-sky-400 font-medium flex items-center transition duration-200 hover:translate-x-2"><ChevronRight className="w-4 h-4 mr-2 text-sky-500"/> Beranda</button></li>
-                  <li><button onClick={() => navigateTo('profil', daftarProfil[0]?.id)} className="text-gray-400 hover:text-sky-400 font-medium flex items-center transition duration-200 hover:translate-x-2"><ChevronRight className="w-4 h-4 mr-2 text-sky-500"/> Profil Desa</button></li>
-                  <li><button onClick={() => navigateTo('pemerintah', 'perangkat')} className="text-gray-400 hover:text-sky-400 font-medium flex items-center transition duration-200 hover:translate-x-2"><ChevronRight className="w-4 h-4 mr-2 text-sky-500"/> Pemerintah Desa</button></li>
-                  <li><button onClick={() => navigateTo('berita', 'list-berita')} className="text-gray-400 hover:text-sky-400 font-medium flex items-center transition duration-200 hover:translate-x-2"><ChevronRight className="w-4 h-4 mr-2 text-sky-500"/> Berita Desa</button></li>
+                  <li><button onClick={() => navigateTo('beranda')} className="text-gray-400 hover:text-teal-400 font-medium flex items-center transition duration-200 hover:translate-x-2"><ChevronRight className="w-4 h-4 mr-2 text-teal-500"/> Beranda</button></li>
+                  <li><button onClick={() => navigateTo('profil', daftarProfil[0]?.id)} className="text-gray-400 hover:text-teal-400 font-medium flex items-center transition duration-200 hover:translate-x-2"><ChevronRight className="w-4 h-4 mr-2 text-teal-500"/> Profil Desa</button></li>
+                  <li><button onClick={() => navigateTo('pemerintah', 'perangkat')} className="text-gray-400 hover:text-teal-400 font-medium flex items-center transition duration-200 hover:translate-x-2"><ChevronRight className="w-4 h-4 mr-2 text-teal-500"/> Pemerintah Desa</button></li>
+                  <li><button onClick={() => navigateTo('berita', 'list-berita')} className="text-gray-400 hover:text-teal-400 font-medium flex items-center transition duration-200 hover:translate-x-2"><ChevronRight className="w-4 h-4 mr-2 text-teal-500"/> Berita Desa</button></li>
                 </ul>
               </div>
               <div>
                 <h4 className="text-lg font-bold mb-6 text-white flex items-center">
-                  <span className="w-8 h-1 bg-gradient-to-r from-blue-500 to-sky-400 rounded-full mr-3"></span> Kontak
+                  <span className="w-8 h-1 bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full mr-3"></span> Kontak
                 </h4>
                 <ul className="space-y-4 text-gray-400 font-medium">
                   <li className="flex items-start group">
-                    <div className="bg-white/5 p-2 rounded-lg group-hover:bg-sky-900/50 transition mr-4">
-                      <MapPin className="w-5 h-5 text-sky-400" />
+                    <div className="bg-white/5 p-2 rounded-lg group-hover:bg-teal-900/50 transition mr-4">
+                      <MapPin className="w-5 h-5 text-teal-400" />
                     </div>
                     <span className="pt-1">Jl. Sunan Kalijaga Dusun II, Kec. Makarti Jaya, Kab. Banyuasin, Sumsel 30972</span>
                   </li>
                   <li className="flex items-center group">
-                    <div className="bg-white/5 p-2 rounded-lg group-hover:bg-sky-900/50 transition mr-4">
-                      <Phone className="w-5 h-5 text-sky-400" />
+                    <div className="bg-white/5 p-2 rounded-lg group-hover:bg-teal-900/50 transition mr-4">
+                      <Phone className="w-5 h-5 text-teal-400" />
                     </div>
                     <span>0822-6876-4585</span>
                   </li>
                   <li className="flex items-center group">
-                    <div className="bg-white/5 p-2 rounded-lg group-hover:bg-sky-900/50 transition mr-4">
-                      <Mail className="w-5 h-5 text-sky-400" />
+                    <div className="bg-white/5 p-2 rounded-lg group-hover:bg-teal-900/50 transition mr-4">
+                      <Mail className="w-5 h-5 text-teal-400" />
                     </div>
                     <span>deltaupang12@gmail.com</span>
                   </li>
@@ -1206,18 +1171,17 @@ export default function App() {
               </div>
             </div>
             <div className="border-t border-white/10 pt-8 text-center text-gray-500 text-sm font-medium">
-              <p>&copy; {new Date().getFullYear()} Pemerintah desa delta upang. Seluruh hak cipta dilindungi.</p>
+              <p>&copy; {new Date().getFullYear()} Pemerintah Desa Delta Upang. Seluruh hak cipta dilindungi.</p>
             </div>
           </div>
         </footer>
 
-        {/* WA BUTTON KHUSUS HALAMAN KONTAK (Dinaikkan sedikit agar tidak tertimpa fitur Pengaduan) */}
         {currentPage === 'kontak' && (
           <a
             href="https://wa.me/6282268764585"
             target="_blank"
             rel="noopener noreferrer"
-            className="fixed bottom-[88px] right-6 md:bottom-[96px] md:right-8 bg-gradient-to-tr from-[#128C7E] to-[#25D366] text-white p-4 rounded-full shadow-[0_10px_30px_rgba(37,211,102,0.5)] hover:shadow-[0_0_40px_rgba(37,211,102,0.8)] z-50 flex items-center justify-center transition-all duration-300 hover:scale-110 animate-in fade-in slide-in-from-bottom-10 group border border-white/20"
+            className="fixed bottom-6 right-6 md:bottom-8 md:right-8 bg-gradient-to-tr from-[#128C7E] to-[#25D366] text-white p-4 rounded-full shadow-[0_10px_30px_rgba(37,211,102,0.5)] hover:shadow-[0_0_40px_rgba(37,211,102,0.8)] z-50 flex items-center justify-center transition-all duration-300 hover:scale-110 animate-in fade-in slide-in-from-bottom-10 group border border-white/20"
           >
             <svg viewBox="0 0 24 24" className="w-7 h-7 md:w-8 md:h-8 fill-current">
               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.305-.88-.653-1.473-1.46-1.646-1.757-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
@@ -1227,156 +1191,15 @@ export default function App() {
             </span>
           </a>
         )}
-
-        {/* FITUR PENGADUAN (GLOBAL FLOATING BUTTON) */}
-        <div className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-[90] flex flex-col items-end">
-            {/* Form Pengaduan Modal */}
-            {isPengaduanOpen && (
-              <div className="bg-white rounded-[16px] shadow-[0_15px_50px_rgba(0,0,0,0.25)] p-5 sm:p-6 w-[320px] sm:w-[350px] mb-4 border border-gray-100 animate-in slide-in-from-bottom-5 origin-bottom-right">
-                <form onSubmit={handleSubmitPengaduan}>
-                  {/* Nama */}
-                  <div className="mb-4">
-                    <label className="block text-[14px] font-bold text-gray-900 mb-1.5">Nama <span className="text-red-500">*</span></label>
-                    <input type="text" name="nama" required placeholder="Masukkan nama Anda" className="w-full px-3 py-2.5 bg-[#f4f5f7] border border-gray-200 rounded-lg focus:ring-1 focus:ring-[#83d65c] focus:border-[#83d65c] outline-none text-[13px] text-gray-700 transition-all placeholder:text-gray-400" />
-                  </div>
-                  {/* No WA */}
-                  <div className="mb-4">
-                    <label className="block text-[14px] font-bold text-gray-900 mb-1.5">Nomor Telepon/WA <span className="text-red-500">*</span></label>
-                    <input type="tel" name="wa" required placeholder="Masukkan nomor HP/WhatsApp" className="w-full px-3 py-2.5 bg-[#f4f5f7] border border-gray-200 rounded-lg focus:ring-1 focus:ring-[#83d65c] focus:border-[#83d65c] outline-none text-[13px] text-gray-700 transition-all placeholder:text-gray-400" />
-                  </div>
-                  {/* Kategori */}
-                  <div className="mb-4 relative">
-                    <label className="block text-[14px] font-bold text-gray-900 mb-1.5">Kategori Pengaduan <span className="text-red-500">*</span></label>
-                    <select name="kategori" required className="w-full px-3 py-2.5 bg-[#f4f5f7] border border-gray-200 rounded-lg focus:ring-1 focus:ring-[#83d65c] focus:border-[#83d65c] outline-none text-[13px] text-gray-500 appearance-none transition-all">
-                      <option value="">Pilih kategori pengaduan</option>
-                      <option value="Infrastruktur">Infrastruktur</option>
-                      <option value="Pelayanan">Pelayanan Publik</option>
-                      <option value="Sosial">Bantuan Sosial</option>
-                      <option value="Lainnya">Lainnya</option>
-                    </select>
-                    <ChevronDown className="absolute right-3 top-9 w-4 h-4 text-gray-400 pointer-events-none" />
-                  </div>
-                  {/* Pengaduan Textarea */}
-                  <div className="mb-4">
-                    <label className="block text-[14px] font-bold text-gray-900 mb-1.5">Pengaduan <span className="text-red-500">*</span></label>
-                    <textarea name="isi" required rows={3} placeholder="Masukkan kesan, informasi, atau detail aduan Anda" className="w-full px-3 py-2.5 bg-[#f4f5f7] border border-gray-200 rounded-lg focus:ring-1 focus:ring-[#83d65c] focus:border-[#83d65c] outline-none text-[13px] text-gray-700 resize-none transition-all placeholder:text-gray-400"></textarea>
-                  </div>
-                  {/* Lampiran */}
-                  <div className="mb-5">
-                    <label className="block text-[14px] font-bold text-gray-900 mb-1.5">Lampiran</label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <FileText className="h-4 w-4 text-gray-500" />
-                      </div>
-                      <input type="text" readOnly placeholder={lampiranPengaduan ? '✓ Foto berhasil dipilih' : 'Unggah foto jika ada'} className="w-full pl-9 pr-3 py-2.5 bg-[#f4f5f7] border border-gray-200 rounded-lg text-[13px] text-gray-400 cursor-pointer" />
-                      <input type="file" accept="image/*" onChange={handleLampiranPengaduan} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-                    </div>
-                  </div>
-                  {/* Submit Button */}
-                  <div className="flex justify-end">
-                    <button type="submit" className="bg-[#83d65c] hover:bg-[#6cb949] text-white font-bold py-2.5 px-6 rounded-lg flex items-center transition-colors text-[14px] shadow-sm">
-                      <Send className="w-4 h-4 mr-2" /> Kirim
-                    </button>
-                  </div>
-                </form>
-              </div>
-            )}
-
-            {/* Tombol-tombol Floating Bawah */}
-            <div className="flex items-center gap-3">
-              {/* Tombol Aksesibilitas Kiri */}
-              <button className="bg-[#35529f] hover:bg-blue-800 text-white p-2 rounded-full shadow-[0_4px_10px_rgba(0,0,0,0.2)] border-2 border-white transition-transform hover:scale-105 flex items-center justify-center h-12 w-12 shrink-0">
-                 {/* Menggunakan Inline SVG Aksesibilitas (Wheelchair) agar akurat seperti di Screenshot */}
-                 <svg className="w-7 h-7 fill-white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                   <path d="M11 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm-1.8 11.5v-2.3H6.8V9.3h4c1 0 1.9.5 2.4 1.2l1.6 2.5c.2.3.6.5 1 .5h2.4v2h-3c-.6 0-1.1-.3-1.4-.7l-1.1-1.7v3.2c0 1.2-.6 2.3-1.6 2.9A4.4 4.4 0 0 1 4.5 17c0-2.4 1.8-4.3 4.2-4.5h.5zm-3 8.3a6.3 6.3 0 0 1-4-8.8l1.6 1.1A4.5 4.5 0 0 0 5.4 18c1.3 1 3 1.2 4.4.5L11 20a6.3 6.3 0 0 1-4.8 1.8z"/>
-                 </svg>
-              </button>
-
-              {/* Tombol Pengaduan Kanan */}
-              <button
-                onClick={() => setIsPengaduanOpen(!isPengaduanOpen)}
-                className="bg-[#df8b88] hover:bg-[#c97573] text-white px-5 py-2.5 rounded-full shadow-[0_4px_10px_rgba(0,0,0,0.2)] border-2 border-white flex items-center justify-center font-bold transition-transform hover:scale-105 h-12 shrink-0"
-              >
-                {isPengaduanOpen ? <X className="w-5 h-5 mr-2" /> : <Headphones className="w-5 h-5 mr-2" />}
-                <span className="text-[15px] pt-0.5">Pengaduan</span>
-              </button>
-            </div>
-        </div>
-        
-        {/* MODAL INBOX PENGADUAN (KHUSUS ADMIN) */}
-        {showAdminPengaduan && isAdmin && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[120] p-4">
-            <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full p-6 md:p-8 max-h-[90vh] flex flex-col animate-in zoom-in-95 border border-blue-100">
-               <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
-                 <h3 className="text-2xl font-extrabold text-gray-900 flex items-center">
-                   <div className="bg-sky-100 p-2 rounded-xl mr-3">
-                     <Inbox className="w-6 h-6 text-sky-600" />
-                   </div>
-                   Kotak Masuk Pengaduan
-                 </h3>
-                 <button onClick={() => setShowAdminPengaduan(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
-                   <X className="w-5 h-5" />
-                 </button>
-               </div>
-
-               <div className="flex-grow overflow-y-auto custom-scrollbar pr-2 space-y-4">
-                 {daftarPengaduan.length === 0 ? (
-                    <div className="text-center text-gray-500 py-10 font-medium bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                      Belum ada pengaduan yang masuk dari pengunjung.
-                    </div>
-                 ) : (
-                    daftarPengaduan.map((item: any) => (
-                       <div key={item.id} className={`p-5 rounded-2xl border ${item.status === 'baru' ? 'bg-sky-50/50 border-sky-200' : 'bg-white border-gray-200'} shadow-sm relative transition-colors`}>
-                          <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-3">
-                             <div>
-                               <h4 className="font-extrabold text-gray-900 text-lg flex items-center gap-2">
-                                 {item.nama}
-                                 {item.status === 'baru' && <span className="bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">Baru</span>}
-                               </h4>
-                               <div className="text-sm text-gray-500 font-medium flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
-                                  <span className="flex items-center"><Clock className="w-3.5 h-3.5 mr-1" /> {item.tanggal}</span>
-                                  <span className="flex items-center"><Phone className="w-3.5 h-3.5 mr-1" /> <a href={`https://wa.me/${item.wa.replace(/^0/, '62')}`} target="_blank" rel="noopener noreferrer" className="hover:text-sky-600 hover:underline">{item.wa}</a></span>
-                                  <span className="bg-gray-200 text-gray-700 px-2 py-0.5 rounded-md text-xs">{item.kategori}</span>
-                               </div>
-                             </div>
-                             <div className="flex gap-2">
-                                {item.status === 'baru' && (
-                                   <button onClick={() => updatePengaduan(daftarPengaduan.map((p:any) => p.id === item.id ? {...p, status: 'dibaca'} : p))} className="text-sky-600 bg-sky-100 hover:bg-sky-200 px-3 py-1.5 rounded-lg transition text-sm font-bold flex items-center" title="Tandai telah dibaca">
-                                     <Check className="w-4 h-4 mr-1" /> Tandai Dibaca
-                                   </button>
-                                )}
-                                <button onClick={() => showConfirm('Hapus pesan pengaduan ini secara permanen?', () => updatePengaduan(daftarPengaduan.filter((p:any) => p.id !== item.id)))} className="text-rose-600 bg-rose-100 hover:bg-rose-200 p-2 rounded-lg transition" title="Hapus Pesan">
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                             </div>
-                          </div>
-                          <div className="bg-white p-4 rounded-xl border border-gray-100 mt-2">
-                             <p className="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm font-medium">{item.isi}</p>
-                          </div>
-                          
-                          {item.lampiran && (
-                            <div className="mt-3">
-                               <p className="text-xs font-bold text-gray-500 mb-1.5 flex items-center"><FileText className="w-3.5 h-3.5 mr-1" /> Lampiran Foto:</p>
-                               <img src={item.lampiran} alt="Lampiran Pengaduan" className="max-w-[200px] h-auto rounded-lg border border-gray-200 shadow-sm cursor-pointer hover:opacity-90 transition-opacity" onClick={() => window.open(item.lampiran, '_blank')} />
-                            </div>
-                          )}
-                       </div>
-                    ))
-                 )}
-               </div>
-            </div>
-          </div>
-        )}
-
       </div>
 
       {showLoginModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[100] p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 animate-in zoom-in-95 duration-300 border border-blue-100">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 animate-in zoom-in-95 duration-300 border border-emerald-100">
             <div className="flex justify-between items-center mb-8">
               <h3 className="text-2xl font-extrabold text-gray-800 flex items-center tracking-tight">
-                <div className="bg-blue-100 p-2 rounded-xl mr-3">
-                  <LogIn className="w-6 h-6 text-blue-600" />
+                <div className="bg-emerald-100 p-2 rounded-xl mr-3">
+                  <LogIn className="w-6 h-6 text-emerald-600" />
                 </div>
                 Login Admin
               </h3>
@@ -1392,7 +1215,7 @@ export default function App() {
                   type="text" 
                   name="username" 
                   required
-                  className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium" 
+                  className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
                   placeholder="Masukkan username"
                 />
               </div>
@@ -1402,48 +1225,22 @@ export default function App() {
                   type="password" 
                   name="password" 
                   required
-                  className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium" 
+                  className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
                   placeholder="Masukkan password"
                 />
               </div>
               <button 
                 type="submit" 
-                className="w-full bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-700 hover:to-sky-700 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-[0_8px_20px_rgba(14,165,233,0.3)] hover:shadow-[0_12px_25px_rgba(14,165,233,0.4)] hover:-translate-y-0.5 mt-4"
+                className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-[0_8px_20px_rgba(13,148,136,0.3)] hover:shadow-[0_12px_25px_rgba(13,148,136,0.4)] hover:-translate-y-0.5 mt-4"
               >
                 Masuk ke Dasbor
               </button>
-              <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 mt-4">
-                <p className="text-xs text-blue-800 text-center font-medium">
+              <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100 mt-4">
+                <p className="text-xs text-emerald-800 text-center font-medium">
                   Peringatan! :<br/>Jangan berikan informasi apapun mengenai username dan password kepada pihak yang tidak bertanggung jawab
                 </p>
               </div>
             </form>
-          </div>
-        </div>
-      )}
-
-      {dialog.isOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-4" style={{ zIndex: 99999 }}>
-          <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 animate-in zoom-in-95 border border-blue-100">
-            <h3 className="text-xl font-extrabold text-gray-900 mb-4 flex items-center">
-              <Info className="w-6 h-6 mr-2 text-sky-600"/>
-              {dialog.type === 'confirm' ? 'Konfirmasi' : 'Pemberitahuan'}
-            </h3>
-            <p className="text-gray-600 mb-8 font-medium">{dialog.message}</p>
-            <div className="flex justify-end gap-3">
-              {dialog.type === 'confirm' && (
-                <button onClick={() => setDialog({ isOpen: false, type: 'alert', message: '', onConfirm: null })} className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition">Batal</button>
-              )}
-              <button
-                onClick={() => {
-                  if (dialog.onConfirm) dialog.onConfirm();
-                  setDialog({ isOpen: false, type: 'alert', message: '', onConfirm: null });
-                }}
-                className={`px-5 py-2.5 text-white rounded-xl font-bold shadow-[0_8px_20px_rgba(14,165,233,0.3)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_25px_rgba(14,165,233,0.4)] bg-gradient-to-r from-blue-600 to-sky-600`}
-              >
-                {dialog.type === 'confirm' ? 'Ya, Lanjutkan' : 'Tutup'}
-              </button>
-            </div>
           </div>
         </div>
       )}
@@ -1659,11 +1456,11 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
           <div className="absolute top-6 left-6 z-30 group flex items-center">
              <button 
                onClick={() => { setEditForm(dataBeranda); setShowEditor(true); }} 
-               className="cursor-pointer bg-white/90 backdrop-blur hover:bg-white text-blue-800 p-3.5 rounded-2xl font-bold flex items-center justify-center shadow-[0_8px_30px_rgba(0,0,0,0.3)] transition-all hover:scale-110 border border-white/50"
+               className="cursor-pointer bg-white/90 backdrop-blur hover:bg-white text-teal-800 p-3.5 rounded-2xl font-bold flex items-center justify-center shadow-[0_8px_30px_rgba(0,0,0,0.3)] transition-all hover:scale-110 border border-white/50"
              >
-                <Edit className="w-6 h-6 text-blue-600" /> 
+                <Edit className="w-6 h-6 text-teal-600" /> 
              </button>
-             <div className="absolute left-full ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white text-blue-800 px-4 py-2 rounded-xl font-bold shadow-lg pointer-events-none whitespace-nowrap">
+             <div className="absolute left-full ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white text-teal-800 px-4 py-2 rounded-xl font-bold shadow-lg pointer-events-none whitespace-nowrap">
                Edit Konten Beranda
              </div>
           </div>
@@ -1690,7 +1487,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
           </div>
 
           <h1 className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight drop-shadow-2xl">
-            Desa <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-300 to-blue-400">{dataBeranda.namaDesa}</span>
+            Desa <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400">{dataBeranda.namaDesa}</span>
           </h1>
           <p className="text-lg md:text-2xl text-gray-200 mb-10 max-w-3xl mx-auto font-medium leading-relaxed drop-shadow-lg whitespace-pre-line">
             {dataBeranda.deskripsiDesa}
@@ -1698,7 +1495,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
           <div className="flex flex-col sm:flex-row justify-center gap-5">
             <button 
               onClick={() => navigateTo('profil')}
-              className="bg-gradient-to-r from-blue-500 to-sky-600 hover:from-blue-400 hover:to-sky-500 text-white font-bold text-lg py-4 px-10 rounded-2xl shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-all transform hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(59,130,246,0.6)] border border-transparent"
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-lg py-4 px-10 rounded-2xl shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all transform hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] border border-transparent"
             >
               Profil Desa
             </button>
@@ -1721,12 +1518,12 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
       <section className="py-20 bg-gray-50 relative">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-gray-100 p-8 md:p-16 flex flex-col md:flex-row items-center gap-12 relative overflow-hidden group hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)] transition-all duration-300">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-sky-50 rounded-bl-full -z-10 opacity-60"></div>
-            <div className="absolute bottom-0 left-0 w-40 h-40 bg-blue-50 rounded-tr-full -z-10 opacity-60"></div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-teal-50 rounded-bl-full -z-10 opacity-60"></div>
+            <div className="absolute bottom-0 left-0 w-40 h-40 bg-emerald-50 rounded-tr-full -z-10 opacity-60"></div>
 
             <div className="w-full md:w-1/3 flex justify-center z-10">
               <div className="relative group/img">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-sky-700 rounded-2xl transform translate-x-4 translate-y-4 group-hover/img:translate-x-6 group-hover/img:translate-y-6 transition-transform duration-500 shadow-xl"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 to-teal-700 rounded-2xl transform translate-x-4 translate-y-4 group-hover/img:translate-x-6 group-hover/img:translate-y-6 transition-transform duration-500 shadow-xl"></div>
                 <img 
                   src={dataBeranda.fotoKades} 
                   alt="Foto Kepala Desa" 
@@ -1740,24 +1537,24 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
               </div>
             </div>
             <div className="w-full md:w-2/3 z-10">
-              <span className="text-sky-600 font-bold uppercase tracking-wider text-sm mb-2 block">Sambutan Hangat</span>
+              <span className="text-teal-600 font-bold uppercase tracking-wider text-sm mb-2 block">Sambutan Hangat</span>
               <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">Kepala Desa</h2>
-              <div className="w-24 h-1.5 bg-gradient-to-r from-blue-500 to-sky-400 rounded-full mb-8"></div>
+              <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full mb-8"></div>
               <p className="text-gray-600 leading-relaxed text-lg mb-8 italic relative whitespace-pre-line">
-                <span className="absolute -top-4 -left-4 text-6xl text-sky-200 opacity-50">"</span>
+                <span className="absolute -top-4 -left-4 text-6xl text-teal-200 opacity-50">"</span>
                 {dataBeranda.sambutanKades}
-                <span className="absolute -bottom-8 ml-2 text-6xl text-sky-200 opacity-50">"</span>
+                <span className="absolute -bottom-8 ml-2 text-6xl text-teal-200 opacity-50">"</span>
               </p>
               <div>
                 <div className="font-extrabold text-gray-900 text-2xl mt-4">{dataBeranda.namaKades}</div>
-                <div className="text-blue-600 font-bold mt-1 text-lg">{dataBeranda.jabatanKades}</div>
+                <div className="text-emerald-600 font-bold mt-1 text-lg">{dataBeranda.jabatanKades}</div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="py-20 relative bg-gradient-to-br from-blue-900 to-sky-900 overflow-hidden">
+      <section className="py-20 relative bg-gradient-to-br from-emerald-900 to-teal-900 overflow-hidden">
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1592982537447-6f2a6a0a091c?w=1920&q=80')", backgroundSize: 'cover', backgroundPosition: 'center', filter: 'grayscale(100%)' }}></div>
         
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
@@ -1781,7 +1578,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                   <div className="text-3xl sm:text-5xl font-extrabold text-white mb-1 sm:mb-2 drop-shadow-md">
                     <AnimatedNumber value={rawNum} />
                   </div>
-                  <div className="text-sky-200 font-bold text-xs sm:text-lg tracking-wide">{stat.label}</div>
+                  <div className="text-teal-200 font-bold text-xs sm:text-lg tracking-wide">{stat.label}</div>
 
                   {stat.id === 1 && (
                     <div className="flex justify-between items-stretch gap-2 mt-4 pt-4 border-t border-white/20 w-full relative z-10">
@@ -1789,13 +1586,13 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                         <span className="font-black text-white text-sm sm:text-xl leading-none drop-shadow-md">
                           <AnimatedNumber value={rawLaki} />
                         </span>
-                        <span className="text-[6px] sm:text-[11px] text-sky-100 font-bold uppercase tracking-wider mt-1.5 text-center break-words whitespace-normal leading-tight w-full">Laki-laki</span>
+                        <span className="text-[6px] sm:text-[11px] text-teal-100 font-bold uppercase tracking-wider mt-1.5 text-center break-words whitespace-normal leading-tight w-full">Laki-laki</span>
                       </div>
                       <div className="flex flex-col items-center justify-center w-1/2 bg-white/5 rounded-xl py-2 px-1 shadow-inner border border-white/10">
                         <span className="font-black text-white text-sm sm:text-xl leading-none drop-shadow-md">
                           <AnimatedNumber value={rawPerempuan} />
                         </span>
-                        <span className="text-[6px] sm:text-[11px] text-sky-100 font-bold uppercase tracking-wider mt-1.5 text-center break-words whitespace-normal leading-tight w-full">Perempuan</span>
+                        <span className="text-[6px] sm:text-[11px] text-teal-100 font-bold uppercase tracking-wider mt-1.5 text-center break-words whitespace-normal leading-tight w-full">Perempuan</span>
                       </div>
                     </div>
                   )}
@@ -1810,25 +1607,25 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
       <section className="py-20 bg-white border-t border-gray-100 relative">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="text-center mb-14">
-            <span className="text-sky-600 font-bold tracking-widest uppercase text-sm mb-2 block">Agenda & Waktu</span>
+            <span className="text-teal-600 font-bold tracking-widest uppercase text-sm mb-2 block">Agenda & Waktu</span>
             <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-6 tracking-tight">Kalender Desa</h2>
-            <div className="w-24 h-1.5 bg-gradient-to-r from-blue-600 to-sky-400 mx-auto rounded-full"></div>
+            <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-600 to-teal-400 mx-auto rounded-full"></div>
           </div>
 
           <div className="max-w-5xl mx-auto flex flex-col lg:flex-row gap-10 lg:gap-16">
             <div className="w-full lg:w-1/2 bg-white rounded-3xl shadow-[0_15px_40px_rgba(0,0,0,0.08)] border border-gray-100 p-6 sm:p-8 flex flex-col relative overflow-hidden group hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] transition-all duration-300">
               <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100">
                 <div className="flex items-center">
-                  <CalendarDays className="w-7 h-7 text-sky-600 mr-3" />
+                  <CalendarDays className="w-7 h-7 text-teal-600 mr-3" />
                   <span className="text-xl font-extrabold text-gray-900 min-w-[140px]">
                     {monthNames[currentMonth]} {currentYear}
                   </span>
                 </div>
                 <div className="flex gap-1.5">
-                  <button onClick={handlePrevYear} className="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:bg-sky-50 hover:text-sky-600 transition" title="Tahun Sebelumnya"><ChevronsLeft className="w-4 h-4"/></button>
-                  <button onClick={handlePrevMonth} className="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:bg-sky-50 hover:text-sky-600 transition" title="Bulan Sebelumnya"><ChevronLeft className="w-4 h-4"/></button>
-                  <button onClick={handleNextMonth} className="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:bg-sky-50 hover:text-sky-600 transition" title="Bulan Berikutnya"><ChevronRight className="w-4 h-4"/></button>
-                  <button onClick={handleNextYear} className="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:bg-sky-50 hover:text-sky-600 transition" title="Tahun Berikutnya"><ChevronsRight className="w-4 h-4"/></button>
+                  <button onClick={handlePrevYear} className="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:bg-teal-50 hover:text-teal-600 transition" title="Tahun Sebelumnya"><ChevronsLeft className="w-4 h-4"/></button>
+                  <button onClick={handlePrevMonth} className="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:bg-teal-50 hover:text-teal-600 transition" title="Bulan Sebelumnya"><ChevronLeft className="w-4 h-4"/></button>
+                  <button onClick={handleNextMonth} className="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:bg-teal-50 hover:text-teal-600 transition" title="Bulan Berikutnya"><ChevronRight className="w-4 h-4"/></button>
+                  <button onClick={handleNextYear} className="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:bg-teal-50 hover:text-teal-600 transition" title="Tahun Berikutnya"><ChevronsRight className="w-4 h-4"/></button>
                 </div>
               </div>
               
@@ -1882,9 +1679,9 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                           }}
                           className={`w-full h-full flex flex-col items-center justify-center rounded-xl font-bold text-sm sm:text-base transition-all cursor-pointer ${
                             isToday 
-                              ? 'bg-gradient-to-br from-blue-500 to-sky-600 text-white shadow-lg shadow-sky-500/40 transform scale-110 z-10' 
+                              ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-teal-500/40 transform scale-110 z-10' 
                               : hasAgenda
-                                ? 'bg-sky-50 text-sky-800 border border-sky-200 hover:bg-sky-100'
+                                ? 'bg-teal-50 text-teal-800 border border-teal-200 hover:bg-teal-100'
                                 : isRedDay 
                                   ? 'text-rose-500 hover:bg-rose-50' 
                                   : 'text-gray-700 hover:bg-gray-50'
@@ -1892,7 +1689,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                         >
                           {day}
                           <div className="flex gap-0.5 absolute bottom-1.5">
-                             {hasAgenda && !isToday && <span className="w-1.5 h-1.5 bg-sky-500 rounded-full"></span>}
+                             {hasAgenda && !isToday && <span className="w-1.5 h-1.5 bg-teal-500 rounded-full"></span>}
                              {isHoliday && !isToday && !hasAgenda && <span className="w-1.5 h-1.5 bg-rose-500 rounded-full"></span>}
                           </div>
                         </div>
@@ -1903,11 +1700,11 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
               </div>
 
               {infoTanggal && (
-                <div className="mt-6 p-4 bg-sky-50 border border-sky-100 rounded-xl flex items-start animate-in fade-in slide-in-from-bottom-2">
-                  <Info className="w-5 h-5 text-sky-600 mr-3 flex-shrink-0 mt-0.5" />
+                <div className="mt-6 p-4 bg-teal-50 border border-teal-100 rounded-xl flex items-start animate-in fade-in slide-in-from-bottom-2">
+                  <Info className="w-5 h-5 text-teal-600 mr-3 flex-shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-bold text-sky-900 text-sm mb-1">{infoTanggal.tanggal}</h4>
-                    <p className="text-sm text-sky-700 font-medium leading-relaxed">
+                    <h4 className="font-bold text-teal-900 text-sm mb-1">{infoTanggal.tanggal}</h4>
+                    <p className="text-sm text-teal-700 font-medium leading-relaxed">
                       {infoTanggal.keterangan}
                     </p>
                   </div>
@@ -1918,11 +1715,11 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
             <div className="w-full lg:w-1/2 flex flex-col">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-2xl font-extrabold text-gray-900 flex items-center">
-                   <Activity className="w-6 h-6 text-sky-600 mr-3" />
+                   <Activity className="w-6 h-6 text-teal-600 mr-3" />
                    Agenda Bulan Ini
                 </h3>
                 {isAdmin && (
-                  <button onClick={() => openEditorAgenda()} className="text-sm bg-sky-100 hover:bg-sky-200 text-sky-700 px-3 py-1.5 rounded-lg font-bold flex items-center transition shadow-sm">
+                  <button onClick={() => openEditorAgenda()} className="text-sm bg-teal-100 hover:bg-teal-200 text-teal-700 px-3 py-1.5 rounded-lg font-bold flex items-center transition shadow-sm">
                     <Plus className="w-4 h-4 mr-1" /> Tambah Agenda
                   </button>
                 )}
@@ -1936,20 +1733,20 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                     const d = new Date(agenda.tanggal);
                     const tgl = String(d.getDate()).padStart(2, '0');
                     return (
-                      <div key={agenda.id} className="bg-white border border-gray-200 rounded-2xl p-5 flex items-start hover:shadow-[0_8px_20px_rgba(0,0,0,0.05)] transition hover:border-sky-200 relative group">
+                      <div key={agenda.id} className="bg-white border border-gray-200 rounded-2xl p-5 flex items-start hover:shadow-[0_8px_20px_rgba(0,0,0,0.05)] transition hover:border-teal-200 relative group">
                         {isAdmin && (
                           <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button onClick={() => openEditorAgenda(agenda)} className="p-1.5 text-amber-500 hover:bg-amber-50 rounded-md transition" title="Edit Agenda"><Edit className="w-4 h-4"/></button>
                             <button onClick={() => handleDeleteAgenda(agenda.id)} className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-md transition" title="Hapus Agenda"><Trash2 className="w-4 h-4"/></button>
                           </div>
                         )}
-                        <div className="bg-gradient-to-br from-sky-50 to-blue-50 text-sky-700 w-16 h-16 rounded-xl flex flex-col items-center justify-center font-extrabold shadow-sm border border-sky-100 flex-shrink-0 mr-5">
-                          <span className="text-xs uppercase tracking-widest text-sky-500">{monthNames[d.getMonth()].substring(0,3)}</span>
+                        <div className="bg-gradient-to-br from-teal-50 to-emerald-50 text-teal-700 w-16 h-16 rounded-xl flex flex-col items-center justify-center font-extrabold shadow-sm border border-teal-100 flex-shrink-0 mr-5">
+                          <span className="text-xs uppercase tracking-widest text-teal-500">{monthNames[d.getMonth()].substring(0,3)}</span>
                           <span className="text-2xl leading-none">{tgl}</span>
                         </div>
                         <div className="pr-12">
                           <h4 className="font-extrabold text-gray-900 text-lg leading-tight">{agenda.judul}</h4>
-                          <p className="text-gray-600 text-sm mt-1.5 font-medium flex items-center"><MapPin className="w-4 h-4 mr-1 text-sky-500"/> {agenda.lokasi}</p>
+                          <p className="text-gray-600 text-sm mt-1.5 font-medium flex items-center"><MapPin className="w-4 h-4 mr-1 text-teal-500"/> {agenda.lokasi}</p>
                         </div>
                       </div>
                     );
@@ -1958,7 +1755,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
               </div>
               
               <div className="mt-6 pt-4 border-t border-gray-100">
-                <button onClick={() => navigateTo('berita', 'list-berita')} className="text-sky-600 font-extrabold hover:text-sky-800 flex items-center transition group">
+                <button onClick={() => navigateTo('berita', 'list-berita')} className="text-teal-600 font-extrabold hover:text-teal-800 flex items-center transition group">
                    Lihat semua kegiatan <ArrowRight className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition" />
                 </button>
               </div>
@@ -1971,11 +1768,11 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
       {/* Modal Editor Khusus Admin dengan Gaya UI Seragam */}
       {showEditor && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full p-8 max-h-[90vh] overflow-y-auto border border-blue-100 animate-in zoom-in-95">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full p-8 max-h-[90vh] overflow-y-auto border border-emerald-100 animate-in zoom-in-95">
             <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100 sticky top-0 bg-white z-10">
               <h3 className="text-2xl font-extrabold text-gray-900 flex items-center">
-                <div className="bg-blue-100 p-2 rounded-xl mr-3">
-                   <Home className="w-6 h-6 text-blue-600" />
+                <div className="bg-emerald-100 p-2 rounded-xl mr-3">
+                   <Home className="w-6 h-6 text-emerald-600" />
                 </div>
                 Pengaturan Konten Beranda
               </h3>
@@ -1987,8 +1784,8 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
             <form onSubmit={handleSave} className="space-y-8">
               
               <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
-                <h4 className="font-extrabold text-lg text-blue-800 mb-4 flex items-center">
-                   <span className="w-6 h-1 bg-blue-500 rounded-full mr-3"></span> Pengaturan Tampilan Situs
+                <h4 className="font-extrabold text-lg text-emerald-800 mb-4 flex items-center">
+                   <span className="w-6 h-1 bg-emerald-500 rounded-full mr-3"></span> Pengaturan Tampilan Situs
                 </h4>
                 <div className="grid grid-cols-1 gap-5">
                   <div className="col-span-full mb-2">
@@ -2002,7 +1799,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                          </div>
                       )}
                       <div className="flex-1">
-                        <label className="cursor-pointer bg-white text-blue-700 border-2 border-blue-200 hover:bg-blue-50 px-5 py-2 rounded-xl font-bold flex items-center justify-center transition-all w-max shadow-sm">
+                        <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 px-5 py-2 rounded-xl font-bold flex items-center justify-center transition-all w-max shadow-sm">
                           <Upload className="w-5 h-5 mr-2" /> Ganti Gambar Latar Luar
                           <input type="file" accept="image/*" className="hidden" onChange={handleOuterBgChange} />
                         </label>
@@ -2014,14 +1811,14 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
               </div>
 
               <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
-                <h4 className="font-extrabold text-lg text-blue-800 mb-4 flex items-center">
-                   <span className="w-6 h-1 bg-blue-500 rounded-full mr-3"></span> Galeri Foto Header
+                <h4 className="font-extrabold text-lg text-emerald-800 mb-4 flex items-center">
+                   <span className="w-6 h-1 bg-emerald-500 rounded-full mr-3"></span> Galeri Foto Header
                 </h4>
                 <div className="grid grid-cols-1 gap-5">
                   <div className="col-span-full mb-2">
                     <label className="block text-sm font-bold text-gray-700 mb-3">Foto-foto Galeri (Muncul Berjalan di Kanan Atas)</label>
                     <div className="bg-white p-5 rounded-2xl border border-gray-200">
-                      <label className="cursor-pointer bg-white text-blue-700 border-2 border-blue-200 hover:bg-blue-50 px-5 py-3 rounded-xl font-bold flex items-center justify-center transition-all shadow-sm w-full mb-4">
+                      <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 px-5 py-3 rounded-xl font-bold flex items-center justify-center transition-all shadow-sm w-full mb-4">
                         <Upload className="w-5 h-5 mr-2" /> Tambah Foto Galeri Header
                         <input type="file" accept="image/*" multiple className="hidden" onChange={handleGaleriHeaderUpload} />
                       </label>
@@ -2048,8 +1845,8 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
               </div>
 
               <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
-                <h4 className="font-extrabold text-lg text-blue-800 mb-4 flex items-center">
-                   <span className="w-6 h-1 bg-blue-500 rounded-full mr-3"></span> Bagian Hero (Atas)
+                <h4 className="font-extrabold text-lg text-emerald-800 mb-4 flex items-center">
+                   <span className="w-6 h-1 bg-emerald-500 rounded-full mr-3"></span> Bagian Hero (Atas)
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   
@@ -2064,7 +1861,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                          </div>
                       )}
                       <div className="flex-1">
-                        <label className="cursor-pointer bg-white text-blue-700 border-2 border-blue-200 hover:bg-blue-50 px-5 py-2 rounded-xl font-bold flex items-center justify-center transition-all w-max shadow-sm">
+                        <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 px-5 py-2 rounded-xl font-bold flex items-center justify-center transition-all w-max shadow-sm">
                           <Upload className="w-5 h-5 mr-2" /> Ganti Gambar Latar
                           <input type="file" accept="image/*" className="hidden" onChange={handleHeroBgChange} />
                         </label>
@@ -2077,14 +1874,14 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                     <label className="block text-sm font-bold text-gray-700 mb-3">Logo Navigasi Header (Pojok Kiri Atas)</label>
                     <div className="flex items-center gap-5">
                       {editForm.headerLogo ? (
-                         <img src={editForm.headerLogo} alt="Preview Logo Header" className="w-16 h-16 object-contain bg-blue-900 rounded-xl shadow-sm border border-blue-800 p-2" />
+                         <img src={editForm.headerLogo} alt="Preview Logo Header" className="w-16 h-16 object-contain bg-emerald-900 rounded-xl shadow-sm border border-emerald-800 p-2" />
                       ) : (
                          <div className="w-16 h-16 bg-gray-200 rounded-xl flex items-center justify-center border border-gray-300 border-dashed">
                            <Landmark className="w-6 h-6 text-gray-400" />
                          </div>
                       )}
                       <div className="flex-1">
-                        <label className="cursor-pointer bg-white text-blue-700 border-2 border-blue-200 hover:bg-blue-50 px-5 py-2 rounded-xl font-bold flex items-center justify-center transition-all w-max shadow-sm">
+                        <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 px-5 py-2 rounded-xl font-bold flex items-center justify-center transition-all w-max shadow-sm">
                           <Upload className="w-5 h-5 mr-2" /> {editForm.headerLogo ? 'Ganti Logo Header' : 'Upload Logo Header'}
                           <input type="file" accept="image/*" className="hidden" onChange={handleHeaderLogoChange} />
                         </label>
@@ -2104,7 +1901,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                          </div>
                       )}
                       <div className="flex-1">
-                        <label className="cursor-pointer bg-white text-blue-700 border-2 border-blue-200 hover:bg-blue-50 px-5 py-2 rounded-xl font-bold flex items-center justify-center transition-all w-max shadow-sm">
+                        <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 px-5 py-2 rounded-xl font-bold flex items-center justify-center transition-all w-max shadow-sm">
                           <Upload className="w-5 h-5 mr-2" /> {editForm.logoHero ? 'Ganti Logo Hero' : 'Upload Logo Hero'}
                           <input type="file" accept="image/*" className="hidden" onChange={handleLogoHeroChange} />
                         </label>
@@ -2118,7 +1915,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                       type="text" required
                       value={editForm.namaDesa}
                       onChange={(e) => setEditForm({...editForm, namaDesa: e.target.value})}
-                      className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium" 
+                      className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
                     />
                   </div>
                   <div className="col-span-full">
@@ -2127,15 +1924,15 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                       required rows={3}
                       value={editForm.deskripsiDesa}
                       onChange={(e) => setEditForm({...editForm, deskripsiDesa: e.target.value})}
-                      className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium leading-relaxed" 
+                      className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium leading-relaxed" 
                     ></textarea>
                   </div>
                 </div>
               </div>
 
               <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
-                <h4 className="font-extrabold text-lg text-blue-800 mb-4 flex items-center">
-                   <span className="w-6 h-1 bg-blue-500 rounded-full mr-3"></span> Bagian Sambutan
+                <h4 className="font-extrabold text-lg text-emerald-800 mb-4 flex items-center">
+                   <span className="w-6 h-1 bg-emerald-500 rounded-full mr-3"></span> Bagian Sambutan
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                   <div>
@@ -2144,7 +1941,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                       type="text" required
                       value={editForm.namaKades}
                       onChange={(e) => setEditForm({...editForm, namaKades: e.target.value})}
-                      className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium" 
+                      className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
                     />
                   </div>
                   <div>
@@ -2153,7 +1950,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                       type="text" required
                       value={editForm.jabatanKades}
                       onChange={(e) => setEditForm({...editForm, jabatanKades: e.target.value})}
-                      className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium" 
+                      className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
                     />
                   </div>
                   <div className="col-span-full">
@@ -2161,7 +1958,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                     <div className="flex items-center gap-5">
                       <img src={editForm.fotoKades} alt="Preview Kades" className="w-24 h-24 object-cover rounded-xl shadow-sm border border-gray-300" />
                       <div className="flex-1">
-                        <label className="cursor-pointer bg-white text-blue-700 border-2 border-blue-200 hover:bg-blue-50 px-5 py-2 rounded-xl font-bold flex items-center justify-center transition-all w-max shadow-sm">
+                        <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 px-5 py-2 rounded-xl font-bold flex items-center justify-center transition-all w-max shadow-sm">
                           <Upload className="w-5 h-5 mr-2" /> Ganti Foto
                           <input type="file" accept="image/*" className="hidden" onChange={handleFotoKadesUpload} />
                         </label>
@@ -2174,15 +1971,15 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                       required rows={6}
                       value={editForm.sambutanKades}
                       onChange={(e) => setEditForm({...editForm, sambutanKades: e.target.value})}
-                      className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium leading-relaxed" 
+                      className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium leading-relaxed" 
                     ></textarea>
                   </div>
                 </div>
               </div>
 
               <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
-                <h4 className="font-extrabold text-lg text-blue-800 mb-4 flex items-center">
-                   <span className="w-6 h-1 bg-blue-500 rounded-full mr-3"></span> Pengaturan Angka Statistik Dasar
+                <h4 className="font-extrabold text-lg text-emerald-800 mb-4 flex items-center">
+                   <span className="w-6 h-1 bg-emerald-500 rounded-full mr-3"></span> Pengaturan Angka Statistik Dasar
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {editForm.stats.map((stat: any, index: number) => {
@@ -2209,7 +2006,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                            value={displayNum}
                            onChange={(e) => handleStatChange(stat.id, 'num', e.target.value)}
                            disabled={isPopulasi}
-                           className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 ${isPopulasi ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`} 
+                           className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 ${isPopulasi ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`} 
                          />
                       </div>
                       <div>
@@ -2218,7 +2015,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                            type="text" required
                            value={stat.label}
                            onChange={(e) => handleStatChange(stat.id, 'label', e.target.value)}
-                           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500" 
+                           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" 
                          />
                       </div>
                       {isPopulasi && (
@@ -2255,7 +2052,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                 <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
                   Batal
                 </button>
-                <button type="submit" className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(37,99,235,0.3)] hover:shadow-[0_10px_25px_rgba(37,99,235,0.4)] hover:-translate-y-0.5">
+                <button type="submit" className="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(5,150,105,0.3)] hover:shadow-[0_10px_25px_rgba(5,150,105,0.4)] hover:-translate-y-0.5">
                   <Save className="w-5 h-5 mr-2" /> Simpan Perubahan Beranda
                 </button>
               </div>
@@ -2266,10 +2063,10 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
 
       {showEditorAgenda && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-in zoom-in-95 border border-blue-100">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-in zoom-in-95 border border-emerald-100">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-extrabold text-gray-900 flex items-center tracking-tight">
-                <CalendarDays className="w-6 h-6 mr-2 text-blue-600" /> 
+                <CalendarDays className="w-6 h-6 mr-2 text-emerald-600" /> 
                 {editDataAgenda.id ? 'Edit Agenda' : 'Tambah Agenda Baru'}
               </h3>
               <button onClick={() => setShowEditorAgenda(false)} className="text-gray-400 hover:bg-gray-100 p-2 rounded-full transition">
@@ -2284,7 +2081,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                   type="text" required
                   value={editDataAgenda.judul}
                   onChange={(e) => setEditDataAgenda({...editDataAgenda, judul: e.target.value})}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 font-medium" 
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 font-medium" 
                 />
               </div>
               <div>
@@ -2293,7 +2090,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                   type="text" required
                   value={editDataAgenda.lokasi}
                   onChange={(e) => setEditDataAgenda({...editDataAgenda, lokasi: e.target.value})}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 font-medium" 
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 font-medium" 
                 />
               </div>
               <div>
@@ -2302,13 +2099,13 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                   type="date" required
                   value={editDataAgenda.tanggal}
                   onChange={(e) => setEditDataAgenda({...editDataAgenda, tanggal: e.target.value})}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 font-medium" 
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 font-medium" 
                 />
               </div>
               
               <div className="flex justify-end gap-3 pt-4">
                 <button type="button" onClick={() => setShowEditorAgenda(false)} className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition">Batal</button>
-                <button type="submit" className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg transition-all hover:-translate-y-0.5 flex items-center">
+                <button type="submit" className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-lg transition-all hover:-translate-y-0.5 flex items-center">
                   <Save className="w-4 h-4 mr-2" /> Simpan Agenda
                 </button>
               </div>
@@ -2406,11 +2203,11 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
       <div className="container mx-auto px-4 lg:px-8 flex flex-col items-center justify-center">
         
         <div className="text-center mb-10 w-full max-w-4xl mx-auto">
-          <span className="text-sky-600 font-bold tracking-widest uppercase text-sm mb-2 block">Informasi Publik</span>
+          <span className="text-teal-600 font-bold tracking-widest uppercase text-sm mb-2 block">Informasi Publik</span>
           <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">Profil Desa</h2>
-          <div className="w-24 h-1.5 bg-gradient-to-r from-blue-600 to-sky-400 mx-auto rounded-full"></div>
+          <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-600 to-teal-400 mx-auto rounded-full"></div>
           <p className="mt-6 text-gray-600 text-lg leading-relaxed">
-            Mengenal lebih dekat sejarah, visi misi, letak geografis, dan struktur organisasi Pemerintah desa delta upang.
+            Mengenal lebih dekat sejarah, visi misi, letak geografis, dan struktur organisasi Pemerintah Desa Delta Upang.
           </p>
         </div>
 
@@ -2418,7 +2215,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
           <div className="w-full max-w-5xl mb-6 flex justify-end">
             <button 
               onClick={() => openEditor()} 
-              className="bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center transition-all"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center transition-all"
             >
               <Plus className="w-5 h-5 mr-2" /> Tambah Bagian Profil
             </button>
@@ -2454,7 +2251,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-transparent"></div>
                   <div className="absolute bottom-0 left-0 p-8 md:p-12 w-full">
-                      <div className="flex items-center gap-3 text-sky-300 mb-3">
+                      <div className="flex items-center gap-3 text-teal-300 mb-3">
                         {renderIcon(activeProfil.iconName, "w-6 h-6")}
                         <span className="font-bold tracking-widest uppercase text-sm">Bagian Profil</span>
                       </div>
@@ -2468,10 +2265,10 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
               <div className={`p-6 md:p-12 flex-grow flex flex-col ${!activeProfil.gambar ? 'pt-16 md:pt-20' : ''}`}>
                 {!activeProfil.gambar && (
                    <div className="mb-10 text-center">
-                     <div className="inline-flex justify-center items-center bg-sky-50 text-sky-600 p-4 rounded-2xl mb-6 shadow-sm border border-sky-100">
+                     <div className="inline-flex justify-center items-center bg-teal-50 text-teal-600 p-4 rounded-2xl mb-6 shadow-sm border border-teal-100">
                        {renderIcon(activeProfil.iconName, "w-10 h-10")}
                      </div>
-                     <h3 className="text-3xl md:text-5xl font-extrabold text-blue-900 tracking-tight">
+                     <h3 className="text-3xl md:text-5xl font-extrabold text-teal-900 tracking-tight">
                        {activeProfil.judul}
                      </h3>
                    </div>
@@ -2480,20 +2277,20 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                 <div className="flex-grow max-w-4xl mx-auto w-full">
                   {isVisiMisi ? (
                     <div className="space-y-12">
-                      <div className="bg-gradient-to-br from-blue-800 to-sky-900 rounded-3xl shadow-2xl p-8 md:p-14 text-center transform hover:scale-[1.02] transition-transform duration-300">
+                      <div className="bg-gradient-to-br from-emerald-800 to-teal-900 rounded-3xl shadow-2xl p-8 md:p-14 text-center transform hover:scale-[1.02] transition-transform duration-300">
                         <h3 className="text-2xl font-extrabold text-white mb-6 tracking-widest">VISI KAMI</h3>
-                        <p className="text-xl md:text-3xl text-blue-50 font-medium leading-tight italic drop-shadow-md">
+                        <p className="text-xl md:text-3xl text-emerald-50 font-medium leading-tight italic drop-shadow-md">
                           "{visiText}"
                         </p>
                       </div>
 
                       <div className="bg-white rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] p-8 md:p-14 border border-gray-100 relative overflow-hidden">
-                         <div className="absolute top-0 right-0 w-32 h-32 bg-sky-50 rounded-bl-[100px] -z-10 opacity-70"></div>
-                        <h3 className="text-2xl md:text-3xl font-extrabold text-blue-900 mb-8 text-center tracking-widest">MISI DESA</h3>
+                         <div className="absolute top-0 right-0 w-32 h-32 bg-teal-50 rounded-bl-[100px] -z-10 opacity-70"></div>
+                        <h3 className="text-2xl md:text-3xl font-extrabold text-teal-900 mb-8 text-center tracking-widest">MISI DESA</h3>
                         <div className="space-y-5">
                           {misiList.map((misi, index) => (
-                            <div key={index} className="flex items-start bg-gray-50 hover:bg-sky-50/50 p-5 md:p-6 rounded-2xl transition-colors duration-300 border border-gray-100 hover:border-sky-200 shadow-sm">
-                              <div className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-blue-100 to-sky-200 text-sky-800 rounded-xl flex items-center justify-center font-black text-lg md:text-xl mr-4 md:mr-5 shadow-sm border border-sky-100">
+                            <div key={index} className="flex items-start bg-gray-50 hover:bg-teal-50/50 p-5 md:p-6 rounded-2xl transition-colors duration-300 border border-gray-100 hover:border-teal-200 shadow-sm">
+                              <div className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-emerald-100 to-teal-200 text-teal-800 rounded-xl flex items-center justify-center font-black text-lg md:text-xl mr-4 md:mr-5 shadow-sm border border-teal-100">
                                 {index + 1}
                               </div>
                               <p className="text-gray-700 text-base md:text-xl font-medium pt-1 md:pt-1.5 leading-relaxed">{misi}</p>
@@ -2519,7 +2316,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                 <div className="mt-16 pt-8 border-t border-gray-100 flex justify-end w-full max-w-4xl mx-auto">
                   <button 
                     onClick={() => navigateTo('beranda')}
-                    className="flex items-center text-sm md:text-base font-bold text-gray-500 hover:text-sky-700 bg-gray-50 hover:bg-sky-50 px-6 py-3.5 rounded-xl border border-gray-200 hover:border-sky-200 transition-all shadow-sm hover:shadow-md"
+                    className="flex items-center text-sm md:text-base font-bold text-gray-500 hover:text-teal-700 bg-gray-50 hover:bg-teal-50 px-6 py-3.5 rounded-xl border border-gray-200 hover:border-teal-200 transition-all shadow-sm hover:shadow-md"
                   >
                     <ArrowRight className="w-5 h-5 mr-2 rotate-180" /> Kembali ke Halaman Utama
                   </button>
@@ -2538,11 +2335,11 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
 
       {showEditor && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full p-8 max-h-[90vh] overflow-y-auto border border-blue-100 animate-in zoom-in-95">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full p-8 max-h-[90vh] overflow-y-auto border border-emerald-100 animate-in zoom-in-95">
             <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-100 sticky top-0 bg-white z-10">
               <h3 className="text-2xl font-extrabold text-gray-900 flex items-center">
-                <div className="bg-blue-100 p-2 rounded-xl mr-3">
-                   <Info className="w-6 h-6 text-blue-600" />
+                <div className="bg-emerald-100 p-2 rounded-xl mr-3">
+                   <Info className="w-6 h-6 text-emerald-600" />
                 </div>
                 {editData.id ? 'Edit Bagian Profil' : 'Tambah Bagian Profil Baru'}
               </h3>
@@ -2560,7 +2357,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                     value={editData.judul}
                     onChange={(e) => setEditData({...editData, judul: e.target.value})}
                     placeholder="Contoh: Sejarah Desa"
-                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium" 
+                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
                   />
                 </div>
                 <div>
@@ -2570,7 +2367,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                       required
                       value={editData.iconName}
                       onChange={(e) => setEditData({...editData, iconName: e.target.value})}
-                      className="w-full px-5 py-3 pl-12 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium appearance-none"
+                      className="w-full px-5 py-3 pl-12 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium appearance-none"
                     >
                       <option value="BookOpen">Buku (Sejarah/Cerita)</option>
                       <option value="Target">Target (Visi/Misi)</option>
@@ -2578,7 +2375,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                       <option value="Building2">Gedung (Struktur/Organisasi)</option>
                       <option value="Info">Info (Umum)</option>
                     </select>
-                    <div className="absolute left-4 top-3.5 text-sky-600 pointer-events-none">
+                    <div className="absolute left-4 top-3.5 text-teal-600 pointer-events-none">
                       {renderIcon(editData.iconName, "w-5 h-5")}
                     </div>
                     <ChevronDown className="absolute right-4 top-3.5 w-5 h-5 text-gray-400 pointer-events-none" />
@@ -2596,7 +2393,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                       </div>
                     )}
                     <div className="flex-1">
-                      <label className="cursor-pointer bg-white text-blue-700 border-2 border-blue-200 hover:bg-blue-50 hover:border-blue-300 px-5 py-3 rounded-xl font-bold flex items-center justify-center transition-all shadow-sm w-max">
+                      <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 hover:border-emerald-300 px-5 py-3 rounded-xl font-bold flex items-center justify-center transition-all shadow-sm w-max">
                         <Upload className="w-5 h-5 mr-2" /> Upload Gambar Header
                         <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
                       </label>
@@ -2612,7 +2409,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                     value={editData.konten}
                     onChange={(e) => setEditData({...editData, konten: e.target.value})}
                     placeholder="Ketikkan isi informasi di sini secara menarik dan meyakinkan..."
-                    className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium leading-relaxed" 
+                    className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium leading-relaxed" 
                   ></textarea>
                 </div>
               </div>
@@ -2621,7 +2418,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                 <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
                   Batal
                 </button>
-                <button type="submit" className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(37,99,235,0.3)] hover:shadow-[0_10px_25px_rgba(37,99,235,0.4)] hover:-translate-y-0.5">
+                <button type="submit" className="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(5,150,105,0.3)] hover:shadow-[0_10px_25px_rgba(5,150,105,0.4)] hover:-translate-y-0.5">
                   <Save className="w-5 h-5 mr-2" /> Simpan Profil
                 </button>
               </div>
@@ -2659,7 +2456,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
       case 'pkk': return 'Tim Penggerak PKK yang berfokus pada pemberdayaan dan kesejahteraan keluarga.';
       case 'kadus': return 'Daftar perangkat kewilayahan yang bertugas membantu Kepala Desa di wilayah Dusun.';
       case 'rt': return 'Daftar Ketua Rukun Tetangga (RT) yang menjadi ujung tombak pelayanan masyarakat.';
-      default: return 'Struktur Organisasi dan Tata Kerja (SOTK) Pemerintah desa delta upang.';
+      default: return 'Struktur Organisasi dan Tata Kerja (SOTK) Pemerintah Desa Delta Upang.';
     }
   };
 
@@ -2736,15 +2533,15 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
   const containerHeight = kasunRowCount === 0 ? 950 : 1300 + ((kasunRowCount - 1) * 340);
 
   const PerangkatCard = ({ p }: any) => (
-    <div style={{ width: '160px', height: '260px' }} className="bg-white border-[3px] border-blue-900 overflow-hidden relative flex flex-col items-center shadow-lg group z-10 transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-sky-600">
+    <div style={{ width: '160px', height: '260px' }} className="bg-white border-[3px] border-emerald-900 overflow-hidden relative flex flex-col items-center shadow-lg group z-10 transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-teal-600">
        {isAdmin && (
-         <div className="absolute top-1 right-1 z-20 flex gap-1 bg-white/90 p-1 rounded backdrop-blur border border-blue-900">
+         <div className="absolute top-1 right-1 z-20 flex gap-1 bg-white/90 p-1 rounded backdrop-blur border border-emerald-900">
            <button onClick={() => openEditorPerangkat(p)} className="text-amber-600 hover:text-amber-800 p-1"><Edit className="w-3.5 h-3.5" /></button>
            <button onClick={() => handleDeletePerangkat(p.id)} className="text-rose-600 hover:text-rose-800 p-1"><Trash2 className="w-3.5 h-3.5" /></button>
          </div>
        )}
        
-       <div style={{ height: '180px' }} className="w-full bg-gradient-to-tr from-blue-800 to-sky-700 border-b-[3px] border-blue-900 flex-shrink-0">
+       <div style={{ height: '180px' }} className="w-full bg-gradient-to-tr from-emerald-800 to-teal-700 border-b-[3px] border-emerald-900 flex-shrink-0">
           <img 
             src={p.foto} 
             alt={p.nama} 
@@ -2758,7 +2555,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
        </div>
        <div className="p-2 text-center w-full bg-white flex-grow flex flex-col items-center justify-center">
           <h3 className="text-[12px] font-black text-gray-900 leading-tight mb-1 underline uppercase text-center line-clamp-2">{p.nama}</h3>
-          <span className="text-[10px] font-bold text-sky-700 uppercase text-center leading-tight line-clamp-2">{p.jabatan}</span>
+          <span className="text-[10px] font-bold text-teal-700 uppercase text-center leading-tight line-clamp-2">{p.jabatan}</span>
        </div>
     </div>
   );
@@ -2768,13 +2565,13 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
       <div className="container mx-auto px-4 lg:px-8 relative">
         
         <div className="text-center mb-16">
-          <span className="text-sky-600 font-bold tracking-widest uppercase text-sm mb-2 block">
+          <span className="text-teal-600 font-bold tracking-widest uppercase text-sm mb-2 block">
             Pemerintahan Desa
           </span>
           <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">
             {getTabTitle(activeTab)}
           </h2>
-          <div className="w-24 h-1.5 bg-gradient-to-r from-blue-600 to-sky-400 mx-auto rounded-full"></div>
+          <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-600 to-teal-400 mx-auto rounded-full"></div>
           <p className="mt-6 text-gray-600 max-w-2xl mx-auto text-lg leading-relaxed">
             {getTabSubtitle(activeTab)}
           </p>
@@ -2784,10 +2581,10 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
         {isPerangkat && (
           <div className="animate-in fade-in duration-500 max-w-full">
             {isAdmin && (
-              <div className="mb-10 flex justify-end bg-blue-50 p-4 rounded-2xl border border-blue-100 shadow-sm max-w-6xl mx-auto">
+              <div className="mb-10 flex justify-end bg-emerald-50 p-4 rounded-2xl border border-emerald-100 shadow-sm max-w-6xl mx-auto">
                 <button 
                   onClick={() => openEditorPerangkat()} 
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-3 px-8 rounded-xl shadow-[0_8px_20px_rgba(37,99,235,0.3)] hover:shadow-[0_10px_25px_rgba(37,99,235,0.4)] hover:-translate-y-0.5 flex items-center transition-all"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 px-8 rounded-xl shadow-[0_8px_20px_rgba(5,150,105,0.3)] hover:shadow-[0_10px_25px_rgba(5,150,105,0.4)] hover:-translate-y-0.5 flex items-center transition-all"
                 >
                   <Plus className="w-5 h-5 mr-2" /> Tambah Perangkat
                 </button>
@@ -2801,23 +2598,23 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                 <div style={{ width: '1300px', height: `${containerHeight}px`, position: 'relative', margin: '0 auto', marginTop: '40px' }} className="bg-white/40 backdrop-blur-sm rounded-3xl">
 
                   {/* --- GARIS PENGHUBUNG (CONNECTOR LINES) --- */}
-                  <div style={{ position: 'absolute', left: '330px', top: '120px', width: '240px', borderTop: '4px dashed #1e3a8a', zIndex: 0 }}></div>
-                  <div style={{ position: 'absolute', left: '648px', top: '260px', width: '4px', height: `${trunkHeight}px`, backgroundColor: '#1e3a8a', zIndex: 0 }}></div>
-                  <div style={{ position: 'absolute', left: '648px', top: '300px', width: '304px', height: '4px', backgroundColor: '#1e3a8a', zIndex: 0 }}></div>
-                  <div style={{ position: 'absolute', left: '948px', top: '300px', width: '4px', height: '20px', backgroundColor: '#1e3a8a', zIndex: 0 }}></div>
-                  <div style={{ position: 'absolute', left: '948px', top: '580px', width: '4px', height: '40px', backgroundColor: '#1e3a8a', zIndex: 0 }}></div>
-                  <div style={{ position: 'absolute', left: '748px', top: '620px', width: '404px', height: '4px', backgroundColor: '#1e3a8a', zIndex: 0 }}></div>
-                  <div style={{ position: 'absolute', left: '748px', top: '620px', width: '4px', height: '20px', backgroundColor: '#1e3a8a', zIndex: 0 }}></div>
-                  <div style={{ position: 'absolute', left: '948px', top: '620px', width: '4px', height: '20px', backgroundColor: '#1e3a8a', zIndex: 0 }}></div>
-                  <div style={{ position: 'absolute', left: '1148px', top: '620px', width: '4px', height: '20px', backgroundColor: '#1e3a8a', zIndex: 0 }}></div>
-                  <div style={{ position: 'absolute', left: '148px', top: '420px', width: '504px', height: '4px', backgroundColor: '#1e3a8a', zIndex: 0 }}></div>
-                  <div style={{ position: 'absolute', left: '148px', top: '420px', width: '4px', height: '40px', backgroundColor: '#1e3a8a', zIndex: 0 }}></div>
-                  <div style={{ position: 'absolute', left: '348px', top: '420px', width: '4px', height: '40px', backgroundColor: '#1e3a8a', zIndex: 0 }}></div>
-                  <div style={{ position: 'absolute', left: '548px', top: '420px', width: '4px', height: '40px', backgroundColor: '#1e3a8a', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '330px', top: '120px', width: '240px', borderTop: '4px dashed #064e3b', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '648px', top: '260px', width: '4px', height: `${trunkHeight}px`, backgroundColor: '#064e3b', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '648px', top: '300px', width: '304px', height: '4px', backgroundColor: '#064e3b', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '948px', top: '300px', width: '4px', height: '20px', backgroundColor: '#064e3b', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '948px', top: '580px', width: '4px', height: '40px', backgroundColor: '#064e3b', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '748px', top: '620px', width: '404px', height: '4px', backgroundColor: '#064e3b', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '748px', top: '620px', width: '4px', height: '20px', backgroundColor: '#064e3b', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '948px', top: '620px', width: '4px', height: '20px', backgroundColor: '#064e3b', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '1148px', top: '620px', width: '4px', height: '20px', backgroundColor: '#064e3b', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '148px', top: '420px', width: '504px', height: '4px', backgroundColor: '#064e3b', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '148px', top: '420px', width: '4px', height: '40px', backgroundColor: '#064e3b', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '348px', top: '420px', width: '4px', height: '40px', backgroundColor: '#064e3b', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '548px', top: '420px', width: '4px', height: '40px', backgroundColor: '#064e3b', zIndex: 0 }}></div>
 
 
                   {/* --- KARTU PERANGKAT DESA (NODES) --- */}
-                  <div style={{ position: 'absolute', left: '170px', top: '80px', width: '160px', height: '80px', zIndex: 10 }} className="bg-white border-[3px] border-blue-900 text-sky-900 flex items-center justify-center font-black text-2xl shadow-lg tracking-widest">
+                  <div style={{ position: 'absolute', left: '170px', top: '80px', width: '160px', height: '80px', zIndex: 10 }} className="bg-white border-[3px] border-emerald-900 text-teal-900 flex items-center justify-center font-black text-2xl shadow-lg tracking-widest">
                     BPD
                   </div>
 
@@ -2878,7 +2675,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                               top: `${currentLineY}px`,
                               width: `${((count - 1) * kasunGap) + 4}px`,
                               height: '4px',
-                              backgroundColor: '#1e3a8a',
+                              backgroundColor: '#064e3b',
                               zIndex: 0
                             }}></div>
                           )}
@@ -2893,7 +2690,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                                   top: `${currentLineY}px`,
                                   width: '4px',
                                   height: '40px',
-                                  backgroundColor: '#1e3a8a',
+                                  backgroundColor: '#064e3b',
                                   zIndex: 0
                                 }}></div>
                                 
@@ -2926,7 +2723,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
               <div className="mb-6 flex justify-end">
                 <button 
                   onClick={() => openEditorLembaga()} 
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center transition-all"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center transition-all"
                 >
                   <Plus className="w-5 h-5 mr-2" /> Tambah Data
                 </button>
@@ -2940,7 +2737,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                 <div className="overflow-x-auto">
                   <table className="w-full text-left whitespace-nowrap">
                     <thead>
-                      <tr className="bg-sky-50 text-sky-800 text-sm tracking-wide uppercase border-b-2 border-sky-100">
+                      <tr className="bg-teal-50 text-teal-800 text-sm tracking-wide uppercase border-b-2 border-teal-100">
                         <th className="px-6 py-5 font-bold">No</th>
                         <th className="px-6 py-5 font-bold">Foto</th>
                         <th className="px-6 py-5 font-bold">Nama Lengkap</th>
@@ -2967,7 +2764,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                             />
                           </td>
                           <td className="px-6 py-4 font-extrabold text-gray-900 text-base">{item.nama}</td>
-                          <td className="px-6 py-4 text-sky-700 font-bold bg-sky-50/70 rounded-lg inline-block mt-3.5 mb-1.5 ml-4 px-3 py-1 border border-sky-100/50">{item.jabatan}</td>
+                          <td className="px-6 py-4 text-teal-700 font-bold bg-teal-50/70 rounded-lg inline-block mt-3.5 mb-1.5 ml-4 px-3 py-1 border border-teal-100/50">{item.jabatan}</td>
                           <td className="px-6 py-4 font-medium text-gray-700">{item.jenisKelamin}</td>
                           <td className="px-6 py-4 font-medium text-gray-700">{item.umur} Thn</td>
                           {isAdmin && (
@@ -2996,11 +2793,11 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
 
       {showEditorPerangkat && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-xl w-full p-8 max-h-[90vh] overflow-y-auto border border-blue-100 animate-in zoom-in-95">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-xl w-full p-8 max-h-[90vh] overflow-y-auto border border-emerald-100 animate-in zoom-in-95">
             <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-100">
               <h3 className="text-2xl font-extrabold text-gray-900 flex items-center">
-                <div className="bg-blue-100 p-2 rounded-xl mr-3">
-                   <Users className="w-6 h-6 text-blue-600" />
+                <div className="bg-emerald-100 p-2 rounded-xl mr-3">
+                   <Users className="w-6 h-6 text-emerald-600" />
                 </div>
                 {editDataPerangkat.id ? 'Edit Perangkat' : 'Tambah Perangkat Baru'}
               </h3>
@@ -3018,7 +2815,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                     value={editDataPerangkat.nama}
                     onChange={(e) => setEditDataPerangkat({...editDataPerangkat, nama: e.target.value})}
                     placeholder="Contoh: Bapak Fulan, S.E."
-                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium" 
+                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
                   />
                 </div>
                 <div>
@@ -3028,7 +2825,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                     value={editDataPerangkat.jabatan}
                     onChange={(e) => setEditDataPerangkat({...editDataPerangkat, jabatan: e.target.value})}
                     placeholder="Ketik 'Kepala Desa' untuk posisi atas"
-                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium" 
+                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
                   />
                   <p className="text-xs text-gray-500 mt-2 font-medium">*Sistem membaca teks KEPALA DESA, SEKRETARIS, KASI, KAUR, dan KASUN untuk diletakkan ke posisinya masing-masing.</p>
                 </div>
@@ -3044,7 +2841,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                       </div>
                     )}
                     <div className="flex-1">
-                      <label className="cursor-pointer bg-white text-blue-700 border-2 border-blue-200 hover:bg-blue-50 hover:border-blue-300 px-5 py-3 rounded-xl font-bold flex items-center justify-center transition-all shadow-sm">
+                      <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 hover:border-emerald-300 px-5 py-3 rounded-xl font-bold flex items-center justify-center transition-all shadow-sm">
                         <Upload className="w-5 h-5 mr-2" /> Upload Foto Baru
                         <input type="file" accept="image/*" required={!editDataPerangkat.foto} className="hidden" onChange={handleImageUploadPerangkat} />
                       </label>
@@ -3058,7 +2855,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                 <button type="button" onClick={() => setShowEditorPerangkat(false)} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
                   Batal
                 </button>
-                <button type="submit" className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(37,99,235,0.3)] hover:shadow-[0_10px_25px_rgba(37,99,235,0.4)] hover:-translate-y-0.5">
+                <button type="submit" className="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(5,150,105,0.3)] hover:shadow-[0_10px_25px_rgba(5,150,105,0.4)] hover:-translate-y-0.5">
                   <Save className="w-5 h-5 mr-2" /> Simpan Data
                 </button>
               </div>
@@ -3069,11 +2866,11 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
 
       {showEditorLembaga && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto border border-blue-100 animate-in zoom-in-95">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto border border-emerald-100 animate-in zoom-in-95">
             <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-100">
               <h3 className="text-2xl font-extrabold text-gray-900 flex items-center">
-                <div className="bg-blue-100 p-2 rounded-xl mr-3">
-                   <Users className="w-6 h-6 text-blue-600" />
+                <div className="bg-emerald-100 p-2 rounded-xl mr-3">
+                   <Users className="w-6 h-6 text-emerald-600" />
                 </div>
                 {editDataLembaga.id ? 'Edit Data' : 'Tambah Data Baru'}
               </h3>
@@ -3091,7 +2888,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                     value={editDataLembaga.nama}
                     onChange={(e) => setEditDataLembaga({...editDataLembaga, nama: e.target.value})}
                     placeholder="Masukkan nama lengkap"
-                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium" 
+                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
                   />
                 </div>
                 <div>
@@ -3101,7 +2898,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                     value={editDataLembaga.jabatan}
                     onChange={(e) => setEditDataLembaga({...editDataLembaga, jabatan: e.target.value})}
                     placeholder="Contoh: Ketua RT 01"
-                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium" 
+                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
                   />
                 </div>
                 <div>
@@ -3111,7 +2908,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                       required
                       value={editDataLembaga.jenisKelamin}
                       onChange={(e) => setEditDataLembaga({...editDataLembaga, jenisKelamin: e.target.value})}
-                      className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium appearance-none"
+                      className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium appearance-none"
                     >
                       <option value="Laki-laki">Laki-laki</option>
                       <option value="Perempuan">Perempuan</option>
@@ -3126,7 +2923,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                     value={editDataLembaga.umur}
                     onChange={(e) => setEditDataLembaga({...editDataLembaga, umur: e.target.value})}
                     placeholder="Contoh: 45"
-                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium" 
+                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
                   />
                 </div>
 
@@ -3141,7 +2938,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                       </div>
                     )}
                     <div className="flex-1">
-                      <label className="cursor-pointer bg-white text-blue-700 border-2 border-blue-200 hover:bg-blue-50 hover:border-blue-300 px-5 py-3 rounded-xl font-bold flex items-center justify-center transition-all shadow-sm w-max">
+                      <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 hover:border-emerald-300 px-5 py-3 rounded-xl font-bold flex items-center justify-center transition-all shadow-sm w-max">
                         <Upload className="w-5 h-5 mr-2" /> Upload Foto Baru
                         <input type="file" accept="image/*" className="hidden" onChange={handleImageUploadLembaga} />
                       </label>
@@ -3155,7 +2952,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                 <button type="button" onClick={() => setShowEditorLembaga(false)} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
                   Batal
                 </button>
-                <button type="submit" className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(37,99,235,0.3)] hover:shadow-[0_10px_25px_rgba(37,99,235,0.4)] hover:-translate-y-0.5">
+                <button type="submit" className="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(5,150,105,0.3)] hover:shadow-[0_10px_25px_rgba(5,150,105,0.4)] hover:-translate-y-0.5">
                   <Save className="w-5 h-5 mr-2" /> Simpan Data
                 </button>
               </div>
@@ -3268,7 +3065,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                 <div className="p-4 md:p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                    <button 
                      onClick={() => setSelectedBerita(null)} 
-                     className="flex items-center text-sky-600 hover:text-sky-800 font-bold transition px-4 py-2 hover:bg-sky-50 rounded-xl"
+                     className="flex items-center text-teal-600 hover:text-teal-800 font-bold transition px-4 py-2 hover:bg-teal-50 rounded-xl"
                    >
                       <ArrowRight className="w-5 h-5 mr-2 rotate-180" /> Kembali ke Daftar Berita
                    </button>
@@ -3289,7 +3086,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                 
                 <div className="p-8 md:p-14">
                    <div className="flex items-center gap-4 mb-6">
-                      <span className="bg-sky-100 text-sky-800 text-xs font-extrabold px-4 py-1.5 rounded-full uppercase tracking-wider">
+                      <span className="bg-teal-100 text-teal-800 text-xs font-extrabold px-4 py-1.5 rounded-full uppercase tracking-wider">
                         {selectedBerita.kategori}
                       </span>
                       <span className="text-sm font-bold text-gray-500">{selectedBerita.tanggal}</span>
@@ -3297,7 +3094,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                    <h2 className="text-3xl md:text-5xl font-extrabold text-gray-900 mb-8 leading-tight tracking-tight">
                      {selectedBerita.judul}
                    </h2>
-                   <div className="w-20 h-1.5 bg-gradient-to-r from-blue-500 to-sky-400 rounded-full mb-10"></div>
+                   <div className="w-20 h-1.5 bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full mb-10"></div>
                    
                    <div className="text-gray-700 text-lg md:text-xl leading-relaxed whitespace-pre-wrap font-medium relative clearfix">
                       {(() => {
@@ -3360,19 +3157,19 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
             ) : (
               <>
                 <div className="text-center mb-16">
-                  <span className="text-sky-600 font-bold tracking-widest uppercase text-sm mb-2 block">Pusat Informasi</span>
+                  <span className="text-teal-600 font-bold tracking-widest uppercase text-sm mb-2 block">Pusat Informasi</span>
                   <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">Berita & Informasi</h2>
-                  <div className="w-24 h-1.5 bg-gradient-to-r from-blue-600 to-sky-400 mx-auto rounded-full"></div>
+                  <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-600 to-teal-400 mx-auto rounded-full"></div>
                   <p className="mt-6 text-gray-600 max-w-2xl mx-auto text-lg leading-relaxed">
-                    Kabar terbaru seputar kegiatan, pengumuman, dan pembangunan di desa delta upang.
+                    Kabar terbaru seputar kegiatan, pengumuman, dan pembangunan di Desa Delta Upang.
                   </p>
                 </div>
 
                 {isAdmin && (
-                  <div className="mb-10 flex justify-end bg-blue-50 p-4 rounded-2xl border border-blue-100 shadow-sm max-w-6xl mx-auto">
+                  <div className="mb-10 flex justify-end bg-emerald-50 p-4 rounded-2xl border border-emerald-100 shadow-sm max-w-6xl mx-auto">
                     <button 
                       onClick={() => openEditorBerita()} 
-                      className="bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-3 px-8 rounded-xl shadow-[0_8px_20px_rgba(37,99,235,0.3)] hover:shadow-[0_10px_25px_rgba(37,99,235,0.4)] hover:-translate-y-0.5 flex items-center transition-all"
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 px-8 rounded-xl shadow-[0_8px_20px_rgba(5,150,105,0.3)] hover:shadow-[0_10px_25px_rgba(5,150,105,0.4)] hover:-translate-y-0.5 flex items-center transition-all"
                     >
                       <Plus className="w-5 h-5 mr-2" /> Tulis Berita Baru
                     </button>
@@ -3408,7 +3205,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                             }
                           }}
                         />
-                        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur text-blue-800 text-xs font-extrabold px-4 py-1.5 rounded-full shadow-sm border border-blue-100">
+                        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur text-teal-800 text-xs font-extrabold px-4 py-1.5 rounded-full shadow-sm border border-teal-100">
                           {berita.kategori}
                         </div>
                       </div>
@@ -3416,7 +3213,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                         <div className="text-sm font-bold text-gray-400 mb-3 flex items-center">
                           <span>{berita.tanggal}</span>
                         </div>
-                        <h3 className="text-2xl font-extrabold text-gray-900 mb-4 leading-tight line-clamp-2 group-hover:text-sky-700 transition-colors">
+                        <h3 className="text-2xl font-extrabold text-gray-900 mb-4 leading-tight line-clamp-2 group-hover:text-teal-700 transition-colors">
                           {berita.judul}
                         </h3>
                         <p className="text-gray-600 mb-6 flex-grow line-clamp-3 text-lg leading-relaxed">
@@ -3425,7 +3222,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                         
                         <button 
                           onClick={() => setSelectedBerita(berita)}
-                          className="mt-auto text-sky-600 font-extrabold hover:text-sky-800 flex items-center transition group-hover:underline decoration-2 underline-offset-4"
+                          className="mt-auto text-teal-600 font-extrabold hover:text-teal-800 flex items-center transition group-hover:underline decoration-2 underline-offset-4"
                         >
                           Baca Selengkapnya <ArrowRight className="w-5 h-5 ml-1.5 transform group-hover:translate-x-1 transition" />
                         </button>
@@ -3437,84 +3234,129 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
             )}
           </>
         ) : (
-          <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-[0_15px_40px_rgba(0,0,0,0.06)] border border-gray-100 overflow-hidden animate-in slide-in-from-bottom-8 duration-500 p-8 md:p-14">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-extrabold text-gray-900 mb-4 tracking-tight">Statistik Penduduk</h2>
-              <div className="w-16 h-1.5 bg-gradient-to-r from-blue-500 to-sky-400 mx-auto rounded-full mb-6"></div>
-              <p className="text-gray-600 text-lg">Visualisasi perbandingan jumlah penduduk berdasarkan jenis kelamin di desa delta upang.</p>
+          /* TAMPILAN GRAFIK PENDUDUK */
+          <div className="animate-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto">
+            <div className="text-center mb-14">
+              <span className="text-teal-600 font-bold tracking-widest uppercase text-sm mb-2 block">Visualisasi Data</span>
+              <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">Demografi Penduduk</h2>
+              <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-600 to-teal-400 mx-auto rounded-full"></div>
+              <p className="mt-6 text-gray-600 max-w-2xl mx-auto text-lg leading-relaxed">
+                Persentase perbandingan jumlah penduduk Laki-laki dan Perempuan di Desa Delta Upang berdasarkan pembaruan data terakhir.
+              </p>
             </div>
 
-            <div className="flex flex-col md:flex-row items-center justify-center gap-12 lg:gap-20">
-              <div className="relative w-64 h-64 md:w-80 md:h-80 flex-shrink-0">
-                <svg viewBox="0 0 36 36" className="w-full h-full transform -rotate-90 filter drop-shadow-xl">
-                  <path
-                    className="text-rose-400"
-                    strokeDasharray={`${persentasePerempuan} 100`}
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                    fill="none" stroke="currentColor" strokeWidth="6"
-                  />
-                  <path
-                    className="text-blue-500"
-                    strokeDasharray={`${persentaseLaki} 100`}
-                    strokeDashoffset={`-${persentasePerempuan}`}
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                    fill="none" stroke="currentColor" strokeWidth="6"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-white rounded-full m-8 shadow-inner border-4 border-gray-50">
-                   <span className="text-3xl font-black text-gray-900 leading-none">{totalPenduduk.toLocaleString('id-ID')}</span>
-                   <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-1">Total Jiwa</span>
+            {isAdmin && (
+              <div className="mb-10 flex justify-end bg-emerald-50 p-4 rounded-2xl border border-emerald-100 shadow-sm max-w-4xl mx-auto">
+                <button 
+                  onClick={() => { setEditDataGrafik(dataGrafik); setShowEditorGrafik(true); }} 
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 px-8 rounded-xl shadow-[0_8px_20px_rgba(5,150,105,0.3)] hover:shadow-[0_10px_25px_rgba(5,150,105,0.4)] hover:-translate-y-0.5 flex items-center transition-all"
+                >
+                  <Edit className="w-5 h-5 mr-2" /> Edit Angka Grafik
+                </button>
+              </div>
+            )}
+
+            <div className="bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.08)] border border-gray-100 p-8 md:p-14 relative overflow-hidden max-w-4xl mx-auto flex flex-col md:flex-row gap-12 items-center justify-center transition-all duration-300 hover:shadow-[0_25px_60px_rgba(0,0,0,0.12)]">
+              <div className="absolute top-0 left-0 w-32 h-32 bg-teal-50 rounded-br-[100px] -z-10 opacity-70"></div>
+              <div className="absolute bottom-0 right-0 w-40 h-40 bg-amber-50 rounded-tl-[100px] -z-10 opacity-70"></div>
+
+              {/* Left Side: Summary Big Number */}
+              <div className="w-full md:w-1/3 text-center md:text-left z-10">
+                <h3 className="text-xl font-bold text-gray-500 mb-2 uppercase tracking-widest flex justify-center md:justify-start items-center">
+                  <TrendingUp className="w-5 h-5 mr-2" /> Total Populasi
+                </h3>
+                <div className="text-6xl md:text-7xl font-black text-gray-900 mb-2 drop-shadow-md">
+                  <AnimatedNumber value={totalPenduduk} duration={2500} />
                 </div>
+                <div className="inline-block bg-teal-50 text-teal-800 px-4 py-1.5 rounded-full font-bold text-sm tracking-wide border border-teal-200 shadow-sm mt-1">
+                  Tahun {dataGrafik.tahun}
+                </div>
+                <p className="text-sm text-gray-400 mt-6 font-medium">Diperbarui: {dataGrafik.updateTerakhir}</p>
               </div>
 
-              <div className="flex flex-col gap-6 w-full md:w-auto">
-                <div className="bg-blue-50 p-5 rounded-2xl border border-blue-100 flex items-center justify-between w-full md:w-64 shadow-sm hover:shadow-md transition">
-                  <div>
-                    <div className="flex items-center text-blue-800 font-bold mb-1">
-                      <span className="w-4 h-4 bg-blue-500 rounded-full mr-2 shadow-sm"></span>
-                      Laki-laki
+              {/* Right Side: Awesome Custom CSS Bar Chart */}
+              <div className="w-full md:w-2/3 z-10">
+                
+                {/* Laki-Laki Bar */}
+                <div className="mb-8">
+                  <div className="flex justify-between items-end mb-3">
+                    <div className="flex items-center">
+                      <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex justify-center items-center mr-4 shadow-sm border border-blue-100">
+                        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                           <path d="M10 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z"></path><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="text-2xl font-extrabold text-gray-900 tracking-tight">Laki-laki</h4>
+                        <span className="text-blue-600 font-bold text-sm bg-blue-50 px-2 py-0.5 rounded-md mt-1 inline-block border border-blue-100 shadow-sm">{persentaseLaki}%</span>
+                      </div>
                     </div>
-                    <div className="text-3xl font-black text-blue-900 ml-6">{(dataGrafik.lakiLaki || 0).toLocaleString('id-ID')}</div>
+                    <div className="text-3xl font-black text-gray-800">
+                      <AnimatedNumber value={dataGrafik.lakiLaki} duration={2000} />
+                    </div>
                   </div>
-                  <div className="text-2xl font-black text-blue-400 opacity-60">{persentaseLaki}%</div>
+                  
+                  <div className="w-full bg-gray-100 h-6 rounded-full overflow-hidden shadow-inner border border-gray-200 relative">
+                    <div 
+                      className="bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-600 h-full rounded-full animate-grow shadow-[inset_0_-2px_4px_rgba(0,0,0,0.2)] absolute left-0 top-0"
+                      style={{ width: `${persentaseLaki}%` }}
+                    >
+                      <div className="absolute inset-0 w-full h-full" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)', transform: 'skewX(-20deg)', animation: 'slideRight 2s infinite linear' }}></div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="bg-rose-50 p-5 rounded-2xl border border-rose-100 flex items-center justify-between w-full md:w-64 shadow-sm hover:shadow-md transition">
-                  <div>
-                    <div className="flex items-center text-rose-800 font-bold mb-1">
-                      <span className="w-4 h-4 bg-rose-400 rounded-full mr-2 shadow-sm"></span>
-                      Perempuan
+                {/* Perempuan Bar */}
+                <div>
+                  <div className="flex justify-between items-end mb-3">
+                    <div className="flex items-center">
+                      <div className="w-12 h-12 bg-rose-50 text-rose-500 rounded-2xl flex justify-center items-center mr-4 shadow-sm border border-rose-100">
+                        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                           <path d="M12 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z"></path><path d="M12 13v8"></path><path d="M9 18h6"></path>
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="text-2xl font-extrabold text-gray-900 tracking-tight">Perempuan</h4>
+                        <span className="text-rose-500 font-bold text-sm bg-rose-50 px-2 py-0.5 rounded-md mt-1 inline-block border border-rose-100 shadow-sm">{persentasePerempuan}%</span>
+                      </div>
                     </div>
-                    <div className="text-3xl font-black text-rose-900 ml-6">{(dataGrafik.perempuan || 0).toLocaleString('id-ID')}</div>
+                    <div className="text-3xl font-black text-gray-800">
+                      <AnimatedNumber value={dataGrafik.perempuan} duration={2000} />
+                    </div>
                   </div>
-                  <div className="text-2xl font-black text-rose-400 opacity-60">{persentasePerempuan}%</div>
-                </div>
-
-                <div className="text-sm font-bold text-gray-400 bg-gray-50 py-2 px-4 rounded-xl border border-gray-100 flex items-center justify-center">
-                  <Clock className="w-4 h-4 mr-2" /> Data Tahun {dataGrafik.tahun}
+                  
+                  <div className="w-full bg-gray-100 h-6 rounded-full overflow-hidden shadow-inner border border-gray-200 relative">
+                    <div 
+                      className="bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 h-full rounded-full animate-grow shadow-[inset_0_-2px_4px_rgba(0,0,0,0.2)] absolute left-0 top-0"
+                      style={{ width: `${persentasePerempuan}%` }}
+                    >
+                      <div className="absolute inset-0 w-full h-full" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)', transform: 'skewX(-20deg)', animation: 'slideRight 2s infinite linear' }}></div>
+                    </div>
+                  </div>
                 </div>
                 
-                {isAdmin && (
-                   <button onClick={() => { setEditDataGrafik(dataGrafik); setShowEditorGrafik(true); }} className="mt-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center w-full">
-                     <Edit className="w-4 h-4 mr-2" /> Update Data Penduduk
-                   </button>
-                )}
+                <style>{`
+                  @keyframes slideRight {
+                    0% { left: -100%; }
+                    100% { left: 100%; }
+                  }
+                `}</style>
               </div>
             </div>
           </div>
         )}
+
       </div>
 
-      {/* MODAL EDITOR BERITA */}
       {showEditorBerita && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full p-8 max-h-[90vh] overflow-y-auto border border-blue-100 animate-in zoom-in-95">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto border border-emerald-100 animate-in zoom-in-95">
             <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-100 sticky top-0 bg-white z-10">
               <h3 className="text-2xl font-extrabold text-gray-900 flex items-center">
-                <div className="bg-blue-100 p-2 rounded-xl mr-3">
-                   <Newspaper className="w-6 h-6 text-blue-600" />
+                <div className="bg-emerald-100 p-2 rounded-xl mr-3">
+                   <Newspaper className="w-6 h-6 text-emerald-600" />
                 </div>
-                {editDataBerita.id ? 'Edit Berita' : 'Tulis Berita Baru'}
+                {editDataBerita.id ? 'Edit Berita' : 'Tambah Berita Baru'}
               </h3>
               <button type="button" onClick={() => setShowEditorBerita(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
                 <X className="w-5 h-5" />
@@ -3529,120 +3371,115 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                     type="text" required
                     value={editDataBerita.judul}
                     onChange={(e) => setEditDataBerita({...editDataBerita, judul: e.target.value})}
-                    placeholder="Contoh: Penyaluran BLT Dana Desa Tahap I Berjalan Lancar"
-                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Tanggal Terbit</label>
-                  <input 
-                    type="text" required
-                    value={editDataBerita.tanggal}
-                    onChange={(e) => setEditDataBerita({...editDataBerita, tanggal: e.target.value})}
-                    placeholder="Contoh: 12 Okt 2024"
-                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium" 
+                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">Kategori</label>
-                  <div className="relative">
-                    <select 
-                      required
-                      value={editDataBerita.kategori}
-                      onChange={(e) => setEditDataBerita({...editDataBerita, kategori: e.target.value})}
-                      className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium appearance-none"
-                    >
-                      <option value="">Pilih Kategori</option>
-                      <option value="Kegiatan">Kegiatan</option>
-                      <option value="Pembangunan">Pembangunan</option>
-                      <option value="Sosial">Sosial</option>
-                      <option value="Pemberdayaan">Pemberdayaan</option>
-                      <option value="Pengumuman">Pengumuman</option>
-                    </select>
-                    <ChevronDown className="absolute right-4 top-3.5 w-5 h-5 text-gray-400 pointer-events-none" />
-                  </div>
+                  <select 
+                    required
+                    value={editDataBerita.kategori}
+                    onChange={(e) => setEditDataBerita({...editDataBerita, kategori: e.target.value})}
+                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium"
+                  >
+                    <option value="">Pilih Kategori</option>
+                    <option value="Sosial">Sosial</option>
+                    <option value="Kegiatan">Kegiatan</option>
+                    <option value="Pemberdayaan">Pemberdayaan</option>
+                    <option value="Pemerintahan">Pemerintahan</option>
+                    <option value="Pengumuman">Pengumuman</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Tanggal Publikasi</label>
+                  <input 
+                    type="text" required placeholder="Contoh: 15 Okt 2024"
+                    value={editDataBerita.tanggal}
+                    onChange={(e) => setEditDataBerita({...editDataBerita, tanggal: e.target.value})}
+                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium" 
+                  />
                 </div>
 
                 <div className="col-span-full">
-                  <label className="block text-sm font-bold text-gray-700 mb-3">Foto Sampul Utama (Wajib)</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-3">Foto Sampul Utama</label>
                   <div className="flex items-center gap-5 bg-gray-50 p-4 rounded-2xl border border-gray-200">
                     {editDataBerita.gambar ? (
-                      <img src={editDataBerita.gambar} alt="Preview" className="w-32 h-20 object-cover rounded-xl shadow-sm border border-gray-200" />
+                      <img src={editDataBerita.gambar} alt="Preview" className="w-32 h-32 object-cover rounded-xl shadow-sm border border-gray-200" />
                     ) : (
-                      <div className="w-32 h-20 bg-gray-200 rounded-xl flex items-center justify-center border border-gray-300 border-dashed">
+                      <div className="w-32 h-32 bg-gray-200 rounded-xl flex items-center justify-center border border-gray-300 border-dashed">
                         <ImageIcon className="w-8 h-8 text-gray-400" />
                       </div>
                     )}
                     <div className="flex-1">
-                      <label className="cursor-pointer bg-white text-blue-700 border-2 border-blue-200 hover:bg-blue-50 hover:border-blue-300 px-5 py-3 rounded-xl font-bold flex items-center justify-center transition-all shadow-sm w-max">
-                        <Upload className="w-5 h-5 mr-2" /> Upload Sampul Utama
-                        <input type="file" accept="image/*" required={!editDataBerita.gambar} className="hidden" onChange={handleImageUpload} />
+                      <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 hover:border-emerald-300 px-5 py-3 rounded-xl font-bold flex items-center justify-center transition-all shadow-sm w-max">
+                        <Upload className="w-5 h-5 mr-2" /> Upload Foto Baru
+                        <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
                       </label>
+                      <p className="text-sm text-gray-500 mt-3 font-medium">Gambar ini akan tampil di daftar berita utama.</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="col-span-full">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Isi Berita Lengkap (Gunakan Enter untuk pemisah paragraf)</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Ringkasan / Isi Berita (Gunakan Enter untuk Baris Baru)</label>
                   <textarea 
                     required rows={8}
                     value={editDataBerita.excerpt}
                     onChange={(e) => setEditDataBerita({...editDataBerita, excerpt: e.target.value})}
-                    placeholder="Tuliskan isi berita atau informasi secara lengkap di sini..."
-                    className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium leading-relaxed" 
+                    className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium leading-relaxed" 
                   ></textarea>
                 </div>
 
-                <div className="col-span-full bg-blue-50 p-5 rounded-2xl border border-blue-100">
-                  <label className="block text-sm font-bold text-blue-900 mb-3 flex items-center">
-                    <ImageIcon className="w-5 h-5 mr-2" /> Galeri / Sisipan Foto Tambahan (Opsional)
-                  </label>
-                  <p className="text-xs text-blue-700 mb-4 font-medium leading-relaxed">
-                    Anda dapat menyisipkan lebih dari satu foto ke dalam berita ini. Setelah di-upload, atur posisinya (kiri, kanan, tengah, atas, atau bawah) agar menyatu dengan teks berita.
-                  </p>
-                  
-                  <label className="cursor-pointer bg-blue-600 text-white hover:bg-blue-700 px-5 py-2.5 rounded-xl font-bold flex items-center justify-center transition-all shadow-sm w-max mb-4">
-                    <Upload className="w-4 h-4 mr-2" /> Pilih Beberapa Foto Tambahan
-                    <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageTambahanUpload} />
-                  </label>
-
-                  {editDataBerita.galeri && editDataBerita.galeri.length > 0 && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-                       {editDataBerita.galeri.map((g: any) => (
-                         <div key={g.id} className="bg-white p-3 rounded-xl border border-blue-200 shadow-sm relative group">
-                            <img src={g.url} alt="Sisipan" className="w-full h-24 object-cover rounded-lg mb-3" />
-                            <select 
-                              value={g.posisi} 
-                              onChange={(e) => ubahPosisiGaleri(g.id, e.target.value)}
-                              className="w-full text-xs font-bold text-gray-700 border border-gray-200 rounded-lg p-2 bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
-                            >
-                               <option value="atas">Atas Paragraf</option>
-                               <option value="bawah">Bawah Paragraf</option>
-                               <option value="kiri">Melayang Kiri</option>
-                               <option value="kanan">Melayang Kanan</option>
-                               <option value="tengah">Tengah (Di antara teks)</option>
-                            </select>
+                <div className="col-span-full border-t border-gray-200 pt-6">
+                  <label className="block text-sm font-bold text-gray-700 mb-3">Foto Tambahan (Opsional - Muncul Dalam Isi Berita)</label>
+                  <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200">
+                    <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 px-5 py-3 rounded-xl font-bold flex items-center justify-center transition-all shadow-sm w-full">
+                      <Upload className="w-5 h-5 mr-2" /> Pilih Beberapa Foto Tambahan
+                      <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageTambahanUpload} />
+                    </label>
+                    
+                    {(editDataBerita.galeri && editDataBerita.galeri.length > 0) && (
+                      <div className="space-y-4 mt-5">
+                        {editDataBerita.galeri.map((g: any) => (
+                          <div key={g.id} className="flex items-center gap-4 bg-white p-3 rounded-xl border border-gray-200 shadow-sm animate-in fade-in">
+                            <img src={g.url} alt="Preview Tambahan" className="w-20 h-20 object-cover rounded-lg shadow-sm border border-gray-100" />
+                            <div className="flex-1">
+                              <label className="block text-xs font-bold text-gray-600 mb-1.5">Posisi Foto Terhadap Teks</label>
+                              <div className="relative">
+                                <select 
+                                  value={g.posisi} 
+                                  onChange={(e) => ubahPosisiGaleri(g.id, e.target.value)}
+                                  className="w-full pl-4 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-teal-500 appearance-none"
+                                >
+                                  <option value="atas">Paling Atas (Di Bawah Judul)</option>
+                                  <option value="kiri">Kiri (Teks Mengalir di Kanan)</option>
+                                  <option value="kanan">Kanan (Teks Mengalir di Kiri)</option>
+                                  <option value="tengah">Tengah (Di Antara Paragraf)</option>
+                                </select>
+                                <ChevronDown className="absolute right-3 top-2.5 w-4 h-4 text-gray-400 pointer-events-none" />
+                              </div>
+                            </div>
                             <button 
-                                type="button" 
-                                onClick={() => hapusImageGaleri(g.id)}
-                                className="absolute -top-2 -right-2 bg-rose-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-rose-600"
+                              type="button" 
+                              onClick={() => hapusImageGaleri(g.id)}
+                              className="p-2.5 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded-lg transition-colors border border-rose-100"
                             >
-                              <X className="w-3.5 h-3.5" />
+                              <Trash2 className="w-5 h-5" />
                             </button>
-                         </div>
-                       ))}
-                    </div>
-                  )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
-
               </div>
               
               <div className="flex justify-end gap-4 pt-6 sticky bottom-0 bg-white p-4 -mx-8 -mb-8 rounded-b-3xl">
                 <button type="button" onClick={() => setShowEditorBerita(false)} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
                   Batal
                 </button>
-                <button type="submit" className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(37,99,235,0.3)] hover:shadow-[0_10px_25px_rgba(37,99,235,0.4)] hover:-translate-y-0.5">
-                  <Save className="w-5 h-5 mr-2" /> Terbitkan Berita
+                <button type="submit" className="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(5,150,105,0.3)] hover:shadow-[0_10px_25px_rgba(5,150,105,0.4)] hover:-translate-y-0.5">
+                  <Save className="w-5 h-5 mr-2" /> Simpan Berita
                 </button>
               </div>
             </form>
@@ -3653,10 +3490,11 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
       {/* MODAL EDITOR GRAFIK */}
       {showEditorGrafik && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 animate-in zoom-in-95 border border-blue-100">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-in zoom-in-95 border border-emerald-100">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-extrabold text-gray-900 flex items-center">
-                <PieChart className="w-6 h-6 mr-2 text-blue-600" /> Update Grafik
+              <h3 className="text-xl font-extrabold text-gray-900 flex items-center tracking-tight">
+                <PieChart className="w-6 h-6 mr-2 text-emerald-600" /> 
+                Edit Data Penduduk
               </h3>
               <button onClick={() => setShowEditorGrafik(false)} className="text-gray-400 hover:bg-gray-100 p-2 rounded-full transition">
                 <X className="w-5 h-5" />
@@ -3665,47 +3503,47 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
             
             <form onSubmit={handleSaveGrafik} className="space-y-5">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2 text-blue-700">Jumlah Laki-laki (Jiwa)</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Jumlah Penduduk Laki-laki</label>
                 <input 
                   type="number" required min="0"
                   value={editDataGrafik.lakiLaki}
                   onChange={(e) => setEditDataGrafik({...editDataGrafik, lakiLaki: e.target.value})}
-                  className="w-full px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 font-extrabold text-blue-900 text-lg" 
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 font-medium" 
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2 text-rose-700">Jumlah Perempuan (Jiwa)</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Jumlah Penduduk Perempuan</label>
                 <input 
                   type="number" required min="0"
                   value={editDataGrafik.perempuan}
                   onChange={(e) => setEditDataGrafik({...editDataGrafik, perempuan: e.target.value})}
-                  className="w-full px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl focus:ring-4 focus:ring-rose-500/20 focus:border-rose-500 font-extrabold text-rose-900 text-lg" 
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 font-medium" 
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                 <div>
-                   <label className="block text-sm font-bold text-gray-700 mb-2">Tahun Data</label>
-                   <input 
-                     type="number" required min="2000" max="2099"
-                     value={editDataGrafik.tahun}
-                     onChange={(e) => setEditDataGrafik({...editDataGrafik, tahun: e.target.value})}
-                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 font-bold" 
-                   />
-                 </div>
-                 <div>
-                   <label className="block text-sm font-bold text-gray-700 mb-2">Bulan Update</label>
-                   <input 
-                     type="text" required placeholder="Cth: Des"
-                     value={editDataGrafik.updateTerakhir}
-                     onChange={(e) => setEditDataGrafik({...editDataGrafik, updateTerakhir: e.target.value})}
-                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 font-bold" 
-                   />
-                 </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Tahun Data</label>
+                  <input 
+                    type="number" required
+                    value={editDataGrafik.tahun}
+                    onChange={(e) => setEditDataGrafik({...editDataGrafik, tahun: e.target.value})}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 font-medium" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Bulan Update</label>
+                  <input 
+                    type="text" required placeholder="Contoh: Desember"
+                    value={editDataGrafik.updateTerakhir}
+                    onChange={(e) => setEditDataGrafik({...editDataGrafik, updateTerakhir: e.target.value})}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 font-medium" 
+                  />
+                </div>
               </div>
               
-              <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+              <div className="flex justify-end gap-3 pt-4">
                 <button type="button" onClick={() => setShowEditorGrafik(false)} className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition">Batal</button>
-                <button type="submit" className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg transition-all hover:-translate-y-0.5 flex items-center">
+                <button type="submit" className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-lg transition-all hover:-translate-y-0.5 flex items-center">
                   <Save className="w-4 h-4 mr-2" /> Simpan Data
                 </button>
               </div>
@@ -3713,98 +3551,79 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
           </div>
         </div>
       )}
+
     </div>
   );
 }
 
+/* ================= Halaman Kontak ================= */
 function HalamanKontak() {
   return (
     <div className="animate-in fade-in zoom-in-95 duration-500 py-16 bg-gray-50 min-h-[70vh]">
       <div className="container mx-auto px-4 lg:px-8">
+        
         <div className="text-center mb-16">
-          <span className="text-sky-600 font-bold tracking-widest uppercase text-sm mb-2 block">Layanan & Bantuan</span>
-          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">Hubungi Kami</h2>
-          <div className="w-24 h-1.5 bg-gradient-to-r from-blue-600 to-sky-400 mx-auto rounded-full"></div>
+          <span className="text-teal-600 font-bold tracking-widest uppercase text-sm mb-2 block">Hubungi Kami</span>
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">Kontak & Layanan</h2>
+          <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-600 to-teal-400 mx-auto rounded-full"></div>
           <p className="mt-6 text-gray-600 max-w-2xl mx-auto text-lg leading-relaxed">
-            Pemerintah desa delta upang siap melayani Anda. Silakan hubungi kami melalui kontak di bawah ini.
+            Kami siap melayani Anda. Kunjungi kantor desa atau hubungi kami melalui kontak yang tersedia untuk informasi lebih lanjut.
           </p>
         </div>
 
-        <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-[0_15px_40px_rgba(0,0,0,0.06)] border border-gray-100 overflow-hidden">
-          <div className="grid grid-cols-1 md:grid-cols-2">
-            <div className="p-8 md:p-14 bg-gradient-to-br from-blue-900 to-sky-900 text-white relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-bl-full -z-0"></div>
-              <div className="absolute bottom-0 left-0 w-40 h-40 bg-black/10 rounded-tr-full -z-0"></div>
-              
-              <div className="relative z-10">
-                <h3 className="text-3xl font-extrabold mb-8 drop-shadow-md">Informasi Kontak</h3>
-                <div className="space-y-8">
-                  <div className="flex items-start group">
-                    <div className="bg-white/10 p-3 rounded-2xl group-hover:bg-sky-500 transition-colors mr-5 shrink-0 border border-white/20">
-                      <MapPin className="w-7 h-7 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="font-extrabold text-lg mb-1">Alamat Kantor</h4>
-                      <p className="text-sky-100 font-medium leading-relaxed">
-                        Jalan Sunan Kalijaga Dusun II, RT. 06 / RW. 02<br />
-                        Kecamatan Makarti Jaya, Kabupaten Banyuasin<br />
-                        Provinsi Sumatera Selatan 30972
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start group">
-                    <div className="bg-white/10 p-3 rounded-2xl group-hover:bg-sky-500 transition-colors mr-5 shrink-0 border border-white/20">
-                      <Phone className="w-7 h-7 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="font-extrabold text-lg mb-1">Telepon / WhatsApp</h4>
-                      <p className="text-sky-100 font-medium text-lg tracking-wide">0822-6876-4585</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start group">
-                    <div className="bg-white/10 p-3 rounded-2xl group-hover:bg-sky-500 transition-colors mr-5 shrink-0 border border-white/20">
-                      <Mail className="w-7 h-7 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="font-extrabold text-lg mb-1">Email</h4>
-                      <p className="text-sky-100 font-medium text-lg">deltaupang12@gmail.com</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start group">
-                    <div className="bg-white/10 p-3 rounded-2xl group-hover:bg-sky-500 transition-colors mr-5 shrink-0 border border-white/20">
-                      <Clock className="w-7 h-7 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="font-extrabold text-lg mb-1">Jam Pelayanan</h4>
-                      <p className="text-sky-100 font-medium leading-relaxed">
-                        Senin - Kamis: 08.00 - 15.00 WIB<br />
-                        Jumat: 08.00 - 11.30 WIB<br />
-                        Sabtu - Minggu: Libur/Tutup
-                      </p>
-                    </div>
-                  </div>
-                </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
+          {/* Informasi Kontak */}
+          <div className="space-y-8">
+            <div className="bg-white p-8 rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-gray-100 flex items-start hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] transition-shadow duration-300 group">
+              <div className="bg-teal-50 border border-teal-100 p-4 rounded-2xl mr-6 group-hover:bg-teal-600 transition-colors duration-300">
+                <MapPin className="w-8 h-8 text-teal-600 group-hover:text-white transition-colors duration-300" />
+              </div>
+              <div>
+                <h3 className="text-xl font-extrabold text-gray-900 mb-3">Alamat Kantor</h3>
+                <p className="text-gray-600 text-lg leading-relaxed font-medium">Jl. Sunan Kalijaga Dusun II<br/>Kecamatan Makarti Jaya, Kab. Banyuasin<br/>Provinsi Sumatera Selatan 30972</p>
               </div>
             </div>
 
+            <div className="bg-white p-8 rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-gray-100 flex items-start hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] transition-shadow duration-300 group">
+              <div className="bg-teal-50 border border-teal-100 p-4 rounded-2xl mr-6 group-hover:bg-teal-600 transition-colors duration-300">
+                <Phone className="w-8 h-8 text-teal-600 group-hover:text-white transition-colors duration-300" />
+              </div>
+              <div>
+                <h3 className="text-xl font-extrabold text-gray-900 mb-3">Telepon / WhatsApp</h3>
+                <p className="text-gray-600 text-lg leading-relaxed font-medium">0822-6876-4585<br/>Layanan aktif pada jam kerja.</p>
+              </div>
+            </div>
+
+            <div className="bg-white p-8 rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-gray-100 flex items-start hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] transition-shadow duration-300 group">
+              <div className="bg-teal-50 border border-teal-100 p-4 rounded-2xl mr-6 group-hover:bg-teal-600 transition-colors duration-300">
+                <Mail className="w-8 h-8 text-teal-600 group-hover:text-white transition-colors duration-300" />
+              </div>
+              <div>
+                <h3 className="text-xl font-extrabold text-gray-900 mb-3">Email</h3>
+                <p className="text-gray-600 text-lg leading-relaxed font-medium">deltaupang12@gmail.com<br/>Untuk keperluan surat-menyurat resmi.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Peta Lokasi */}
+          <div className="h-full min-h-[400px]">
             <a 
-              href="https://maps.app.goo.gl/pL21tZ9LrxpC3YhA6" 
+              href="https://maps.app.goo.gl/o1v4m8G5F5R4t4vP8" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="relative min-h-[400px] md:min-h-full block group cursor-pointer overflow-hidden"
-              title="Buka Google Maps"
+              className="block w-full h-full bg-gray-200 rounded-3xl overflow-hidden shadow-xl border-4 border-white relative group cursor-pointer"
             >
-              <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=80')] bg-cover bg-center transition-transform duration-[10s] group-hover:scale-110"></div>
-              <div className="absolute inset-0 bg-blue-900/60 group-hover:bg-blue-900/40 transition-colors duration-300"></div>
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-8">
-                 <div className="bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-3xl shadow-2xl transform transition-transform duration-300 group-hover:-translate-y-2 group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] w-full max-w-[300px]">
-                   <div className="bg-white rounded-full p-4 mb-4 shadow-inner flex items-center justify-center mx-auto w-16 h-16">
-                     <MapPin className="w-8 h-8 text-sky-600" />
+              <img 
+                src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                alt="Peta Lokasi" 
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-teal-900/40 group-hover:bg-teal-900/20 transition-colors duration-300 flex items-center justify-center">
+                 <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20 shadow-2xl transform group-hover:scale-110 transition-transform duration-300">
+                   <div className="bg-white p-3 rounded-xl mb-4 shadow-inner flex items-center justify-center mx-auto w-16 h-16">
+                     <MapPin className="w-8 h-8 text-teal-600" />
                    </div>
-                   <span className="font-extrabold text-2xl text-white drop-shadow-lg text-center px-4 block">Lokasi Kantor <br/> desa delta upang</span>
+                   <span className="font-extrabold text-2xl text-white drop-shadow-lg text-center px-4 block">Lokasi Kantor <br/> Desa Delta Upang</span>
                  </div>
               </div>
             </a>
@@ -3823,7 +3642,7 @@ function NavButton({ children, active, onClick, icon }: any) {
       onClick={onClick}
       className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
         active 
-          ? 'bg-gradient-to-r from-blue-500 to-sky-500 text-white shadow-lg border border-transparent' 
+          ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg border border-transparent' 
           : 'text-gray-200 hover:bg-white/10 hover:text-white border border-transparent'
       }`}
     >
@@ -3839,8 +3658,8 @@ function MobileNavButton({ children, active, onClick }: any) {
       onClick={onClick}
       className={`w-full text-left px-5 py-4 rounded-xl text-lg font-bold transition-all ${
         active 
-          ? 'bg-gradient-to-r from-blue-800 to-sky-800 text-white border-l-4 border-sky-400 shadow-inner' 
-          : 'text-blue-100 hover:bg-blue-800/50 hover:text-white'
+          ? 'bg-gradient-to-r from-emerald-800 to-teal-800 text-white border-l-4 border-teal-400 shadow-inner' 
+          : 'text-emerald-100 hover:bg-emerald-800/50 hover:text-white'
       }`}
     >
       {children}
